@@ -1,42 +1,61 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Su queste pagine restiamo in contesto reparto per logo/home
   BranchView.persist("reparto", { updateUrl: false });
 
   const bookStatus = document.getElementById("book-status");
   const bookEmpty = document.getElementById("book-empty");
   const bookFrame = document.getElementById("book-frame");
+  const bookMeta = document.getElementById("book-meta-line");
   const songsList = document.getElementById("songs-list");
   const proposeForm = document.getElementById("propose-form");
   const proposeAlert = document.getElementById("propose-alert");
 
   let currentBookUrl = null;
 
+  function showEmpty(message) {
+    if (bookEmpty) {
+      bookEmpty.hidden = false;
+      bookEmpty.classList.add("is-visible");
+    }
+    if (bookStatus) bookStatus.textContent = message;
+    if (bookFrame) {
+      bookFrame.hidden = true;
+      bookFrame.removeAttribute("src");
+      bookFrame.classList.remove("is-visible");
+    }
+  }
+
+  function showPdf(url) {
+    if (bookEmpty) {
+      bookEmpty.hidden = true;
+      bookEmpty.classList.remove("is-visible");
+    }
+    if (bookFrame) {
+      bookFrame.src = url;
+      bookFrame.hidden = false;
+      bookFrame.classList.add("is-visible");
+    }
+  }
+
   async function refreshBook() {
     const book = CanzoniereStore.getBook();
     if (!bookFrame && !bookEmpty) return;
 
     if (!book) {
-      if (bookEmpty) bookEmpty.hidden = false;
-      if (bookStatus) bookStatus.textContent = "Il canzoniere non è ancora stato caricato dallo staff.";
-      if (bookFrame) {
-        bookFrame.hidden = true;
-        bookFrame.removeAttribute("src");
-      }
+      showEmpty("Il canzoniere non è ancora stato caricato dallo staff.");
+      if (bookMeta) bookMeta.textContent = "Reparto · nessun PDF";
       return;
     }
 
     try {
       if (currentBookUrl) URL.revokeObjectURL(currentBookUrl);
       currentBookUrl = await CanzoniereStore.getPdfUrl(book.fileId);
-      if (bookFrame) {
-        bookFrame.src = currentBookUrl;
-        bookFrame.hidden = false;
+      showPdf(currentBookUrl);
+      if (bookMeta) {
+        const when = new Date(book.updatedAt).toLocaleDateString("it-IT");
+        bookMeta.textContent = `${book.fileName || "canzoniere.pdf"} · aggiornato ${when}`;
       }
-      if (bookEmpty) bookEmpty.hidden = true;
     } catch (err) {
-      if (bookEmpty) bookEmpty.hidden = false;
-      if (bookStatus) bookStatus.textContent = err.message || "Impossibile aprire il PDF.";
-      if (bookFrame) bookFrame.hidden = true;
+      showEmpty(err.message || "Impossibile aprire il PDF.");
     }
   }
 

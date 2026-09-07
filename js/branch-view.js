@@ -54,12 +54,21 @@ const BranchView = (() => {
     return branca ? `${path}?branca=${encodeURIComponent(branca)}` : path;
   }
 
+  function groupHomeHref(base = "", hash = "") {
+    return `${base}index.html?branca=gruppo${hash || ""}`;
+  }
+
   function wireHomeLinks() {
     document.querySelectorAll("[data-home-link]").forEach((a) => {
       const base = a.dataset.homeBase || "";
       a.setAttribute("href", homeHref(base));
     });
+    document.querySelectorAll("[data-group-home]").forEach((a) => {
+      const base = a.dataset.homeBase || "";
+      const hash = a.dataset.hash || "";
+      a.setAttribute("href", groupHomeHref(base, hash));
+    });
   }
 
-  return { resolveInitial, persist, homeHref, wireHomeLinks, getStored, isValid };
+  return { resolveInitial, persist, homeHref, groupHomeHref, wireHomeLinks, getStored, isValid };
 })();

@@ -15,20 +15,34 @@
         <span class="brand-text">Firenze 1</span>
       </a>
       <div class="nav-links">
-        <a href="../index.html" data-home-link data-home-base="../">Home</a>
-        <a href="#canzoni">Canzoni</a>
-        <a href="proponi.html">Proponi</a>
+        <a href="../index.html?branca=gruppo" data-group-home data-home-base="../">Home</a>
+        <a href="../index.html?branca=gruppo#chi-siamo" data-group-home data-home-base="../" data-hash="#chi-siamo">Chi siamo</a>
+        <a href="../index.html?branca=gruppo#calendario" data-group-home data-home-base="../" data-hash="#calendario">Calendario</a>
+        <a href="../index.html?branca=gruppo#contatti" data-group-home data-home-base="../" data-hash="#contatti">Contatti</a>
       </div>
       <div class="nav-actions" data-auth-slot data-base="../"></div>
     </div>
   </nav>
 
-  <div class="pdf-stage" id="pdf-stage">
-    <div class="pdf-empty" id="book-empty" hidden>
-      <p id="book-status">Il canzoniere non è ancora stato caricato dallo staff.</p>
+  <main class="pdf-wrap">
+    <div class="pdf-toolbar">
+      <div>
+        <h1>Canzoniere</h1>
+        <p id="book-meta-line">Reparto · PDF</p>
+      </div>
+      <div class="inline-actions">
+        <a class="btn btn-ghost btn-small" href="#canzoni">Canzoni</a>
+        <a class="btn btn-yellow btn-small" href="proponi.html">Proponi</a>
+      </div>
     </div>
-    <iframe id="book-frame" class="pdf-frame" title="Canzoniere PDF" hidden></iframe>
-  </div>
+
+    <div class="pdf-stage" id="pdf-stage">
+      <div class="pdf-empty" id="book-empty" hidden>
+        <p id="book-status">Il canzoniere non è ancora stato caricato dallo staff.</p>
+      </div>
+      <iframe id="book-frame" class="pdf-frame" title="Canzoniere PDF" hidden></iframe>
+    </div>
+  </main>
 
   <section class="section" id="canzoni">
     <div class="container">

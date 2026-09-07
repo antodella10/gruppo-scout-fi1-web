@@ -18,20 +18,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const gruppoBtn = document.getElementById("view-gruppo");
   const branchMenu = document.getElementById("branch-menu");
   const branchTrigger = document.getElementById("branch-menu-trigger");
+  const branchTriggerLabel = document.getElementById("branch-trigger-label");
   const branchPanel = document.getElementById("branch-menu-panel");
-  const viewLabel = document.getElementById("view-label");
   const calLead = document.getElementById("cal-lead");
   const sediLead = document.getElementById("sedi-lead");
   const sediTitle = document.getElementById("sedi-title");
   const layoutDefault = document.getElementById("layout-default");
   const layoutReparto = document.getElementById("layout-reparto");
-  const navGruppo = document.getElementById("nav-links-gruppo");
-  const navReparto = document.getElementById("nav-links-reparto");
   const nextEventEl = document.getElementById("reparto-next-event");
 
   let selectedBranca = null;
   let viewDate = new Date();
   viewDate.setDate(1);
+
+  const PASTEL_CLASS = {
+    lupetti: "pastel-lupetti",
+    reparto: "pastel-reparto",
+    noviziato: "pastel-noviziato",
+    clan: "pastel-clan",
+  };
 
   const BRANCH_COPY = {
     null: {
@@ -138,13 +143,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (viewRoot) {
       viewRoot.classList.add("is-switching");
       window.setTimeout(() => {
-        if (viewLabel) viewLabel.textContent = copy.viewLabel;
         viewRoot.dataset.branca = branca || "gruppo";
 
         if (layoutDefault) layoutDefault.hidden = isReparto;
         if (layoutReparto) layoutReparto.hidden = !isReparto;
-        if (navGruppo) navGruppo.hidden = isReparto;
-        if (navReparto) navReparto.hidden = !isReparto;
 
         if (!isReparto) {
           if (sediTitle) sediTitle.textContent = copy.sediTitle;
@@ -168,7 +170,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     gruppoBtn?.classList.toggle("is-active", !branca);
-    branchTrigger?.classList.toggle("is-active", !!branca);
+    if (branchTrigger) {
+      branchTrigger.classList.toggle("is-active", !!branca);
+      Object.values(PASTEL_CLASS).forEach((cls) => branchTrigger.classList.remove(cls));
+      if (branca && PASTEL_CLASS[branca]) branchTrigger.classList.add(PASTEL_CLASS[branca]);
+    }
+    if (branchTriggerLabel) {
+      branchTriggerLabel.textContent = branca
+        ? ScoutStore.branchLabel(branca)
+        : "Branca";
+    }
     branchPanel?.querySelectorAll("[data-branca]").forEach((btn) => {
       btn.classList.toggle("is-selected", btn.dataset.branca === branca);
     });

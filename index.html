@@ -15,17 +15,11 @@
         <img src="photos/logo.jpeg" alt="Logo Gruppo Scout Firenze 1">
         <span class="brand-text">Firenze 1</span>
       </a>
-      <div class="nav-links" id="nav-links-gruppo">
-        <a href="#sedi">Sedi</a>
-        <a href="#calendario">Calendario</a>
-        <a href="#chi-siamo">Chi siamo</a>
-        <a href="#contatti">Contatti</a>
-      </div>
-      <div class="nav-links" id="nav-links-reparto" hidden>
-        <a href="index.html" data-home-link data-home-base="">Home</a>
-        <a href="#reparto-prossimo">Prossimo evento</a>
-        <a href="#calendario-reparto">Calendario</a>
-        <a href="canzoniere/">Canzoniere</a>
+      <div class="nav-links">
+        <a href="index.html?branca=gruppo" data-group-home data-home-base="">Home</a>
+        <a href="index.html?branca=gruppo#chi-siamo" data-group-home data-home-base="" data-hash="#chi-siamo">Chi siamo</a>
+        <a href="index.html?branca=gruppo#calendario" data-group-home data-home-base="" data-hash="#calendario">Calendario</a>
+        <a href="index.html?branca=gruppo#contatti" data-group-home data-home-base="" data-hash="#contatti">Contatti</a>
       </div>
       <div class="nav-actions" data-auth-slot data-base=""></div>
     </div>
@@ -38,7 +32,7 @@
         <div class="view-divider" aria-hidden="true"></div>
         <div class="branch-menu" id="branch-menu">
           <button type="button" class="branch-menu-trigger" id="branch-menu-trigger" aria-expanded="false" aria-haspopup="true">
-            Branca
+            <span id="branch-trigger-label">Branca</span>
             <span class="branch-menu-caret" aria-hidden="true"></span>
           </button>
           <div class="branch-menu-panel" id="branch-menu-panel" role="menu">
@@ -48,7 +42,6 @@
             <button type="button" class="branch-menu-item pastel-clan" role="menuitem" data-branca="clan">Clan</button>
           </div>
         </div>
-        <span class="view-current" id="view-label">Vista gruppo</span>
       </div>
     </div>
 
