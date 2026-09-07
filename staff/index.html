@@ -23,20 +23,27 @@
       <div class="staff-hero">
         <div>
           <h1>Ciao, <span id="staff-name">staff</span></h1>
-          <p>La tua area personale. Da qui gestisci il calendario attività e il calendario staff.</p>
+          <p id="staff-meta">Area personale</p>
         </div>
         <button type="button" class="btn btn-ghost" id="logout-btn">Esci</button>
       </div>
 
       <div class="staff-grid">
         <section class="panel">
-          <h2>Calendario attività (home)</h2>
-          <p class="hint">Questi eventi compaiono nel calendario pubblico della home. Aggiungi uscite, riunioni, San Giorgio…</p>
+          <h2>Gestione attività</h2>
+          <p class="hint">
+            Puoi creare/modificare eventi <strong>Gruppo</strong>, della <strong>tua branca</strong>,
+            dello <strong>staff di branca</strong> e della <strong>Co.Ca.</strong>
+          </p>
           <div id="event-alert" class="alert alert-ok" hidden></div>
           <form id="event-form" class="form-grid">
             <label>
               Titolo
-              <input type="text" name="title" required placeholder="Es. Uscita reparto">
+              <input type="text" name="title" required placeholder="Es. Uscita">
+            </label>
+            <label>
+              Tipo evento
+              <select name="scope" id="event-scope" required></select>
             </label>
             <div class="form-row-2">
               <label>
@@ -56,44 +63,54 @@
               Note
               <textarea name="notes" rows="2" placeholder="Opzionale"></textarea>
             </label>
-            <button class="btn btn-primary" type="submit">Aggiungi attività</button>
+            <div class="inline-actions">
+              <button class="btn btn-primary" type="submit" id="event-submit">Aggiungi attività</button>
+              <button class="btn btn-ghost" type="button" id="cancel-edit" hidden>Annulla modifica</button>
+            </div>
           </form>
           <hr style="border:none;border-top:1px solid var(--line);margin:1.25rem 0">
           <div id="staff-event-list"></div>
         </section>
 
-        <section class="panel">
-          <h2>Calendario staff (Google)</h2>
-          <p class="hint">
-            Incolla il link di incorporamento del tuo Google Calendar (pubblico o condiviso con lo staff).
-            Su Google Calendar: Impostazioni calendario → Integra calendario → Copia l’indirizzo <em>src</em> dell’iframe.
-          </p>
-          <form id="gcal-form" class="form-grid">
+        <section class="panel" id="gcal-panel">
+          <h2>Calendario Google</h2>
+          <p class="hint" id="gcal-hint">Calendario staff configurato dall’admin.</p>
+          <form id="gcal-form" class="form-grid" hidden>
             <label>
               URL incorporamento Google Calendar
               <input type="url" name="googleEmbed" placeholder="https://calendar.google.com/calendar/embed?src=...">
             </label>
-            <button class="btn btn-primary" type="submit">Salva e mostra</button>
+            <button class="btn btn-primary" type="submit">Salva calendario</button>
           </form>
           <div style="margin-top:1rem">
             <iframe id="gcal-frame" class="gcal-frame" title="Google Calendar staff" hidden></iframe>
-            <div id="gcal-empty" class="placeholder-box">
-              Nessun calendario collegato ancora. Incolla l’URL qui sopra per vederlo in questa pagina.
-            </div>
+            <div id="gcal-empty" class="placeholder-box">Nessun calendario collegato ancora.</div>
+          </div>
+        </section>
+
+        <section class="panel" id="admin-panel" hidden>
+          <h2>Impostazioni admin</h2>
+          <p class="hint">
+            Visibile solo con la mail di gruppo <strong>scoutfirenze1ms@gmail.com</strong>.
+            Le modifiche profonde (calendario Google, ecc.) restano qui.
+          </p>
+          <div class="placeholder-box">
+            Admin generale attivo. Usa il form calendario sopra per collegare Google Calendar.
           </div>
         </section>
 
         <section class="panel wide">
           <h2>File e documenti</h2>
-          <p class="hint">Spazio riservato: qui arriveranno upload file o collegamento a OneDrive.</p>
+          <p class="hint">Spazio riservato: upload file / OneDrive in arrivo.</p>
           <div class="placeholder-box">
-            Presto: caricamento documenti staff e accesso alle cartelle condivise OneDrive.
+            Presto: documenti staff e cartelle OneDrive.
           </div>
         </section>
       </div>
     </div>
   </main>
 
+  <script src="../js/config.js"></script>
   <script src="../js/store.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/staff.js"></script>

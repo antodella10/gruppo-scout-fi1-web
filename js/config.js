@@ -1,8 +1,19 @@
-/* Impostazioni pubbliche del sito.
-   Per il calendario attività visibile a TUTTI i visitatori,
-   incolla qui l’URL embed di un Google Calendar pubblico. */
 window.SCOUT_CONFIG = {
+  adminEmail: "scoutfirenze1ms@gmail.com",
   homeCalendarEmbed: "",
-  // Esempio:
-  // homeCalendarEmbed: "https://calendar.google.com/calendar/embed?src=TUO_ID&ctz=Europe%2FRome",
+  association: "FederScout — Associazione Mariano Silvani",
+};
+
+window.SCOUT_BRANCHES = {
+  lupetti: { id: "lupetti", label: "Lupetti", short: "Lupetti" },
+  reparto: { id: "reparto", label: "Reparto", short: "Reparto" },
+  noviziato: { id: "noviziato", label: "Noviziato", short: "Noviziato" },
+  clan: { id: "clan", label: "Clan", short: "Clan" },
+};
+
+window.SCOUT_SCOPES = {
+  gruppo: { id: "gruppo", label: "Gruppo" },
+  branca: { id: "branca", label: "Branca" },
+  staff: { id: "staff", label: "Staff" },
+  coca: { id: "coca", label: "Co.Ca." },
 };

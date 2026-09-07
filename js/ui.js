@@ -18,11 +18,32 @@ function ymd(date) {
   return `${y}-${m}-${d}`;
 }
 
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function eventBadge(event) {
+  const label = ScoutStore.scopeLabel(event.scope, event.branca);
+  const cls =
+    event.scope === "gruppo"
+      ? "badge-gruppo"
+      : event.scope === "coca"
+        ? "badge-coca"
+        : event.scope === "staff"
+          ? "badge-staff"
+          : "badge-branca";
+  return `<span class="event-badge ${cls}">${escapeHtml(label)}</span>`;
+}
+
 function renderMonthCalendar(container, events, viewDate) {
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
   const first = new Date(year, month, 1);
-  const startOffset = (first.getDay() + 6) % 7; // Monday-first
+  const startOffset = (first.getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const daysInPrev = new Date(year, month, 0).getDate();
   const today = ymd(new Date());
@@ -61,14 +82,14 @@ function renderMonthCalendar(container, events, viewDate) {
   container.innerHTML = html;
 }
 
-function renderEventList(container, events, { upcomingOnly = true, limit = 8 } = {}) {
+function renderEventList(container, events, { upcomingOnly = true, limit = 10 } = {}) {
   const today = ymd(new Date());
   let list = [...events];
   if (upcomingOnly) list = list.filter((e) => e.date >= today);
   list = list.slice(0, limit);
 
   if (!list.length) {
-    container.innerHTML = `<div class="empty-state">Nessuna attività in programma. Lo staff può aggiungerle dall'area riservata.</div>`;
+    container.innerHTML = `<div class="empty-state">Nessuna attività in programma per questa vista.</div>`;
     return;
   }
 
@@ -81,6 +102,7 @@ function renderEventList(container, events, { upcomingOnly = true, limit = 8 } =
           <span class="mon">${formatShortMonth(e.date)}</span>
         </div>
         <div>
+          <div class="event-item-top">${eventBadge(e)}</div>
           <h4>${escapeHtml(e.title)}</h4>
           <p>
             ${e.time ? escapeHtml(e.time) + " · " : ""}${e.place ? escapeHtml(e.place) : "Luogo da definire"}
@@ -92,22 +114,15 @@ function renderEventList(container, events, { upcomingOnly = true, limit = 8 } =
     .join("");
 }
 
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
-
 function updateNavAuth() {
   const slot = document.querySelector("[data-auth-slot]");
   if (!slot) return;
   const user = ScoutStore.getSession();
   const base = slot.dataset.base || "";
   if (user) {
+    const br = user.branca ? ScoutStore.branchLabel(user.branca) : "";
     slot.innerHTML = `
-      <span class="user-chip">${escapeHtml(user.nome)} ${escapeHtml(user.cognome)}</span>
+      <span class="user-chip">${escapeHtml(user.nome)} ${escapeHtml(user.cognome)}${br ? " · " + escapeHtml(br) : ""}${user.isAdmin ? " · Admin" : ""}</span>
       <a class="btn btn-primary btn-small" href="${base}staff/">Area staff</a>
     `;
   } else {

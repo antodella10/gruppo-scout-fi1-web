@@ -1,19 +1,14 @@
 ﻿# Gruppo Scout Firenze 1 — sito web
 
-Sito statico del gruppo, deploy su Netlify.
+FederScout — Associazione Mariano Silvani. Deploy su Netlify.
 
-## Struttura
+## Funzionalità
 
-- `index.html` — home pubblica
-- `staff/` — login, registrazione e area personale
-- `photos/` — logo e foto (metti qui le immagini)
-- `css/`, `js/` — stili e logica
+- Home con selettore **Gruppo / Lupetti / Reparto / Noviziato / Clan**
+- Calendario filtrato per ambito (gruppo, branca, staff, Co.Ca.)
+- Area staff con OTP approvato da `scoutfirenze1ms@gmail.com`
+- Admin = account con quella mail di gruppo
 
-## Foto e loghi
+## Foto
 
-Metti file in `photos/` (es. `photos/logo.jpeg`, `photos/sede.jpg`). Poi dimmi i nomi file e li colleghiamo alle sezioni.
-
-## Note tecniche
-
-Account staff e calendario attività sono salvati per ora nel browser (`localStorage`).
-Il calendario staff usa un embed di Google Calendar (URL da Impostazioni → Integra calendario).
+Metti file in `photos/` e segnala i nomi da collegare.

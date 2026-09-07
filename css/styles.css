@@ -729,6 +729,81 @@ select:focus {
   font-size: 0.9rem;
 }
 
+/* —— Branch selector —— */
+.branch-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.branch-chip {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--green-deep);
+  font: inherit;
+  font-weight: 700;
+  padding: 0.7rem 1.15rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.branch-chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(31, 122, 58, 0.35);
+}
+
+.branch-chip.is-active {
+  background: var(--green);
+  color: white;
+  border-color: var(--green);
+  box-shadow: 0 8px 20px rgba(31, 122, 58, 0.22);
+}
+
+#view-root {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#view-root.is-switching {
+  opacity: 0.35;
+  transform: translateY(6px);
+}
+
+.event-item-top {
+  margin-bottom: 0.25rem;
+}
+
+.event-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+.badge-gruppo {
+  background: var(--green-soft);
+  color: var(--green-deep);
+}
+
+.badge-branca {
+  background: #e8f1ff;
+  color: #1d4f91;
+}
+
+.badge-staff {
+  background: #f3e8ff;
+  color: #6b2d8b;
+}
+
+.badge-coca {
+  background: var(--yellow-soft);
+  color: #7a5a00;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
