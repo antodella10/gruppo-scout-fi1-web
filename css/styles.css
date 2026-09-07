@@ -1059,7 +1059,7 @@ select:focus {
 }
 
 .pdf-wrap {
-  width: min(100% - 2rem, 980px);
+  width: min(100% - 2rem, 1180px);
   margin: 1.25rem auto 0;
 }
 
@@ -1091,13 +1091,13 @@ select:focus {
   border-radius: 18px;
   overflow: hidden;
   box-shadow: var(--shadow);
-  min-height: 70vh;
+  min-height: 82vh;
 }
 
 .pdf-frame {
   width: 100%;
-  height: 72vh;
-  min-height: 480px;
+  height: 82vh;
+  min-height: 640px;
   border: 0;
   display: none;
   background: #f4f6f4;
@@ -1109,7 +1109,7 @@ select:focus {
 
 .pdf-empty {
   display: none;
-  min-height: 70vh;
+  min-height: 82vh;
   place-items: center;
   color: var(--muted);
   padding: 2rem;
@@ -1126,18 +1126,46 @@ select:focus {
   display: none !important;
 }
 
+.pdf-exit-fs {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  z-index: 5;
+  background: rgba(255, 255, 255, 0.94) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.pdf-stage:fullscreen {
+  border-radius: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  background: #111;
+}
+
+.pdf-stage:fullscreen .pdf-frame {
+  height: 100vh;
+  min-height: 100%;
+}
+
 @media (max-width: 900px) {
   .reparto-actions .dest-card {
     grid-column: span 12;
   }
 
   .pdf-wrap {
-    width: min(100% - 1.25rem, 980px);
+    width: min(100% - 1.25rem, 1180px);
+  }
+
+  .pdf-frame,
+  .pdf-stage {
+    height: auto;
+    min-height: 70vh;
   }
 
   .pdf-frame {
-    height: 65vh;
-    min-height: 360px;
+    height: 70vh;
+    min-height: 420px;
   }
 }
 
