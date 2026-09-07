@@ -227,8 +227,24 @@ const ScoutStore = (() => {
   }
 
   function getEvents() {
-    return read(KEYS.events, []).sort(
-      (a, b) => a.date.localeCompare(b.date) || (a.time || "").localeCompare(b.time || "")
+    const raw = read(KEYS.events, []);
+    const normalized = raw.map((e) => {
+      const dateStart = e.dateStart || e.date || "";
+      const dateEnd = e.dateEnd || e.dateStart || e.date || dateStart;
+      return {
+        ...e,
+        dateStart,
+        dateEnd,
+        date: dateStart, // compat
+        allDay: !!e.allDay,
+        description: e.description || e.notes || "",
+        notes: e.description || e.notes || "",
+      };
+    });
+    return normalized.sort(
+      (a, b) =>
+        a.dateStart.localeCompare(b.dateStart) ||
+        (a.time || "").localeCompare(b.time || "")
     );
   }
 
@@ -265,12 +281,26 @@ const ScoutStore = (() => {
       }
     }
 
+    const dateStart = event.dateStart || event.date || "";
+    let dateEnd = event.dateEnd || dateStart;
+    if (dateEnd && dateStart && dateEnd < dateStart) {
+      throw new Error("La data di fine non può essere prima dell’inizio.");
+    }
+    if (!dateEnd) dateEnd = dateStart;
+
+    const allDay = !!event.allDay;
+    const description = String(event.description ?? event.notes ?? "").trim();
+
     return {
       title: String(event.title || "").trim(),
-      date: event.date,
-      time: event.time || "",
+      dateStart,
+      dateEnd,
+      date: dateStart,
+      time: allDay ? "" : event.time || "",
+      allDay,
       place: String(event.place || "").trim(),
-      notes: String(event.notes || "").trim(),
+      description,
+      notes: description,
       scope,
       branca,
     };
@@ -279,7 +309,7 @@ const ScoutStore = (() => {
   function addEvent(event, user) {
     if (!user) throw new Error("Devi essere autenticato.");
     const data = normalizeEventInput(event, user);
-    if (!data.title || !data.date) throw new Error("Titolo e data sono obbligatori.");
+    if (!data.title || !data.dateStart) throw new Error("Titolo e data inizio sono obbligatori.");
     const item = {
       id: uid("evt"),
       ...data,
@@ -335,7 +365,20 @@ const ScoutStore = (() => {
   }
 
   function getSettings() {
-    return read(KEYS.settings, { googleCalendarEmbed: "" });
+    const raw = read(KEYS.settings, {});
+    const calendars = Array.isArray(raw.googleCalendars) ? raw.googleCalendars : [];
+    // migrazione vecchio singolo embed
+    if (!calendars.length && raw.googleCalendarEmbed) {
+      calendars.push({
+        id: "legacy_gruppo",
+        branca: "gruppo",
+        embedUrl: raw.googleCalendarEmbed,
+      });
+    }
+    return {
+      googleCalendars: calendars,
+      googleCalendarEmbed: raw.googleCalendarEmbed || "",
+    };
   }
 
   function saveSettings(settings, user) {
@@ -343,6 +386,48 @@ const ScoutStore = (() => {
       throw new Error("Solo l’account mail di gruppo può modificare queste impostazioni.");
     }
     write(KEYS.settings, { ...getSettings(), ...settings });
+  }
+
+  function listGoogleCalendars() {
+    return getSettings().googleCalendars || [];
+  }
+
+  function addGoogleCalendar({ branca, embedUrl }, user) {
+    if (!isAdminUser(user)) throw new Error("Solo admin.");
+    const url = String(embedUrl || "").trim();
+    if (!url.includes("google.com/calendar")) {
+      throw new Error("Incolla un URL di incorporamento Google Calendar valido.");
+    }
+    const key = branca === "gruppo" ? "gruppo" : branca;
+    if (key !== "gruppo" && !window.SCOUT_BRANCHES?.[key]) {
+      throw new Error("Seleziona una branca valida.");
+    }
+    const settings = getSettings();
+    const list = [...(settings.googleCalendars || [])];
+    list.push({
+      id: uid("gcal"),
+      branca: key,
+      embedUrl: url,
+      createdAt: new Date().toISOString(),
+    });
+    saveSettings({ googleCalendars: list }, user);
+    return list;
+  }
+
+  function removeGoogleCalendar(id, user) {
+    if (!isAdminUser(user)) throw new Error("Solo admin.");
+    const settings = getSettings();
+    const list = (settings.googleCalendars || []).filter((c) => c.id !== id);
+    saveSettings({ googleCalendars: list }, user);
+    return list;
+  }
+
+  function getGoogleCalendarsForView(selectedBranca) {
+    const list = listGoogleCalendars();
+    if (!selectedBranca) {
+      return list.filter((c) => c.branca === "gruppo");
+    }
+    return list.filter((c) => c.branca === "gruppo" || c.branca === selectedBranca);
   }
 
   return {
@@ -368,5 +453,9 @@ const ScoutStore = (() => {
     deleteEvent,
     getSettings,
     saveSettings,
+    listGoogleCalendars,
+    addGoogleCalendar,
+    removeGoogleCalendar,
+    getGoogleCalendarsForView,
   };
 })();

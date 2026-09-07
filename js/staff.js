@@ -15,10 +15,10 @@ document.addEventListener("DOMContentLoaded", () => {
       : `Staff ${ScoutStore.branchLabel(user.branca)}`;
   }
 
-  const eventHint = document.getElementById("event-hint");
-  if (eventHint && isAdmin) {
-    eventHint.textContent =
-      "Come admin puoi creare e modificare qualsiasi evento di qualsiasi branca.";
+  if (eventHint) {
+    eventHint.textContent = isAdmin
+      ? "Come admin puoi creare e modificare qualsiasi evento di qualsiasi branca."
+      : `Puoi creare eventi Gruppo, Staff ${ScoutStore.branchLabel(user.branca)} e Co.Ca. (e ${ScoutStore.branchLabel(user.branca)}).`;
   }
 
   document.getElementById("logout-btn")?.addEventListener("click", () => {
@@ -34,37 +34,58 @@ document.addEventListener("DOMContentLoaded", () => {
   // —— Admin: Google Calendar + pending approvals ——
   if (isAdmin) {
     const gcalForm = document.getElementById("gcal-form");
-    const gcalFrame = document.getElementById("gcal-frame");
-    const gcalEmpty = document.getElementById("gcal-empty");
-    const settings = ScoutStore.getSettings();
+    const gcalList = document.getElementById("gcal-list");
 
-    function renderGcal(url) {
-      if (!gcalFrame || !gcalEmpty) return;
-      if (url && url.includes("google.com/calendar")) {
-        gcalFrame.hidden = false;
-        gcalEmpty.hidden = true;
-        gcalFrame.src = url;
-      } else {
-        gcalFrame.hidden = true;
-        gcalFrame.removeAttribute("src");
-        gcalEmpty.hidden = false;
+    function refreshGcalList() {
+      if (!gcalList) return;
+      const list = ScoutStore.listGoogleCalendars();
+      if (!list.length) {
+        gcalList.innerHTML = `<div class="placeholder-box">Nessun calendario Google collegato.</div>`;
+        return;
       }
+      gcalList.innerHTML = list
+        .map((c) => {
+          const label = c.branca === "gruppo" ? "Gruppo" : ScoutStore.branchLabel(c.branca);
+          return `
+          <div class="event-admin-item">
+            <div>
+              <strong>${escapeHtml(label)}</strong><br>
+              <span style="color:var(--muted);font-size:.85rem;word-break:break-all">${escapeHtml(c.embedUrl)}</span>
+            </div>
+            <button type="button" class="btn btn-ghost btn-small" data-del-gcal="${c.id}">Rimuovi</button>
+          </div>`;
+        })
+        .join("");
     }
 
-    if (gcalForm) {
-      gcalForm.googleEmbed.value = settings.googleCalendarEmbed || "";
-      renderGcal(settings.googleCalendarEmbed || "");
-      gcalForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        try {
-          const url = gcalForm.googleEmbed.value.trim();
-          ScoutStore.saveSettings({ googleCalendarEmbed: url }, user);
-          renderGcal(url);
-        } catch (err) {
-          alert(err.message);
-        }
-      });
-    }
+    gcalForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const data = new FormData(gcalForm);
+      try {
+        ScoutStore.addGoogleCalendar(
+          { branca: data.get("gcalBranca"), embedUrl: data.get("googleEmbed") },
+          user
+        );
+        gcalForm.reset();
+        refreshGcalList();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    gcalList?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-del-gcal]");
+      if (!btn) return;
+      if (!confirm("Rimuovere questo calendario Google?")) return;
+      try {
+        ScoutStore.removeGoogleCalendar(btn.dataset.delGcal, user);
+        refreshGcalList();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    refreshGcalList();
 
     const pendingList = document.getElementById("pending-list");
     function refreshPending() {
@@ -144,16 +165,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const scopeSelect = document.getElementById("event-scope");
   const brancaWrap = document.getElementById("event-branca-wrap");
   const brancaSelect = document.getElementById("event-branca");
+  const allDayInput = document.getElementById("event-allday");
+  const timeWrap = document.getElementById("event-time-wrap");
   const submitBtn = document.getElementById("event-submit");
   const cancelEditBtn = document.getElementById("cancel-edit");
   let editingId = null;
+
+  // Staff generico: niente selettore "Branca"
+  if (!isAdmin && brancaWrap) {
+    brancaWrap.remove();
+  }
 
   function fillScopeOptions() {
     if (!scopeSelect) return;
     if (isAdmin) {
       scopeSelect.innerHTML = `
         <option value="gruppo">Gruppo</option>
-        <option value="branca">Branca</option>
+        <option value="branca">Evento di branca</option>
         <option value="staff">Staff di branca</option>
         <option value="coca">Co.Ca.</option>
       `;
@@ -163,6 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
           .join("");
       }
     } else {
+      // Staff generico: tipi con nome branca, senza campo/selettore "Branca"
       const brancaLabel = ScoutStore.branchLabel(user.branca);
       scopeSelect.innerHTML = `
         <option value="gruppo">Gruppo</option>
@@ -172,16 +201,28 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }
     syncBrancaVisibility();
+    syncAllDay();
   }
 
   function syncBrancaVisibility() {
-    if (!brancaWrap || !scopeSelect) return;
-    const needs = isAdmin && (scopeSelect.value === "branca" || scopeSelect.value === "staff");
+    if (!brancaWrap || !scopeSelect || !isAdmin) {
+      if (brancaWrap) brancaWrap.hidden = true;
+      return;
+    }
+    const needs = scopeSelect.value === "branca" || scopeSelect.value === "staff";
     brancaWrap.hidden = !needs;
     if (brancaSelect) brancaSelect.required = needs;
   }
 
+  function syncAllDay() {
+    const on = !!allDayInput?.checked;
+    if (timeWrap) timeWrap.hidden = on;
+    const timeInput = document.getElementById("event-time");
+    if (timeInput) timeInput.disabled = on;
+  }
+
   scopeSelect?.addEventListener("change", syncBrancaVisibility);
+  allDayInput?.addEventListener("change", syncAllDay);
 
   function showAlert(msg, ok = true) {
     if (!eventAlert) return;
@@ -206,35 +247,39 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     eventList.innerHTML = events
-      .map(
-        (e) => `
+      .map((e) => {
+        const range = formatEventRange(e);
+        return `
         <div class="event-admin-item" data-id="${e.id}">
           <div>
             ${eventBadge(e)}
             <strong style="display:inline-block;margin-left:.35rem">${escapeHtml(e.title)}</strong><br>
-            <span style="color:var(--muted)">${escapeHtml(e.date)}${e.time ? " · " + escapeHtml(e.time) : ""}${e.place ? " · " + escapeHtml(e.place) : ""}</span>
+            <span style="color:var(--muted)">${escapeHtml(range)}${e.place ? " · " + escapeHtml(e.place) : ""}</span>
           </div>
           <div class="inline-actions">
             <button type="button" class="btn btn-ghost btn-small" data-edit="${e.id}">Modifica</button>
             <button type="button" class="btn btn-ghost btn-small" data-delete="${e.id}">Elimina</button>
           </div>
-        </div>`
-      )
+        </div>`;
+      })
       .join("");
   }
 
   function startEdit(id) {
     const event = ScoutStore.getEvents().find((e) => e.id === id);
     if (!event || !ScoutStore.canManageEvent(user, event)) return;
+    fillScopeOptions();
     editingId = id;
     eventForm.title.value = event.title;
-    eventForm.date.value = event.date;
+    eventForm.dateStart.value = event.dateStart || event.date || "";
+    eventForm.dateEnd.value = event.dateEnd || event.dateStart || event.date || "";
+    if (allDayInput) allDayInput.checked = !!event.allDay;
     eventForm.time.value = event.time || "";
     eventForm.place.value = event.place || "";
-    eventForm.notes.value = event.notes || "";
-    fillScopeOptions();
+    eventForm.description.value = event.description || event.notes || "";
     scopeSelect.value = event.scope;
     syncBrancaVisibility();
+    syncAllDay();
     if (brancaSelect && event.branca) brancaSelect.value = event.branca;
     if (submitBtn) submitBtn.textContent = "Salva modifiche";
     if (cancelEditBtn) cancelEditBtn.hidden = false;
@@ -248,10 +293,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = new FormData(eventForm);
     const payload = {
       title: data.get("title"),
-      date: data.get("date"),
+      dateStart: data.get("dateStart"),
+      dateEnd: data.get("dateEnd") || data.get("dateStart"),
+      allDay: !!allDayInput?.checked,
       time: data.get("time"),
       place: data.get("place"),
-      notes: data.get("notes"),
+      description: data.get("description"),
       scope: data.get("scope"),
       branca: isAdmin ? data.get("branca") : user.branca,
     };

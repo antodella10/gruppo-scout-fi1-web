@@ -1,9 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const user = ScoutStore.getCurrentUser();
-  const embed = window.SCOUT_CONFIG?.homeCalendarEmbed?.trim();
   const gcalWrap = document.getElementById("gcal-home-wrap");
-  const gcalFrame = document.getElementById("gcal-home");
-  const localWrap = document.getElementById("local-calendar-wrap");
+  const gcalWrapRep = document.getElementById("gcal-reparto-wrap");
   const calEl = document.getElementById("cal-grid");
   const listEl = document.getElementById("event-list");
   const labelEl = document.getElementById("month-label");
@@ -45,35 +43,30 @@ document.addEventListener("DOMContentLoaded", () => {
       calLead: "Appuntamenti di gruppo.",
       heroLine:
         "Avventura, servizio e crescita tra le colline fiorentine. Un gruppo FederScout, tante strade — un unico sentiero insieme.",
-      viewLabel: "Vista gruppo",
     },
     lupetti: {
       sediTitle: "Lupetti",
       sediLead: "Gioco, natura e vita di branco.",
       calLead: "Calendario lupetti e gruppo.",
       heroLine: "Branco in cammino: gioco, amicizia e grandi scoperte.",
-      viewLabel: "Vista Lupetti",
     },
     reparto: {
       sediTitle: "Reparto",
       sediLead: "",
       calLead: "Eventi reparto e di gruppo.",
       heroLine: "",
-      viewLabel: "Vista Reparto",
     },
     noviziato: {
       sediTitle: "Noviziato",
       sediLead: "Discernimento, servizio e crescita.",
       calLead: "Calendario noviziato e gruppo.",
       heroLine: "Noviziato: un anno per scegliere e servire.",
-      viewLabel: "Vista Noviziato",
     },
     clan: {
       sediTitle: "Clan",
       sediLead: "Servizio, strada e comunità.",
       calLead: "Calendario clan e gruppo.",
       heroLine: "Clan in servizio: responsabilità e comunità adulta.",
-      viewLabel: "Vista Clan",
     },
   };
 
@@ -83,7 +76,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function nearestEvent() {
     const today = ymd(new Date());
-    return currentEvents().find((e) => e.date >= today) || null;
+    return (
+      currentEvents().find((e) => (e.dateEnd || e.dateStart || e.date || "") >= today) || null
+    );
+  }
+
+  function renderGoogleCalendars() {
+    const calendars = ScoutStore.getGoogleCalendarsForView(selectedBranca);
+    if (selectedBranca === "reparto") {
+      if (gcalWrap) gcalWrap.innerHTML = "";
+      fillGcalWrap(gcalWrapRep, calendars);
+    } else {
+      if (gcalWrapRep) gcalWrapRep.innerHTML = "";
+      fillGcalWrap(gcalWrap, calendars);
+    }
+  }
+
+  function fillGcalWrap(wrap, calendars) {
+    if (!wrap) return;
+    if (!calendars.length) {
+      wrap.innerHTML = "";
+      return;
+    }
+    wrap.innerHTML = calendars
+      .map((c) => {
+        const label =
+          c.branca === "gruppo"
+            ? "Google · Gruppo"
+            : `Google · ${ScoutStore.branchLabel(c.branca)}`;
+        return `
+          <div class="panel gcal-overlay-item">
+            <h3 style="margin:0 0 .75rem;font-family:'Bricolage Grotesque',sans-serif;color:var(--green-deep);font-size:1.1rem">${escapeHtml(label)}</h3>
+            <iframe class="gcal-frame" title="${escapeHtml(label)}" src="${escapeHtml(c.embedUrl)}" loading="lazy"></iframe>
+          </div>`;
+      })
+      .join("");
   }
 
   function renderRepartoNext() {
@@ -93,19 +120,14 @@ document.addEventListener("DOMContentLoaded", () => {
       nextEventEl.innerHTML = `<div class="empty-state">Nessun evento in programma per il reparto.</div>`;
       return;
     }
-    const dateLabel = new Date(ev.date + "T12:00:00").toLocaleDateString("it-IT", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    const desc = ev.description || ev.notes || "";
     nextEventEl.innerHTML = `
       <div class="next-event-inner">
         ${eventBadge(ev)}
         <h3 style="margin:.6rem 0 .35rem;font-size:1.7rem">${escapeHtml(ev.title)}</h3>
-        <p class="next-event-meta"><strong>Data:</strong> ${escapeHtml(dateLabel)}${ev.time ? " · " + escapeHtml(ev.time) : ""}</p>
+        <p class="next-event-meta"><strong>Quando:</strong> ${escapeHtml(formatEventRange(ev))}</p>
         <p class="next-event-meta"><strong>Luogo:</strong> ${escapeHtml(ev.place || "Da definire")}</p>
-        ${ev.notes ? `<p class="next-event-desc">${escapeHtml(ev.notes)}</p>` : ""}
+        ${desc ? `<p class="next-event-desc">${escapeHtml(desc)}</p>` : ""}
       </div>`;
   }
 
@@ -118,19 +140,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function refreshCalendar() {
+    renderGoogleCalendars();
     if (selectedBranca === "reparto") {
       renderRepartoNext();
       paintCalendar(calElRep, listElRep, labelElRep);
       return;
     }
-
-    if (embed && embed.includes("google.com/calendar") && gcalWrap && gcalFrame) {
-      gcalWrap.hidden = false;
-      gcalFrame.src = embed;
-      if (localWrap) localWrap.hidden = true;
-      return;
-    }
-
     paintCalendar(calEl, listEl, labelEl);
   }
 
@@ -215,10 +230,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const day = e.target.closest(".cal-day.has-event");
       if (!day) return;
       const date = day.dataset.date;
-      const match = currentEvents().filter((ev) => ev.date === date);
+      const match = currentEvents().filter((ev) => eventCoversDate(ev, date));
       if (!match.length) return;
       const titles = match
-        .map((m) => `• [${ScoutStore.scopeLabel(m.scope, m.branca)}] ${m.title}${m.time ? " (" + m.time + ")" : ""}`)
+        .map((m) => `• [${ScoutStore.scopeLabel(m.scope, m.branca)}] ${m.title} (${formatEventRange(m)})`)
         .join("\n");
       alert(`${date}\n\n${titles}`);
     });

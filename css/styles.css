@@ -1054,6 +1054,56 @@ select:focus {
   font-size: 1.05rem;
 }
 
+.check-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 600;
+}
+
+.check-row input {
+  width: auto;
+}
+
+.book-meta-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.btn-download {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--green-deep);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.btn-download:hover {
+  background: var(--green-soft);
+  transform: translateY(-1px);
+}
+
+.gcal-overlay-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.gcal-overlay-item .gcal-frame {
+  min-height: 360px;
+}
+
 /* Canzoniere PDF viewer */
 .canzoniere-page {
   min-height: 100vh;

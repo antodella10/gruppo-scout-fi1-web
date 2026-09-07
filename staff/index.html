@@ -48,23 +48,31 @@
               Branca
               <select name="branca" id="event-branca"></select>
             </label>
+            <label class="check-row">
+              <input type="checkbox" name="allDay" id="event-allday">
+              <span>Tutto il giorno</span>
+            </label>
             <div class="form-row-2">
               <label>
-                Data
-                <input type="date" name="date" required>
+                Da
+                <input type="date" name="dateStart" id="event-date-start" required>
               </label>
               <label>
-                Ora
-                <input type="time" name="time">
+                A
+                <input type="date" name="dateEnd" id="event-date-end">
               </label>
             </div>
+            <label id="event-time-wrap">
+              Ora
+              <input type="time" name="time" id="event-time">
+            </label>
             <label>
               Luogo
               <input type="text" name="place" placeholder="Sede, parco, …">
             </label>
             <label>
-              Note
-              <textarea name="notes" rows="2" placeholder="Opzionale"></textarea>
+              Descrizione
+              <textarea name="description" rows="2" placeholder="Opzionale"></textarea>
             </label>
             <div class="inline-actions">
               <button class="btn btn-primary" type="submit" id="event-submit">Aggiungi attività</button>
@@ -92,19 +100,26 @@
         </section>
 
         <section class="panel" id="gcal-panel" hidden>
-          <h2>Calendario Google</h2>
-          <p class="hint">Solo admin — collega l’embed del Google Calendar.</p>
+          <h2>Calendari Google</h2>
+          <p class="hint">Solo admin — collega un Google Calendar a una branca (o al gruppo). Comparirà in home insieme agli eventi del sito.</p>
           <form id="gcal-form" class="form-grid">
             <label>
-              URL incorporamento
-              <input type="url" name="googleEmbed" placeholder="https://calendar.google.com/calendar/embed?src=...">
+              Branca
+              <select name="gcalBranca" id="gcal-branca" required>
+                <option value="gruppo">Gruppo</option>
+                <option value="lupetti">Lupetti</option>
+                <option value="reparto">Reparto</option>
+                <option value="noviziato">Noviziato</option>
+                <option value="clan">Clan</option>
+              </select>
             </label>
-            <button class="btn btn-primary" type="submit">Salva calendario</button>
+            <label>
+              URL incorporamento
+              <input type="url" name="googleEmbed" placeholder="https://calendar.google.com/calendar/embed?src=..." required>
+            </label>
+            <button class="btn btn-primary" type="submit">Aggiungi calendario</button>
           </form>
-          <div style="margin-top:1rem">
-            <iframe id="gcal-frame" class="gcal-frame" title="Google Calendar" hidden></iframe>
-            <div id="gcal-empty" class="placeholder-box">Nessun calendario collegato.</div>
-          </div>
+          <div id="gcal-list" style="margin-top:1rem"></div>
         </section>
 
         <section class="panel wide">

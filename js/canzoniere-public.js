@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const bookEmpty = document.getElementById("book-empty");
   const bookFrame = document.getElementById("book-frame");
   const bookMeta = document.getElementById("book-meta-line");
+  const downloadBtn = document.getElementById("pdf-download");
   const pdfStage = document.getElementById("pdf-stage");
   const fsBtn = document.getElementById("pdf-fullscreen");
   const exitFsBtn = document.getElementById("pdf-exit-fs");
@@ -13,9 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const proposeAlert = document.getElementById("propose-alert");
 
   let currentBookUrl = null;
+  let currentBookName = "canzoniere.pdf";
 
   function pdfSrc(url, { toolbar = false, zoom = 110 } = {}) {
-    // Chrome/Edge: toolbar=0 nasconde la barra; in fullscreen la lasciamo visibile
     if (toolbar) {
       return `${url}#toolbar=1&navpanes=0&zoom=${zoom}`;
     }
@@ -41,6 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
       bookFrame.classList.remove("is-visible");
     }
     if (fsBtn) fsBtn.hidden = true;
+    if (downloadBtn) downloadBtn.hidden = true;
     setExitFsVisible(false);
   }
 
@@ -56,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
       bookFrame.classList.add("is-visible");
     }
     if (fsBtn) fsBtn.hidden = false;
+    if (downloadBtn) downloadBtn.hidden = false;
     setExitFsVisible(!!document.fullscreenElement);
   }
 
@@ -82,10 +85,11 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       if (currentBookUrl) URL.revokeObjectURL(currentBookUrl);
       currentBookUrl = await CanzoniereStore.getPdfUrl(book.fileId);
+      currentBookName = book.fileName || "canzoniere.pdf";
       showPdf(currentBookUrl);
       if (bookMeta) {
         const when = new Date(book.updatedAt).toLocaleDateString("it-IT");
-        bookMeta.textContent = `${book.fileName || "canzoniere.pdf"} · aggiornato ${when}`;
+        bookMeta.textContent = `${currentBookName} · aggiornato ${when}`;
       }
     } catch (err) {
       showEmpty(err.message || "Impossibile aprire il PDF.");
@@ -141,13 +145,22 @@ document.addEventListener("DOMContentLoaded", () => {
   fsBtn?.addEventListener("click", enterFullscreen);
   exitFsBtn?.addEventListener("click", exitFullscreen);
 
+  downloadBtn?.addEventListener("click", () => {
+    if (!currentBookUrl) return;
+    const a = document.createElement("a");
+    a.href = currentBookUrl;
+    a.download = currentBookName || "canzoniere.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+
   document.addEventListener("fullscreenchange", () => {
     const on = !!document.fullscreenElement;
     setExitFsVisible(on);
     reloadPdfForMode();
   });
 
-  // stato iniziale: mai mostrare "esci" fuori dal fullscreen
   setExitFsVisible(false);
 
   proposeForm?.addEventListener("submit", (e) => {

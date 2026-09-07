@@ -39,6 +39,26 @@ function eventBadge(event) {
   return `<span class="event-badge ${cls}">${escapeHtml(label)}</span>`;
 }
 
+function eventCoversDate(event, dateKey) {
+  const start = event.dateStart || event.date || "";
+  const end = event.dateEnd || start;
+  if (!start) return false;
+  return dateKey >= start && dateKey <= end;
+}
+
+function formatEventRange(event) {
+  const start = event.dateStart || event.date || "";
+  const end = event.dateEnd || start;
+  if (!start) return "";
+  if (event.allDay) {
+    if (end && end !== start) return `Tutto il giorno · ${start} → ${end}`;
+    return `Tutto il giorno · ${start}`;
+  }
+  const time = event.time ? `${event.time} · ` : "";
+  if (end && end !== start) return `${time}${start} → ${end}`;
+  return `${time}${start}`;
+}
+
 function renderMonthCalendar(container, events, viewDate) {
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -47,7 +67,6 @@ function renderMonthCalendar(container, events, viewDate) {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const daysInPrev = new Date(year, month, 0).getDate();
   const today = ymd(new Date());
-  const eventDates = new Set(events.map((e) => e.date));
 
   const dows = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
   let html = dows.map((d) => `<div class="cal-dow">${d}</div>`).join("");
@@ -74,7 +93,7 @@ function renderMonthCalendar(container, events, viewDate) {
     const classes = ["cal-day"];
     if (muted) classes.push("muted");
     if (key === today) classes.push("today");
-    if (eventDates.has(key)) classes.push("has-event");
+    if (events.some((e) => eventCoversDate(e, key))) classes.push("has-event");
 
     html += `<div class="${classes.join(" ")}" data-date="${key}" title="${key}">${day}</div>`;
   }
@@ -85,7 +104,9 @@ function renderMonthCalendar(container, events, viewDate) {
 function renderEventList(container, events, { upcomingOnly = true, limit = 10 } = {}) {
   const today = ymd(new Date());
   let list = [...events];
-  if (upcomingOnly) list = list.filter((e) => e.date >= today);
+  if (upcomingOnly) {
+    list = list.filter((e) => (e.dateEnd || e.dateStart || e.date || "") >= today);
+  }
   list = list.slice(0, limit);
 
   if (!list.length) {
@@ -94,23 +115,26 @@ function renderEventList(container, events, { upcomingOnly = true, limit = 10 } 
   }
 
   container.innerHTML = list
-    .map(
-      (e) => `
+    .map((e) => {
+      const start = e.dateStart || e.date || "";
+      const desc = e.description || e.notes || "";
+      return `
       <article class="event-item">
         <div class="event-date">
-          <span class="day">${dayNumber(e.date)}</span>
-          <span class="mon">${formatShortMonth(e.date)}</span>
+          <span class="day">${dayNumber(start)}</span>
+          <span class="mon">${formatShortMonth(start)}</span>
         </div>
         <div>
           <div class="event-item-top">${eventBadge(e)}</div>
           <h4>${escapeHtml(e.title)}</h4>
           <p>
-            ${e.time ? escapeHtml(e.time) + " · " : ""}${e.place ? escapeHtml(e.place) : "Luogo da definire"}
-            ${e.notes ? "<br>" + escapeHtml(e.notes) : ""}
+            ${escapeHtml(formatEventRange(e))}
+            ${e.place ? " · " + escapeHtml(e.place) : ""}
+            ${desc ? "<br>" + escapeHtml(desc) : ""}
           </p>
         </div>
-      </article>`
-    )
+      </article>`;
+    })
     .join("");
 }
 
