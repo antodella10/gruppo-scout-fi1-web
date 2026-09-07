@@ -5,14 +5,20 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  const isAdmin = !!(user.isAdmin || ScoutStore.isAdminEmail(user.email));
+  const isAdmin = ScoutStore.isAdminUser(user);
   const nameEl = document.getElementById("staff-name");
   const metaEl = document.getElementById("staff-meta");
   if (nameEl) nameEl.textContent = `${user.nome} ${user.cognome}`;
   if (metaEl) {
     metaEl.textContent = isAdmin
-      ? `Admin generale · ${ScoutStore.branchLabel(user.branca)}`
+      ? "Admin generale · tutte le branche"
       : `Staff ${ScoutStore.branchLabel(user.branca)}`;
+  }
+
+  const eventHint = document.getElementById("event-hint");
+  if (eventHint && isAdmin) {
+    eventHint.textContent =
+      "Come admin puoi creare e modificare qualsiasi evento di qualsiasi branca.";
   }
 
   document.getElementById("logout-btn")?.addEventListener("click", () => {
@@ -21,35 +27,33 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const adminPanel = document.getElementById("admin-panel");
+  const gcalPanel = document.getElementById("gcal-panel");
   if (adminPanel) adminPanel.hidden = !isAdmin;
+  if (gcalPanel) gcalPanel.hidden = !isAdmin;
 
-  const gcalForm = document.getElementById("gcal-form");
-  const gcalHint = document.getElementById("gcal-hint");
-  const gcalFrame = document.getElementById("gcal-frame");
-  const gcalEmpty = document.getElementById("gcal-empty");
-  const settings = ScoutStore.getSettings();
+  // —— Admin: Google Calendar + pending approvals ——
+  if (isAdmin) {
+    const gcalForm = document.getElementById("gcal-form");
+    const gcalFrame = document.getElementById("gcal-frame");
+    const gcalEmpty = document.getElementById("gcal-empty");
+    const settings = ScoutStore.getSettings();
 
-  function renderGcal(url) {
-    if (!gcalFrame || !gcalEmpty) return;
-    if (url && url.includes("google.com/calendar")) {
-      gcalFrame.hidden = false;
-      gcalEmpty.hidden = true;
-      gcalFrame.src = url;
-    } else {
-      gcalFrame.hidden = true;
-      gcalFrame.removeAttribute("src");
-      gcalEmpty.hidden = false;
-    }
-  }
-
-  if (gcalForm) {
-    if (isAdmin) {
-      gcalForm.hidden = false;
-      if (gcalHint) {
-        gcalHint.innerHTML =
-          "Solo l’admin (mail di gruppo) può collegare o cambiare il Google Calendar.";
+    function renderGcal(url) {
+      if (!gcalFrame || !gcalEmpty) return;
+      if (url && url.includes("google.com/calendar")) {
+        gcalFrame.hidden = false;
+        gcalEmpty.hidden = true;
+        gcalFrame.src = url;
+      } else {
+        gcalFrame.hidden = true;
+        gcalFrame.removeAttribute("src");
+        gcalEmpty.hidden = false;
       }
+    }
+
+    if (gcalForm) {
       gcalForm.googleEmbed.value = settings.googleCalendarEmbed || "";
+      renderGcal(settings.googleCalendarEmbed || "");
       gcalForm.addEventListener("submit", (e) => {
         e.preventDefault();
         try {
@@ -60,10 +64,52 @@ document.addEventListener("DOMContentLoaded", () => {
           alert(err.message);
         }
       });
-    } else if (gcalHint) {
-      gcalHint.textContent = "Calendario configurato dall’admin — solo visualizzazione.";
     }
-    renderGcal(settings.googleCalendarEmbed || "");
+
+    const pendingList = document.getElementById("pending-list");
+    function refreshPending() {
+      if (!pendingList) return;
+      const list = ScoutStore.listPending(user);
+      if (!list.length) {
+        pendingList.innerHTML = `<div class="empty-state">Nessuna richiesta in attesa.</div>`;
+        return;
+      }
+      pendingList.innerHTML = list
+        .map(
+          (p) => `
+          <div class="event-admin-item" data-pending="${p.id}">
+            <div>
+              <strong>${escapeHtml(p.nome)} ${escapeHtml(p.cognome)}</strong><br>
+              <span style="color:var(--muted)">${escapeHtml(p.email)} · ${escapeHtml(ScoutStore.branchLabel(p.branca))}</span>
+            </div>
+            <div class="inline-actions">
+              <button type="button" class="btn btn-primary btn-small" data-approve="${p.id}">Approva</button>
+              <button type="button" class="btn btn-ghost btn-small" data-reject="${p.id}">Rifiuta</button>
+            </div>
+          </div>`
+        )
+        .join("");
+    }
+
+    pendingList?.addEventListener("click", (e) => {
+      const approve = e.target.closest("[data-approve]");
+      const reject = e.target.closest("[data-reject]");
+      try {
+        if (approve) {
+          ScoutStore.approvePending(approve.dataset.approve, user);
+          refreshPending();
+        }
+        if (reject) {
+          if (!confirm("Rifiutare questa richiesta?")) return;
+          ScoutStore.rejectPending(reject.dataset.reject, user);
+          refreshPending();
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    refreshPending();
   }
 
   // —— Events ——
@@ -71,20 +117,46 @@ document.addEventListener("DOMContentLoaded", () => {
   const eventList = document.getElementById("staff-event-list");
   const eventAlert = document.getElementById("event-alert");
   const scopeSelect = document.getElementById("event-scope");
+  const brancaWrap = document.getElementById("event-branca-wrap");
+  const brancaSelect = document.getElementById("event-branca");
   const submitBtn = document.getElementById("event-submit");
   const cancelEditBtn = document.getElementById("cancel-edit");
   let editingId = null;
 
   function fillScopeOptions() {
     if (!scopeSelect) return;
-    const brancaLabel = ScoutStore.branchLabel(user.branca);
-    scopeSelect.innerHTML = `
-      <option value="gruppo">Gruppo</option>
-      <option value="branca">${escapeHtml(brancaLabel)}</option>
-      <option value="staff">Staff ${escapeHtml(brancaLabel)}</option>
-      <option value="coca">Co.Ca.</option>
-    `;
+    if (isAdmin) {
+      scopeSelect.innerHTML = `
+        <option value="gruppo">Gruppo</option>
+        <option value="branca">Branca</option>
+        <option value="staff">Staff di branca</option>
+        <option value="coca">Co.Ca.</option>
+      `;
+      if (brancaSelect) {
+        brancaSelect.innerHTML = Object.values(window.SCOUT_BRANCHES || {})
+          .map((b) => `<option value="${b.id}">${escapeHtml(b.label)}</option>`)
+          .join("");
+      }
+    } else {
+      const brancaLabel = ScoutStore.branchLabel(user.branca);
+      scopeSelect.innerHTML = `
+        <option value="gruppo">Gruppo</option>
+        <option value="branca">${escapeHtml(brancaLabel)}</option>
+        <option value="staff">Staff ${escapeHtml(brancaLabel)}</option>
+        <option value="coca">Co.Ca.</option>
+      `;
+    }
+    syncBrancaVisibility();
   }
+
+  function syncBrancaVisibility() {
+    if (!brancaWrap || !scopeSelect) return;
+    const needs = isAdmin && (scopeSelect.value === "branca" || scopeSelect.value === "staff");
+    brancaWrap.hidden = !needs;
+    if (brancaSelect) brancaSelect.required = needs;
+  }
+
+  scopeSelect?.addEventListener("change", syncBrancaVisibility);
 
   function showAlert(msg, ok = true) {
     if (!eventAlert) return;
@@ -137,6 +209,8 @@ document.addEventListener("DOMContentLoaded", () => {
     eventForm.notes.value = event.notes || "";
     fillScopeOptions();
     scopeSelect.value = event.scope;
+    syncBrancaVisibility();
+    if (brancaSelect && event.branca) brancaSelect.value = event.branca;
     if (submitBtn) submitBtn.textContent = "Salva modifiche";
     if (cancelEditBtn) cancelEditBtn.hidden = false;
     eventForm.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -154,7 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
       place: data.get("place"),
       notes: data.get("notes"),
       scope: data.get("scope"),
-      branca: user.branca,
+      branca: isAdmin ? data.get("branca") : user.branca,
     };
     try {
       if (editingId) {

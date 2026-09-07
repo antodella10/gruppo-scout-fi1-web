@@ -31,9 +31,8 @@
       <div class="staff-grid">
         <section class="panel">
           <h2>Gestione attività</h2>
-          <p class="hint">
-            Puoi creare/modificare eventi <strong>Gruppo</strong>, della <strong>tua branca</strong>,
-            dello <strong>staff di branca</strong> e della <strong>Co.Ca.</strong>
+          <p class="hint" id="event-hint">
+            Eventi Gruppo, della tua branca, staff di branca e Co.Ca.
           </p>
           <div id="event-alert" class="alert alert-ok" hidden></div>
           <form id="event-form" class="form-grid">
@@ -44,6 +43,10 @@
             <label>
               Tipo evento
               <select name="scope" id="event-scope" required></select>
+            </label>
+            <label id="event-branca-wrap" hidden>
+              Branca
+              <select name="branca" id="event-branca"></select>
             </label>
             <div class="form-row-2">
               <label>
@@ -72,39 +75,32 @@
           <div id="staff-event-list"></div>
         </section>
 
-        <section class="panel" id="gcal-panel">
+        <section class="panel" id="admin-panel" hidden>
+          <h2>Richieste staff</h2>
+          <p class="hint">Approva o rifiuta le registrazioni in attesa.</p>
+          <div id="pending-list"></div>
+        </section>
+
+        <section class="panel" id="gcal-panel" hidden>
           <h2>Calendario Google</h2>
-          <p class="hint" id="gcal-hint">Calendario staff configurato dall’admin.</p>
-          <form id="gcal-form" class="form-grid" hidden>
+          <p class="hint">Solo admin — collega l’embed del Google Calendar.</p>
+          <form id="gcal-form" class="form-grid">
             <label>
-              URL incorporamento Google Calendar
+              URL incorporamento
               <input type="url" name="googleEmbed" placeholder="https://calendar.google.com/calendar/embed?src=...">
             </label>
             <button class="btn btn-primary" type="submit">Salva calendario</button>
           </form>
           <div style="margin-top:1rem">
-            <iframe id="gcal-frame" class="gcal-frame" title="Google Calendar staff" hidden></iframe>
-            <div id="gcal-empty" class="placeholder-box">Nessun calendario collegato ancora.</div>
-          </div>
-        </section>
-
-        <section class="panel" id="admin-panel" hidden>
-          <h2>Impostazioni admin</h2>
-          <p class="hint">
-            Visibile solo con la mail di gruppo <strong>scoutfirenze1ms@gmail.com</strong>.
-            Le modifiche profonde (calendario Google, ecc.) restano qui.
-          </p>
-          <div class="placeholder-box">
-            Admin generale attivo. Usa il form calendario sopra per collegare Google Calendar.
+            <iframe id="gcal-frame" class="gcal-frame" title="Google Calendar" hidden></iframe>
+            <div id="gcal-empty" class="placeholder-box">Nessun calendario collegato.</div>
           </div>
         </section>
 
         <section class="panel wide">
           <h2>File e documenti</h2>
           <p class="hint">Spazio riservato: upload file / OneDrive in arrivo.</p>
-          <div class="placeholder-box">
-            Presto: documenti staff e cartelle OneDrive.
-          </div>
+          <div class="placeholder-box">Presto: documenti staff e cartelle OneDrive.</div>
         </section>
       </div>
     </div>

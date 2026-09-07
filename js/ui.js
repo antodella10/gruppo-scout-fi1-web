@@ -120,9 +120,13 @@ function updateNavAuth() {
   const user = ScoutStore.getSession();
   const base = slot.dataset.base || "";
   if (user) {
-    const br = user.branca ? ScoutStore.branchLabel(user.branca) : "";
+    const br = user.isAdmin
+      ? "Admin"
+      : user.branca
+        ? ScoutStore.branchLabel(user.branca)
+        : "";
     slot.innerHTML = `
-      <span class="user-chip">${escapeHtml(user.nome)} ${escapeHtml(user.cognome)}${br ? " · " + escapeHtml(br) : ""}${user.isAdmin ? " · Admin" : ""}</span>
+      <span class="user-chip">${escapeHtml(user.nome)} ${escapeHtml(user.cognome)}${br ? " · " + escapeHtml(br) : ""}</span>
       <a class="btn btn-primary btn-small" href="${base}staff/">Area staff</a>
     `;
   } else {

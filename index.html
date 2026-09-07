@@ -16,7 +16,6 @@
         <span class="brand-text">Firenze 1</span>
       </a>
       <div class="nav-links">
-        <a href="#branche">Branche</a>
         <a href="#sedi">Sedi</a>
         <a href="#calendario">Calendario</a>
         <a href="#chi-siamo">Chi siamo</a>
@@ -35,7 +34,7 @@
             <h1>Firenze 1</h1>
             <p id="hero-lead">Avventura, servizio e crescita tra le colline fiorentine. Un gruppo FederScout, tante strade — un unico sentiero insieme.</p>
             <div class="inline-actions">
-              <a class="btn btn-yellow" href="#branche">Scegli la branca</a>
+              <a class="btn btn-yellow" href="#calendario">Calendario</a>
               <a class="btn btn-ghost" href="#contatti" style="color:white;border-color:rgba(255,255,255,.35)">Contattaci</a>
             </div>
           </div>
@@ -44,23 +43,21 @@
       </div>
     </header>
 
-    <section class="section" id="branche">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <h2>Esplora il gruppo</h2>
-            <p>Di default vedi le info di gruppo. Seleziona una branca per adattare pagina e calendario.</p>
-          </div>
-        </div>
-        <div class="branch-selector" id="branch-selector" role="group" aria-label="Seleziona branca">
-          <button type="button" class="branch-chip is-active" data-branca="" aria-pressed="true">Gruppo</button>
-          <button type="button" class="branch-chip" data-branca="lupetti" aria-pressed="false">Lupetti</button>
-          <button type="button" class="branch-chip" data-branca="reparto" aria-pressed="false">Reparto</button>
-          <button type="button" class="branch-chip" data-branca="noviziato" aria-pressed="false">Noviziato</button>
-          <button type="button" class="branch-chip" data-branca="clan" aria-pressed="false">Clan</button>
-        </div>
+    <div class="view-bar" id="view-bar">
+      <div class="container view-bar-inner">
+        <button type="button" class="view-gruppo is-active" id="view-gruppo">Gruppo</button>
+        <div class="view-divider" aria-hidden="true"></div>
+        <label class="view-branch-label" for="branch-select">Branca</label>
+        <select id="branch-select" class="view-branch-select" aria-label="Seleziona branca">
+          <option value="">—</option>
+          <option value="lupetti">Lupetti</option>
+          <option value="reparto">Reparto</option>
+          <option value="noviziato">Noviziato</option>
+          <option value="clan">Clan</option>
+        </select>
+        <span class="view-current" id="view-label">Vista gruppo</span>
       </div>
-    </section>
+    </div>
 
     <section class="section" id="sedi">
       <div class="container">
@@ -153,7 +150,7 @@
         <div class="section-head">
           <div>
             <h2>Calendario attività</h2>
-            <p id="cal-lead">Appuntamenti di gruppo. Scegli una branca per vedere anche le sue attività.</p>
+            <p id="cal-lead">Appuntamenti di gruppo.</p>
           </div>
         </div>
         <div id="gcal-home-wrap" class="panel" hidden style="margin-bottom:1.25rem">

@@ -1,8 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
   const registerForm = document.getElementById("register-form");
-  const verifyForm = document.getElementById("verify-form");
   const alertBox = document.getElementById("auth-alert");
+  const brancaField = document.getElementById("branca-field");
+  const brancaSelect = registerForm?.querySelector('[name="branca"]');
+  const emailInput = registerForm?.querySelector('[name="email"]');
 
   function showError(msg) {
     if (!alertBox) return;
@@ -17,6 +19,17 @@ document.addEventListener("DOMContentLoaded", () => {
     alertBox.className = "alert alert-ok";
     alertBox.textContent = msg;
   }
+
+  function syncAdminFields() {
+    if (!emailInput || !brancaField || !brancaSelect) return;
+    const admin = ScoutStore.isAdminEmail(emailInput.value);
+    brancaField.hidden = admin;
+    brancaSelect.required = !admin;
+    if (admin) brancaSelect.value = "";
+  }
+
+  emailInput?.addEventListener("input", syncAdminFields);
+  syncAdminFields();
 
   loginForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -44,16 +57,12 @@ document.addEventListener("DOMContentLoaded", () => {
         branca: data.get("branca"),
       });
 
-      if (result.needsOtp) {
-        const mailto = ScoutStore.buildOtpMailto(result.user);
-        sessionStorage.setItem("pendingStaffEmail", result.user.email);
-        const mailLink = document.createElement("a");
-        mailLink.href = mailto;
-        mailLink.rel = "noopener";
-        document.body.appendChild(mailLink);
-        mailLink.click();
-        mailLink.remove();
-        location.href = `./verify.html?email=${encodeURIComponent(result.user.email)}`;
+      if (result.pendingApproval) {
+        showOk(
+          "Richiesta inviata. L’admin dovrà approvarla dall’area staff. Poi potrai accedere."
+        );
+        registerForm.reset();
+        syncAdminFields();
         return;
       }
 
@@ -62,29 +71,4 @@ document.addEventListener("DOMContentLoaded", () => {
       showError(err.message || "Registrazione non riuscita.");
     }
   });
-
-  if (verifyForm) {
-    const params = new URLSearchParams(location.search);
-    const preset =
-      params.get("email") || sessionStorage.getItem("pendingStaffEmail") || "";
-    if (preset && verifyForm.email) verifyForm.email.value = preset;
-
-    verifyForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const data = new FormData(verifyForm);
-      try {
-        await ScoutStore.verifyOtp({
-          email: data.get("email"),
-          otp: data.get("otp"),
-        });
-        sessionStorage.removeItem("pendingStaffEmail");
-        showOk("Account verificato! Reindirizzamento…");
-        window.setTimeout(() => {
-          location.href = "./index.html";
-        }, 700);
-      } catch (err) {
-        showError(err.message || "Verifica non riuscita.");
-      }
-    });
-  }
 });

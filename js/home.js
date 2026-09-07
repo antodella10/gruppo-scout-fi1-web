@@ -10,45 +10,53 @@ document.addEventListener("DOMContentLoaded", () => {
   const prevBtn = document.getElementById("month-prev");
   const nextBtn = document.getElementById("month-next");
   const viewRoot = document.getElementById("view-root");
-  const branchBar = document.getElementById("branch-selector");
+  const gruppoBtn = document.getElementById("view-gruppo");
+  const branchSelect = document.getElementById("branch-select");
+  const viewLabel = document.getElementById("view-label");
   const calLead = document.getElementById("cal-lead");
   const sediLead = document.getElementById("sedi-lead");
   const sediTitle = document.getElementById("sedi-title");
 
-  let selectedBranca = null; // null = solo gruppo
+  let selectedBranca = null;
   let viewDate = new Date();
   viewDate.setDate(1);
 
   const BRANCH_COPY = {
     null: {
       sediTitle: "Dove ci trovi",
-      sediLead: "Sedi, campo estivo e San Giorgio — i momenti e i luoghi del gruppo.",
-      calLead: "Appuntamenti di gruppo. Scegli una branca per vedere anche le sue attività.",
-      heroLine: "Avventura, servizio e crescita tra le colline fiorentine. Un gruppo FederScout, tante strade — un unico sentiero insieme.",
+      sediLead: "Sedi, campo estivo e San Giorgio.",
+      calLead: "Appuntamenti di gruppo.",
+      heroLine:
+        "Avventura, servizio e crescita tra le colline fiorentine. Un gruppo FederScout, tante strade — un unico sentiero insieme.",
+      viewLabel: "Vista gruppo",
     },
     lupetti: {
       sediTitle: "Lupetti",
-      sediLead: "La branca più piccola: gioco, natura e la scoperta della vita di branco.",
-      calLead: "Eventi lupetti + gruppo. Se sei staff, vedi anche staff lupetti e Co.Ca.",
-      heroLine: "Branco in cammino: gioco, amicizia e grandi scoperte per i più piccoli.",
+      sediLead: "Gioco, natura e vita di branco.",
+      calLead: "Calendario lupetti e gruppo.",
+      heroLine: "Branco in cammino: gioco, amicizia e grandi scoperte.",
+      viewLabel: "Vista Lupetti",
     },
     reparto: {
       sediTitle: "Reparto",
-      sediLead: "Esplorazione, pattuglie e avventura: il cuore dell’esperienza scout.",
-      calLead: "Eventi reparto + gruppo. Se sei staff, vedi anche staff reparto e Co.Ca.",
-      heroLine: "Reparto in strada: uscite, imprese e lo spirito di pattuglia.",
+      sediLead: "Esplorazione, pattuglie e avventura.",
+      calLead: "Calendario reparto e gruppo.",
+      heroLine: "Reparto in strada: uscite, imprese e spirito di pattuglia.",
+      viewLabel: "Vista Reparto",
     },
     noviziato: {
       sediTitle: "Noviziato",
-      sediLead: "Il ponte verso il clan: discernimento, servizio e crescita personale.",
-      calLead: "Eventi noviziato + gruppo. Se sei staff, vedi anche staff noviziato e Co.Ca.",
-      heroLine: "Noviziato: un anno per scegliere, servire e diventare protagonisti.",
+      sediLead: "Discernimento, servizio e crescita.",
+      calLead: "Calendario noviziato e gruppo.",
+      heroLine: "Noviziato: un anno per scegliere e servire.",
+      viewLabel: "Vista Noviziato",
     },
     clan: {
       sediTitle: "Clan",
-      sediLead: "Servizio, strada e comunità: i grandi del gruppo.",
-      calLead: "Eventi clan + gruppo. Se sei staff, vedi anche staff clan e Co.Ca.",
-      heroLine: "Clan in servizio: responsabilità, strada e comunità adulta.",
+      sediLead: "Servizio, strada e comunità.",
+      calLead: "Calendario clan e gruppo.",
+      heroLine: "Clan in servizio: responsabilità e comunità adulta.",
+      viewLabel: "Vista Clan",
     },
   };
 
@@ -80,17 +88,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (sediTitle) sediTitle.textContent = copy.sediTitle;
         if (sediLead) sediLead.textContent = copy.sediLead;
         if (calLead) calLead.textContent = copy.calLead;
+        if (viewLabel) viewLabel.textContent = copy.viewLabel;
         const heroP = document.getElementById("hero-lead");
         if (heroP) heroP.textContent = copy.heroLine;
 
         viewRoot.dataset.branca = branca || "gruppo";
         document.querySelectorAll("[data-branca-panel]").forEach((el) => {
           const only = el.getAttribute("data-branca-panel");
-          if (only === "gruppo") {
-            el.hidden = !!branca;
-          } else {
-            el.hidden = branca !== only;
-          }
+          if (only === "gruppo") el.hidden = !!branca;
+          else el.hidden = branca !== only;
         });
 
         refreshCalendar();
@@ -100,19 +106,15 @@ document.addEventListener("DOMContentLoaded", () => {
       refreshCalendar();
     }
 
-    branchBar?.querySelectorAll("[data-branca]").forEach((btn) => {
-      const val = btn.getAttribute("data-branca");
-      const active = (val === "" && !branca) || val === branca;
-      btn.classList.toggle("is-active", active);
-      btn.setAttribute("aria-pressed", active ? "true" : "false");
-    });
+    gruppoBtn?.classList.toggle("is-active", !branca);
+    if (branchSelect) branchSelect.value = branca || "";
   }
 
-  branchBar?.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-branca]");
-    if (!btn) return;
-    const val = btn.getAttribute("data-branca");
-    applyBranchView(val === "" ? null : val);
+  gruppoBtn?.addEventListener("click", () => applyBranchView(null));
+
+  branchSelect?.addEventListener("change", () => {
+    const val = branchSelect.value;
+    applyBranchView(val || null);
   });
 
   prevBtn?.addEventListener("click", () => {

@@ -729,36 +729,77 @@ select:focus {
   font-size: 0.9rem;
 }
 
-/* —— Branch selector —— */
-.branch-selector {
+/* —— View bar (gruppo > branca) —— */
+.view-bar {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 40;
+  background: rgba(247, 250, 246, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  padding: 0.65rem 0;
+}
+
+.view-bar-inner {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem;
+  align-items: center;
+  gap: 0.75rem 1rem;
 }
 
-.branch-chip {
+.view-gruppo {
   appearance: none;
-  border: 1px solid var(--line);
-  background: var(--white);
+  border: none;
+  background: transparent;
   color: var(--green-deep);
-  font: inherit;
-  font-weight: 700;
-  padding: 0.7rem 1.15rem;
-  border-radius: 999px;
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-.branch-chip:hover {
-  transform: translateY(-1px);
-  border-color: rgba(31, 122, 58, 0.35);
+.view-gruppo:hover {
+  background: var(--green-soft);
 }
 
-.branch-chip.is-active {
+.view-gruppo.is-active {
   background: var(--green);
   color: white;
-  border-color: var(--green);
-  box-shadow: 0 8px 20px rgba(31, 122, 58, 0.22);
+}
+
+.view-divider {
+  width: 1px;
+  height: 1.4rem;
+  background: var(--line);
+}
+
+.view-branch-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.view-branch-select {
+  width: auto;
+  min-width: 10rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  background: var(--white);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.view-current {
+  margin-left: auto;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
 }
 
 #view-root {
@@ -833,6 +874,11 @@ select:focus {
 
   .hero-logo {
     display: none;
+  }
+
+  .view-current {
+    width: 100%;
+    margin-left: 0;
   }
 
   .dest-card.sede-a,

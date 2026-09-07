@@ -1,5 +1,4 @@
-/* Storage: staff accounts, OTP verification, scoped events.
-   Data is local to the browser for now. */
+/* Storage: staff accounts, admin approval, scoped events. */
 
 const ScoutStore = (() => {
   const KEYS = {
@@ -30,10 +29,6 @@ const ScoutStore = (() => {
     return `${prefix}_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`;
   }
 
-  function otpCode() {
-    return String(Math.floor(100000 + Math.random() * 900000));
-  }
-
   async function hashPassword(password) {
     const data = new TextEncoder().encode(password);
     const digest = await crypto.subtle.digest("SHA-256", data);
@@ -60,6 +55,10 @@ const ScoutStore = (() => {
     return String(email || "").trim().toLowerCase() === ADMIN_EMAIL();
   }
 
+  function isAdminUser(user) {
+    return !!(user && (user.isAdmin || isAdminEmail(user.email)));
+  }
+
   function getSession() {
     return read(KEYS.session, null);
   }
@@ -69,13 +68,14 @@ const ScoutStore = (() => {
       localStorage.removeItem(KEYS.session);
       return;
     }
+    const admin = isAdminUser(user);
     write(KEYS.session, {
       id: user.id,
       nome: user.nome,
       cognome: user.cognome,
       email: user.email,
-      branca: user.branca || null,
-      isAdmin: !!user.isAdmin,
+      branca: admin ? null : user.branca || null,
+      isAdmin: admin,
     });
   }
 
@@ -84,6 +84,10 @@ const ScoutStore = (() => {
     if (!session) return null;
     const user = getUsers().find((u) => u.id === session.id);
     if (!user || !user.verified) return null;
+    if (isAdminEmail(user.email)) {
+      user.isAdmin = true;
+      user.branca = null;
+    }
     return user;
   }
 
@@ -98,15 +102,12 @@ const ScoutStore = (() => {
     return "Gruppo";
   }
 
-  /** Start registration: admin auto-verified; others need OTP emailed to group mail. */
+  /** Admin: no branca. Others: pending until admin approves. */
   async function registerStaff({ nome, cognome, email, password, branca }) {
     const users = getUsers();
     const pending = getPending();
     const normalized = email.trim().toLowerCase();
 
-    if (!window.SCOUT_BRANCHES?.[branca] && !isAdminEmail(normalized)) {
-      throw new Error("Seleziona una branca valida.");
-    }
     if (password.length < 6) {
       throw new Error("La password deve avere almeno 6 caratteri.");
     }
@@ -114,79 +115,64 @@ const ScoutStore = (() => {
       throw new Error("Esiste già un account con questa email.");
     }
     if (pending.some((u) => u.email === normalized)) {
-      throw new Error("C’è già una registrazione in attesa per questa email. Completa la verifica OTP.");
+      throw new Error("C’è già una richiesta in attesa di approvazione per questa email.");
     }
-
-    const passwordHash = await hashPassword(password);
-    const base = {
-      id: uid("staff"),
-      nome: nome.trim(),
-      cognome: cognome.trim(),
-      email: normalized,
-      branca: isAdminEmail(normalized) ? branca || "reparto" : branca,
-      passwordHash,
-      createdAt: new Date().toISOString(),
-    };
 
     if (isAdminEmail(normalized)) {
       const user = {
-        ...base,
+        id: uid("staff"),
+        nome: nome.trim(),
+        cognome: cognome.trim(),
+        email: normalized,
+        branca: null,
+        passwordHash: await hashPassword(password),
+        createdAt: new Date().toISOString(),
         verified: true,
         isAdmin: true,
-        branca: branca || "reparto",
       };
       users.push(user);
       saveUsers(users);
       setSession(user);
-      return { user, needsOtp: false };
+      return { user, pendingApproval: false };
     }
 
-    const otp = otpCode();
+    if (!window.SCOUT_BRANCHES?.[branca]) {
+      throw new Error("Seleziona una branca valida.");
+    }
+
     const pendingUser = {
-      ...base,
-      otp,
-      otpExpires: Date.now() + 1000 * 60 * 60 * 24,
+      id: uid("staff"),
+      nome: nome.trim(),
+      cognome: cognome.trim(),
+      email: normalized,
+      branca,
+      passwordHash: await hashPassword(password),
+      createdAt: new Date().toISOString(),
       verified: false,
       isAdmin: false,
     };
     pending.push(pendingUser);
     savePending(pending);
-
-    return { user: pendingUser, needsOtp: true, otp };
+    return { user: pendingUser, pendingApproval: true };
   }
 
-  function buildOtpMailto(pendingUser) {
-    const to = ADMIN_EMAIL();
-    const subject = encodeURIComponent(
-      `[Firenze 1] Verifica staff: ${pendingUser.nome} ${pendingUser.cognome}`
-    );
-    const body = encodeURIComponent(
-      `Nuova richiesta account staff\n\n` +
-        `Nome: ${pendingUser.nome} ${pendingUser.cognome}\n` +
-        `Email: ${pendingUser.email}\n` +
-        `Branca: ${branchLabel(pendingUser.branca)}\n` +
-        `Codice OTP: ${pendingUser.otp}\n\n` +
-        `Se approvi, comunica questo codice alla persona (rispondi alla sua email).\n` +
-        `Il codice scade entro 24 ore.`
-    );
-    return `mailto:${to}?subject=${subject}&body=${body}`;
+  function listPending(adminUser) {
+    if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può vedere le richieste.");
+    return getPending().sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
   }
 
-  async function verifyOtp({ email, otp }) {
-    const normalized = email.trim().toLowerCase();
-    const code = String(otp || "").trim();
+  function approvePending(pendingId, adminUser) {
+    if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può approvare.");
     const pending = getPending();
-    const idx = pending.findIndex((u) => u.email === normalized);
-    if (idx < 0) throw new Error("Nessuna registrazione in attesa per questa email.");
+    const idx = pending.findIndex((u) => u.id === pendingId);
+    if (idx < 0) throw new Error("Richiesta non trovata.");
     const item = pending[idx];
-    if (Date.now() > item.otpExpires) {
+    const users = getUsers();
+    if (users.some((u) => u.email === item.email)) {
       pending.splice(idx, 1);
       savePending(pending);
-      throw new Error("OTP scaduto. Registrati di nuovo.");
+      throw new Error("Questa email è già registrata.");
     }
-    if (item.otp !== code) throw new Error("Codice OTP non valido.");
-
-    const users = getUsers();
     const user = {
       id: item.id,
       nome: item.nome,
@@ -196,14 +182,20 @@ const ScoutStore = (() => {
       passwordHash: item.passwordHash,
       createdAt: item.createdAt,
       verified: true,
-      isAdmin: isAdminEmail(item.email),
+      isAdmin: false,
+      approvedAt: new Date().toISOString(),
+      approvedBy: adminUser.id,
     };
     users.push(user);
     saveUsers(users);
     pending.splice(idx, 1);
     savePending(pending);
-    setSession(user);
     return user;
+  }
+
+  function rejectPending(pendingId, adminUser) {
+    if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può rifiutare.");
+    savePending(getPending().filter((u) => u.id !== pendingId));
   }
 
   async function loginStaff({ email, password }) {
@@ -211,15 +203,20 @@ const ScoutStore = (() => {
     const pending = getPending();
     const normalized = email.trim().toLowerCase();
     if (pending.some((u) => u.email === normalized)) {
-      throw new Error("Account in attesa di verifica OTP. Controlla con la mail di gruppo.");
+      throw new Error("Account in attesa di approvazione da parte dell’admin.");
     }
     const user = users.find((u) => u.email === normalized);
     if (!user) throw new Error("Email o password non corretti.");
-    if (!user.verified) throw new Error("Account non ancora verificato.");
+    if (!user.verified) throw new Error("Account non ancora approvato.");
     const hash = await hashPassword(password);
     if (hash !== user.passwordHash) throw new Error("Email o password non corretti.");
-    // refresh admin flag
-    user.isAdmin = isAdminEmail(user.email);
+
+    if (isAdminEmail(user.email)) {
+      user.isAdmin = true;
+      user.branca = null;
+    } else {
+      user.isAdmin = false;
+    }
     saveUsers(users.map((u) => (u.id === user.id ? user : u)));
     setSession(user);
     return user;
@@ -241,9 +238,8 @@ const ScoutStore = (() => {
 
   function canManageEvent(user, event) {
     if (!user) return false;
-    if (user.isAdmin || isAdminEmail(user.email)) return true;
-    if (event.scope === "coca") return true;
-    if (event.scope === "gruppo") return true;
+    if (isAdminUser(user)) return true;
+    if (event.scope === "coca" || event.scope === "gruppo") return true;
     if ((event.scope === "branca" || event.scope === "staff") && event.branca === user.branca) {
       return true;
     }
@@ -256,17 +252,17 @@ const ScoutStore = (() => {
       throw new Error("Tipo evento non valido.");
     }
 
+    const admin = isAdminUser(user);
     let branca = null;
+
     if (scope === "branca" || scope === "staff") {
-      branca = user.isAdmin && event.branca ? event.branca : user.branca;
-      if (!branca) throw new Error("Branca mancante per questo tipo di evento.");
-      if (!user.isAdmin && branca !== user.branca) {
+      branca = admin ? event.branca : user.branca;
+      if (!branca || !window.SCOUT_BRANCHES?.[branca]) {
+        throw new Error("Seleziona la branca per questo evento.");
+      }
+      if (!admin && branca !== user.branca) {
         throw new Error("Puoi gestire solo eventi della tua branca.");
       }
-    }
-
-    if (scope === "coca" || scope === "gruppo") {
-      branca = null;
     }
 
     return {
@@ -307,11 +303,7 @@ const ScoutStore = (() => {
     if (!canManageEvent(user, current)) throw new Error("Non puoi modificare questo evento.");
     const merged = normalizeEventInput({ ...current, ...patch }, user);
     if (!canManageEvent(user, merged)) throw new Error("Non puoi impostare questo tipo di evento.");
-    events[idx] = {
-      ...current,
-      ...merged,
-      updatedAt: new Date().toISOString(),
-    };
+    events[idx] = { ...current, ...merged, updatedAt: new Date().toISOString() };
     saveEvents(events);
     return events[idx];
   }
@@ -325,7 +317,6 @@ const ScoutStore = (() => {
     saveEvents(events.filter((e) => e.id !== id));
   }
 
-  /** Home visibility rules */
   function getVisibleEvents(selectedBranca, user) {
     const staff = user && user.verified;
     return getEvents().filter((e) => {
@@ -338,20 +329,17 @@ const ScoutStore = (() => {
     });
   }
 
-  /** Events a staff member can manage in their panel */
   function getManageableEvents(user) {
     if (!user) return [];
     return getEvents().filter((e) => canManageEvent(user, e));
   }
 
   function getSettings() {
-    return read(KEYS.settings, {
-      googleCalendarEmbed: "",
-    });
+    return read(KEYS.settings, { googleCalendarEmbed: "" });
   }
 
   function saveSettings(settings, user) {
-    if (!user || !(user.isAdmin || isAdminEmail(user.email))) {
+    if (!isAdminUser(user)) {
       throw new Error("Solo l’account mail di gruppo può modificare queste impostazioni.");
     }
     write(KEYS.settings, { ...getSettings(), ...settings });
@@ -360,11 +348,13 @@ const ScoutStore = (() => {
   return {
     ADMIN_EMAIL,
     isAdminEmail,
+    isAdminUser,
     branchLabel,
     scopeLabel,
     registerStaff,
-    buildOtpMailto,
-    verifyOtp,
+    listPending,
+    approvePending,
+    rejectPending,
     loginStaff,
     logout,
     getCurrentUser,
