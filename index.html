@@ -1,200 +1,152 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gruppo Scout | Avventura e Crescita</title>
-    <style>
-        /* Stili di base */
-        :root {
-            --verde-scout: #2E5C31;
-            --giallo-scout: #F2C12E;
-            --bianco-panna: #F9F9F6;
-            --testo-scuro: #333333;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bianco-panna);
-            color: var(--testo-scuro);
-            line-height: 1.6;
-        }
-
-        /* Barra di navigazione */
-        nav {
-            background-color: var(--verde-scout);
-            color: white;
-            padding: 1rem 0;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin: 0 15px;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        nav a:hover {
-            color: var(--giallo-scout);
-        }
-
-        /* Testata principale */
-        header {
-            background: linear-gradient(rgba(46, 92, 49, 0.8), rgba(46, 92, 49, 0.8)), url('https://images.unsplash.com/photo-1504280390227-331bef20bbe4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover;
-            color: white;
-            text-align: center;
-            padding: 6rem 20px;
-        }
-
-        header h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        header p {
-            font-size: 1.3rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Sezioni generiche */
-        section {
-            padding: 4rem 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        h2 {
-            color: var(--verde-scout);
-            font-size: 2.5rem;
-            margin-bottom: 2rem;
-            position: relative;
-        }
-
-        h2::after {
-            content: '';
-            display: block;
-            width: 60px;
-            height: 4px;
-            background-color: var(--giallo-scout);
-            margin: 10px auto 0;
-        }
-
-        /* Layout a griglia per le attività */
-        .grid-attivita {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .card {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-10px);
-        }
-
-        .card h3 {
-            color: var(--verde-scout);
-            margin-top: 0;
-        }
-
-        /* Modulo contatti */
-        .contact-box {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .contact-box p {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-        }
-
-        /* Footer */
-        footer {
-            background-color: var(--testo-scuro);
-            color: white;
-            text-align: center;
-            padding: 2rem 0;
-            margin-top: 2rem;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gruppo Scout Firenze 1</title>
+  <meta name="description" content="Sito ufficiale del Gruppo Scout Firenze 1 — attività, sedi, campo estivo e San Giorgio.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="photos/logo.jpeg">
 </head>
 <body>
-
-    <nav>
-        <a href="#home">Home</a>
-        <a href="#chi-siamo">Chi Siamo</a>
-        <a href="#attivita">Le Nostre Attività</a>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="#home">
+        <img src="photos/logo.jpeg" alt="Logo Gruppo Scout Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-links">
+        <a href="#sedi">Sedi &amp; eventi</a>
+        <a href="#calendario">Calendario</a>
+        <a href="#chi-siamo">Chi siamo</a>
         <a href="#contatti">Contatti</a>
-    </nav>
+      </div>
+      <div class="nav-actions" data-auth-slot data-base=""></div>
+    </div>
+  </nav>
 
-    <header id="home">
-        <h1>Il Nostro Gruppo Scout</h1>
-        <p>Un'avventura continua tra natura, gioco di squadra e crescita personale. Costruiamo insieme i cittadini di domani.</p>
-    </header>
-
-    <section id="chi-siamo">
-        <h2>Chi Siamo</h2>
-        <p style="font-size: 1.2rem; max-width: 800px; margin: 0 auto;">
-            Siamo una comunità vivace e dinamica, unita dalla passione per lo scautismo. 
-            Il nostro obiettivo è educare i ragazzi attraverso il gioco, l'avventura e il servizio al prossimo, incoraggiandoli a lasciare il mondo un po' migliore di come lo hanno trovato.
-        </p>
-    </section>
-
-    <section id="attivita" style="background-color: #E8F0E9;">
-        <h2>Le Nostre Attività</h2>
-        <div class="grid-attivita">
-            <div class="card">
-                <h3>Grandi Giochi e Missioni</h3>
-                <p>Organizziamo avventure strutturate, meccaniche di gioco all'aperto e missioni educative per mettere alla prova l'ingegno e la capacità di lavorare in gruppo.</p>
-            </div>
-            <div class="card">
-                <h3>Campi Estivi</h3>
-                <p>Il momento culminante dell'anno. Dalle esplorazioni locali alle escursioni tra le vette delle Dolomiti Bellunesi e del Veneto, viviamo la natura al 100% imparando l'essenzialità.</p>
-            </div>
-            <div class="card">
-                <h3>Servizio e Territorio</h3>
-                <p>Scopriamo la storia e la cultura della nostra regione, offrendo il nostro servizio per la comunità locale e diventando protagonisti attivi del nostro territorio.</p>
-            </div>
+  <header class="hero" id="home">
+    <div class="container">
+      <div class="hero-panel">
+        <div class="hero-content">
+          <div class="hero-kicker">Gruppo Scout Agesci</div>
+          <h1>Firenze 1</h1>
+          <p>Avventura, servizio e crescita tra le colline fiorentine. Un gruppo, tante strade — e un unico sentiero insieme.</p>
+          <div class="inline-actions">
+            <a class="btn btn-yellow" href="#calendario">Vedi le attività</a>
+            <a class="btn btn-ghost" href="#contatti" style="color:white;border-color:rgba(255,255,255,.35)">Contattaci</a>
+          </div>
         </div>
-    </section>
+        <img class="hero-logo" src="photos/logo.jpeg" alt="">
+      </div>
+    </div>
+  </header>
 
-    <section id="contatti">
-        <h2>Unisciti a Noi</h2>
-        <div class="contact-box">
-            <p><strong>📍 Sede:</strong> [Inserisci qui l'indirizzo della sede]</p>
-            <p><strong>✉️ Email:</strong> info@grupposcout.it</p>
-            <p><strong>📞 Telefono:</strong> +39 333 1234567</p>
-            <p style="margin-top: 2rem; font-style: italic;">
-                Le iscrizioni per il nuovo anno scout aprono a Settembre. Contattaci per avere maggiori informazioni sui ritrovi delle branche!
-            </p>
+  <section class="section" id="sedi">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>Dove ci trovi</h2>
+          <p>Sedi, campo estivo e San Giorgio — i luoghi e i momenti che segnano l’anno scout.</p>
         </div>
-    </section>
+      </div>
+      <div class="dest-grid">
+        <a class="dest-card sede-a" href="#contatti">
+          <span>Sede</span>
+          <h3>Sede principale</h3>
+          <p>Indirizzo da completare — qui potremo mettere la sede del gruppo.</p>
+        </a>
+        <a class="dest-card sede-b" href="#contatti">
+          <span>Sede</span>
+          <h3>Seconda sede</h3>
+          <p>Se avete più locali o oratori, questa casella è pronta per i dettagli.</p>
+        </a>
+        <a class="dest-card campo" href="#calendario">
+          <span>Estate</span>
+          <h3>Campo estivo</h3>
+          <p>L’avventura dell’anno: natura, vita di comunità e ricordi che restano.</p>
+        </a>
+        <a class="dest-card sangiorgio" href="#calendario">
+          <span>Festa del gruppo</span>
+          <h3>San Giorgio</h3>
+          <p>La festa della promessa e della comunità: giochi, cerimonie e festa insieme.</p>
+        </a>
+      </div>
+    </div>
+  </section>
 
-    <footer>
-        <p>&copy; 2026 Gruppo Scout. Tutti i diritti riservati. | Buona Caccia e Buon Sentiero!</p>
-    </footer>
+  <section class="section" id="calendario">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>Calendario attività</h2>
+          <p>Uscite, riunioni e appuntamenti del gruppo. Lo staff li aggiorna dall’area riservata.</p>
+        </div>
+      </div>
+      <div id="gcal-home-wrap" class="panel" hidden style="margin-bottom:1.25rem">
+        <iframe id="gcal-home" class="gcal-frame" title="Calendario attività"></iframe>
+      </div>
+      <div class="calendar-layout" id="local-calendar-wrap">
+        <div class="panel">
+          <div class="month-bar">
+            <button type="button" class="btn btn-ghost btn-small" id="month-prev" aria-label="Mese precedente">←</button>
+            <h3 id="month-label">Mese</h3>
+            <button type="button" class="btn btn-ghost btn-small" id="month-next" aria-label="Mese successivo">→</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div class="panel">
+          <h3 style="margin:0 0 1rem;font-family:'Bricolage Grotesque',sans-serif;color:var(--green-deep)">Prossimi appuntamenti</h3>
+          <div class="event-list" id="event-list"></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
+  <section class="section" id="chi-siamo">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>Chi siamo</h2>
+          <p>Una comunità scout a Firenze, unita dal gioco, dal servizio e dalla voglia di lasciare il mondo un po’ migliore.</p>
+        </div>
+      </div>
+      <div class="about-grid">
+        <div class="panel about-copy">
+          <p>
+            Siamo il <strong>Gruppo Scout Firenze 1</strong>. Attraverso le branche — lupetti, reparto, clan —
+            accompagniamo i ragazzi e le ragazze in un percorso di crescita fatto di avventura, responsabilità e amicizia.
+          </p>
+          <p>
+            Dalle uscite del fine settimana al campo estivo, ogni attività è un pezzo di strada verso la promessa:
+            lasciare il mondo un po’ migliore di come lo abbiamo trovato.
+          </p>
+        </div>
+        <div class="panel" id="contatti">
+          <h3 style="margin-top:0;color:var(--green-deep);font-family:'Bricolage Grotesque',sans-serif">Unisciti a noi</h3>
+          <ul class="contact-list">
+            <li><strong>Sede:</strong> <span>[indirizzo da inserire]</span></li>
+            <li><strong>Email:</strong> <span>info@firenze1.it</span></li>
+            <li><strong>Telefono:</strong> <span>+39 …</span></li>
+          </ul>
+          <p style="margin:1.2rem 0 0;color:var(--muted);font-size:.95rem">
+            Le iscrizioni per il nuovo anno scout aprono a settembre. Scrivici per i ritrovi delle branche.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div>© 2026 Gruppo Scout Firenze 1 · Buona Caccia!</div>
+      <a href="staff/login.html">Area staff</a>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/home.js"></script>
 </body>
 </html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login staff · Firenze 1</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="auth-page">
+    <div class="auth-card">
+      <h1>Login staff</h1>
+      <p class="lead">Accedi all’area riservata del gruppo.</p>
+      <div id="auth-alert" class="alert alert-error" hidden></div>
+      <form id="login-form" class="form-grid">
+        <label>
+          Email
+          <input type="email" name="email" required autocomplete="username" placeholder="nome@email.it">
+        </label>
+        <label>
+          Password
+          <input type="password" name="password" required autocomplete="current-password" minlength="6">
+        </label>
+        <button class="btn btn-primary" type="submit">Entra</button>
+      </form>
+      <p class="form-note">Non hai un account? <a href="register.html">Crea account staff</a></p>
+    </div>
+  </main>
+
+  <script src="../js/store.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>
