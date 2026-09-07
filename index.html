@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gruppo Scout | Avventura e Crescita</title>
+    <style>
+        /* Stili di base */
+        :root {
+            --verde-scout: #2E5C31;
+            --giallo-scout: #F2C12E;
+            --bianco-panna: #F9F9F6;
+            --testo-scuro: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bianco-panna);
+            color: var(--testo-scuro);
+            line-height: 1.6;
+        }
+
+        /* Barra di navigazione */
+        nav {
+            background-color: var(--verde-scout);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        nav a:hover {
+            color: var(--giallo-scout);
+        }
+
+        /* Testata principale */
+        header {
+            background: linear-gradient(rgba(46, 92, 49, 0.8), rgba(46, 92, 49, 0.8)), url('https://images.unsplash.com/photo-1504280390227-331bef20bbe4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover;
+            color: white;
+            text-align: center;
+            padding: 6rem 20px;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        header p {
+            font-size: 1.3rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Sezioni generiche */
+        section {
+            padding: 4rem 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--verde-scout);
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        h2::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background-color: var(--giallo-scout);
+            margin: 10px auto 0;
+        }
+
+        /* Layout a griglia per le attività */
+        .grid-attivita {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+        }
+
+        .card h3 {
+            color: var(--verde-scout);
+            margin-top: 0;
+        }
+
+        /* Modulo contatti */
+        .contact-box {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contact-box p {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--testo-scuro);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#chi-siamo">Chi Siamo</a>
+        <a href="#attivita">Le Nostre Attività</a>
+        <a href="#contatti">Contatti</a>
+    </nav>
+
+    <header id="home">
+        <h1>Il Nostro Gruppo Scout</h1>
+        <p>Un'avventura continua tra natura, gioco di squadra e crescita personale. Costruiamo insieme i cittadini di domani.</p>
+    </header>
+
+    <section id="chi-siamo">
+        <h2>Chi Siamo</h2>
+        <p style="font-size: 1.2rem; max-width: 800px; margin: 0 auto;">
+            Siamo una comunità vivace e dinamica, unita dalla passione per lo scautismo. 
+            Il nostro obiettivo è educare i ragazzi attraverso il gioco, l'avventura e il servizio al prossimo, incoraggiandoli a lasciare il mondo un po' migliore di come lo hanno trovato.
+        </p>
+    </section>
+
+    <section id="attivita" style="background-color: #E8F0E9;">
+        <h2>Le Nostre Attività</h2>
+        <div class="grid-attivita">
+            <div class="card">
+                <h3>Grandi Giochi e Missioni</h3>
+                <p>Organizziamo avventure strutturate, meccaniche di gioco all'aperto e missioni educative per mettere alla prova l'ingegno e la capacità di lavorare in gruppo.</p>
+            </div>
+            <div class="card">
+                <h3>Campi Estivi</h3>
+                <p>Il momento culminante dell'anno. Dalle esplorazioni locali alle escursioni tra le vette delle Dolomiti Bellunesi e del Veneto, viviamo la natura al 100% imparando l'essenzialità.</p>
+            </div>
+            <div class="card">
+                <h3>Servizio e Territorio</h3>
+                <p>Scopriamo la storia e la cultura della nostra regione, offrendo il nostro servizio per la comunità locale e diventando protagonisti attivi del nostro territorio.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contatti">
+        <h2>Unisciti a Noi</h2>
+        <div class="contact-box">
+            <p><strong>📍 Sede:</strong> [Inserisci qui l'indirizzo della sede]</p>
+            <p><strong>✉️ Email:</strong> info@grupposcout.it</p>
+            <p><strong>📞 Telefono:</strong> +39 333 1234567</p>
+            <p style="margin-top: 2rem; font-style: italic;">
+                Le iscrizioni per il nuovo anno scout aprono a Settembre. Contattaci per avere maggiori informazioni sui ritrovi delle branche!
+            </p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Gruppo Scout. Tutti i diritti riservati. | Buona Caccia e Buon Sentiero!</p>
+    </footer>
+
+</body>
+</html>
