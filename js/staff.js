@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="event-admin-item">
             <div>
               <strong>${escapeHtml(label)}</strong><br>
-              <span style="color:var(--muted);font-size:.85rem;word-break:break-all">${escapeHtml(c.embedUrl)}</span>
+              <span style="color:var(--muted);font-size:.85rem;word-break:break-all">${escapeHtml(c.calendarId || c.embedUrl)}</span>
             </div>
             <button type="button" class="btn btn-ghost btn-small" data-del-gcal="${c.id}">Rimuovi</button>
           </div>`;

@@ -1035,6 +1035,11 @@ select:focus {
   color: #7a5a00;
 }
 
+.badge-google {
+  background: #e8f0fe;
+  color: #1a56db;
+}
+
 .reparto-actions .dest-card {
   grid-column: span 6;
   min-height: 240px;

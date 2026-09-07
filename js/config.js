@@ -1,6 +1,8 @@
 window.SCOUT_CONFIG = {
   adminEmail: "scoutfirenze1ms@gmail.com",
   homeCalendarEmbed: "",
+  /** Opzionale: chiave API Google Calendar (alternativa alla function Netlify). */
+  googleCalendarApiKey: "",
   association: "FederScout — Associazione Mariano Silvani",
 };
 

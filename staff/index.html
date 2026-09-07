@@ -98,7 +98,10 @@
 
         <section class="panel" id="gcal-panel" hidden>
           <h2>Calendari Google</h2>
-          <p class="hint">Solo admin — collega un Google Calendar a una branca (o al gruppo). Comparirà in home insieme agli eventi del sito.</p>
+          <p class="hint">
+            Solo admin — gli eventi del calendario Google vengono uniti a quello del sito e restano sincronizzati.
+            Il calendario deve essere <strong>pubblico</strong> (Google Calendar → Impostazioni → Accessibilità pubblico).
+          </p>
           <form id="gcal-form" class="form-grid">
             <label>
               Branca
@@ -111,8 +114,8 @@
               </select>
             </label>
             <label>
-              URL incorporamento
-              <input type="url" name="googleEmbed" placeholder="https://calendar.google.com/calendar/embed?src=..." required>
+              URL o ID calendario
+              <input type="text" name="googleEmbed" placeholder="URL incorporamento oppure ID (…@group.calendar.google.com)" required>
             </label>
             <button class="btn btn-primary" type="submit">Aggiungi calendario</button>
           </form>
@@ -130,6 +133,7 @@
 
   <script src="../js/config.js"></script>
   <script src="../js/store.js"></script>
+  <script src="../js/google-calendar.js"></script>
   <script src="../js/canzoniere-store.js"></script>
   <script src="../js/branch-view.js"></script>
   <script src="../js/ui.js"></script>

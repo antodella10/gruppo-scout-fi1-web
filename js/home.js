@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const user = ScoutStore.getCurrentUser();
-  const gcalWrap = document.getElementById("gcal-home-wrap");
-  const gcalWrapRep = document.getElementById("gcal-reparto-wrap");
+  const syncStatus = document.getElementById("gcal-sync-status");
+  const syncStatusRep = document.getElementById("gcal-sync-status-reparto");
   const calEl = document.getElementById("cal-grid");
   const listEl = document.getElementById("event-list");
   const labelEl = document.getElementById("month-label");
@@ -28,6 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let selectedBranca = null;
   let viewDate = new Date();
   viewDate.setDate(1);
+  let googleEvents = [];
+  let loadToken = 0;
 
   const PASTEL_CLASS = {
     lupetti: "pastel-lupetti",
@@ -70,8 +72,20 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   };
 
+  function mergeEvents() {
+    const local = ScoutStore.getVisibleEvents(selectedBranca, user);
+    const all = [...local, ...googleEvents];
+    all.sort(
+      (a, b) =>
+        (a.dateStart || a.date || "").localeCompare(b.dateStart || b.date || "") ||
+        (a.time || "").localeCompare(b.time || "") ||
+        (a.title || "").localeCompare(b.title || "")
+    );
+    return all;
+  }
+
   function currentEvents() {
-    return ScoutStore.getVisibleEvents(selectedBranca, user);
+    return mergeEvents();
   }
 
   function nearestEvent() {
@@ -81,36 +95,44 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  function renderGoogleCalendars() {
-    const calendars = ScoutStore.getGoogleCalendarsForView(selectedBranca);
-    if (selectedBranca === "reparto") {
-      if (gcalWrap) gcalWrap.innerHTML = "";
-      fillGcalWrap(gcalWrapRep, calendars);
-    } else {
-      if (gcalWrapRep) gcalWrapRep.innerHTML = "";
-      fillGcalWrap(gcalWrap, calendars);
+  function setSyncHint(msg) {
+    const el = selectedBranca === "reparto" ? syncStatusRep : syncStatus;
+    const other = selectedBranca === "reparto" ? syncStatus : syncStatusRep;
+    if (other) {
+      other.hidden = true;
+      other.textContent = "";
     }
-  }
-
-  function fillGcalWrap(wrap, calendars) {
-    if (!wrap) return;
-    if (!calendars.length) {
-      wrap.innerHTML = "";
+    if (!el) return;
+    if (!msg) {
+      el.hidden = true;
+      el.textContent = "";
       return;
     }
-    wrap.innerHTML = calendars
-      .map((c) => {
-        const label =
-          c.branca === "gruppo"
-            ? "Google · Gruppo"
-            : `Google · ${ScoutStore.branchLabel(c.branca)}`;
-        return `
-          <div class="panel gcal-overlay-item">
-            <h3 style="margin:0 0 .75rem;font-family:'Bricolage Grotesque',sans-serif;color:var(--green-deep);font-size:1.1rem">${escapeHtml(label)}</h3>
-            <iframe class="gcal-frame" title="${escapeHtml(label)}" src="${escapeHtml(c.embedUrl)}" loading="lazy"></iframe>
-          </div>`;
-      })
-      .join("");
+    el.hidden = false;
+    el.textContent = msg;
+  }
+
+  async function loadGoogleEvents() {
+    const token = ++loadToken;
+    const calendars = ScoutStore.getGoogleCalendarsForView(selectedBranca);
+    if (!calendars.length || typeof GoogleCal === "undefined") {
+      googleEvents = [];
+      setSyncHint("");
+      return;
+    }
+    try {
+      const events = await GoogleCal.loadForView(selectedBranca, viewDate);
+      if (token !== loadToken) return;
+      googleEvents = events;
+      setSyncHint("");
+    } catch (err) {
+      if (token !== loadToken) return;
+      googleEvents = [];
+      setSyncHint(
+        "Calendario Google non sincronizzato: rendi il calendario pubblico nelle impostazioni Google, poi ricarica."
+      );
+      console.warn(err);
+    }
   }
 
   function renderRepartoNext() {
@@ -139,8 +161,8 @@ document.addEventListener("DOMContentLoaded", () => {
     renderEventList(targetList, events);
   }
 
-  function refreshCalendar() {
-    renderGoogleCalendars();
+  async function refreshCalendar() {
+    await loadGoogleEvents();
     if (selectedBranca === "reparto") {
       renderRepartoNext();
       paintCalendar(calElRep, listElRep, labelElRep);
@@ -233,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const match = currentEvents().filter((ev) => eventCoversDate(ev, date));
       if (!match.length) return;
       const titles = match
-        .map((m) => `• [${ScoutStore.scopeLabel(m.scope, m.branca)}] ${m.title} (${formatEventRange(m)})`)
+        .map((m) => `• [${ScoutStore.scopeLabel(m.scope, m.branca || m.googleBranca)}] ${m.title} (${formatEventRange(m)})`)
         .join("\n");
       alert(`${date}\n\n${titles}`);
     });
@@ -272,6 +294,12 @@ document.addEventListener("DOMContentLoaded", () => {
   bindMonthNav(prevBtnRep, nextBtnRep);
   onDayClick(calEl);
   onDayClick(calElRep);
+
+  // Risincronizza Google ogni 5 minuti
+  window.setInterval(() => {
+    if (typeof GoogleCal !== "undefined") GoogleCal.clearCache();
+    refreshCalendar();
+  }, 5 * 60 * 1000);
 
   applyBranchView(BranchView.resolveInitial());
 });

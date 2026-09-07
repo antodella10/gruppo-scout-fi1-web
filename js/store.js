@@ -96,6 +96,12 @@ const ScoutStore = (() => {
   }
 
   function scopeLabel(scope, branca) {
+    if (scope === "google") {
+      if (branca && window.SCOUT_BRANCHES?.[branca]) {
+        return `Google · ${branchLabel(branca)}`;
+      }
+      return "Google";
+    }
     if (scope === "branca") return branchLabel(branca) || "Branca";
     if (scope === "staff") return `Staff ${branchLabel(branca)}`.trim();
     if (scope === "coca") return "Co.Ca.";
@@ -367,15 +373,29 @@ const ScoutStore = (() => {
 
   function getSettings() {
     const raw = read(KEYS.settings, {});
-    const calendars = Array.isArray(raw.googleCalendars) ? raw.googleCalendars : [];
+    let calendars = Array.isArray(raw.googleCalendars) ? raw.googleCalendars : [];
     // migrazione vecchio singolo embed
     if (!calendars.length && raw.googleCalendarEmbed) {
+      const id =
+        typeof GoogleCal !== "undefined"
+          ? GoogleCal.extractCalendarId(raw.googleCalendarEmbed)
+          : "";
       calendars.push({
         id: "legacy_gruppo",
         branca: "gruppo",
+        calendarId: id,
         embedUrl: raw.googleCalendarEmbed,
       });
     }
+    // backfill calendarId da URL
+    calendars = calendars.map((c) => {
+      if (c.calendarId) return c;
+      const id =
+        typeof GoogleCal !== "undefined"
+          ? GoogleCal.extractCalendarId(c.embedUrl || "")
+          : "";
+      return id ? { ...c, calendarId: id } : c;
+    });
     return {
       googleCalendars: calendars,
       googleCalendarEmbed: raw.googleCalendarEmbed || "",
@@ -395,9 +415,13 @@ const ScoutStore = (() => {
 
   function addGoogleCalendar({ branca, embedUrl }, user) {
     if (!isAdminUser(user)) throw new Error("Solo admin.");
-    const url = String(embedUrl || "").trim();
-    if (!url.includes("google.com/calendar")) {
-      throw new Error("Incolla un URL di incorporamento Google Calendar valido.");
+    const raw = String(embedUrl || "").trim();
+    const calendarId =
+      typeof GoogleCal !== "undefined"
+        ? GoogleCal.extractCalendarId(raw)
+        : raw;
+    if (!calendarId) {
+      throw new Error("Incolla l’URL di incorporamento o l’ID del calendario Google.");
     }
     const key = branca === "gruppo" ? "gruppo" : branca;
     if (key !== "gruppo" && !window.SCOUT_BRANCHES?.[key]) {
@@ -408,7 +432,8 @@ const ScoutStore = (() => {
     list.push({
       id: uid("gcal"),
       branca: key,
-      embedUrl: url,
+      calendarId,
+      embedUrl: raw.includes("://") ? raw : `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(calendarId)}`,
       createdAt: new Date().toISOString(),
     });
     saveSettings({ googleCalendars: list }, user);

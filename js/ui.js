@@ -27,15 +27,17 @@ function escapeHtml(str) {
 }
 
 function eventBadge(event) {
-  const label = ScoutStore.scopeLabel(event.scope, event.branca);
+  const label = ScoutStore.scopeLabel(event.scope, event.branca || event.googleBranca);
   const cls =
-    event.scope === "gruppo"
-      ? "badge-gruppo"
-      : event.scope === "coca"
-        ? "badge-coca"
-        : event.scope === "staff"
-          ? "badge-staff"
-          : "badge-branca";
+    event.scope === "google" || event.fromGoogle
+      ? "badge-google"
+      : event.scope === "gruppo"
+        ? "badge-gruppo"
+        : event.scope === "coca"
+          ? "badge-coca"
+          : event.scope === "staff"
+            ? "badge-staff"
+            : "badge-branca";
   return `<span class="event-badge ${cls}">${escapeHtml(label)}</span>`;
 }
 
