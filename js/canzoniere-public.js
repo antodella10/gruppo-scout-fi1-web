@@ -15,14 +15,18 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentBookUrl = null;
 
   function pdfSrc(url, { toolbar = false, zoom = 110 } = {}) {
-    const flags = [
-      `zoom=${zoom}`,
-      `toolbar=${toolbar ? 1 : 0}`,
-      "navpanes=0",
-      "scrollbar=1",
-      "view=FitH",
-    ];
-    return `${url}#${flags.join("&")}`;
+    // Chrome/Edge: toolbar=0 nasconde la barra; in fullscreen la lasciamo visibile
+    if (toolbar) {
+      return `${url}#toolbar=1&navpanes=0&zoom=${zoom}`;
+    }
+    return `${url}#toolbar=0&navpanes=0&scrollbar=1&zoom=${zoom}`;
+  }
+
+  function setExitFsVisible(on) {
+    if (!exitFsBtn) return;
+    exitFsBtn.hidden = !on;
+    exitFsBtn.classList.toggle("is-visible", on);
+    exitFsBtn.setAttribute("aria-hidden", on ? "false" : "true");
   }
 
   function showEmpty(message) {
@@ -37,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
       bookFrame.classList.remove("is-visible");
     }
     if (fsBtn) fsBtn.hidden = true;
+    setExitFsVisible(false);
   }
 
   function showPdf(url) {
@@ -51,12 +56,17 @@ document.addEventListener("DOMContentLoaded", () => {
       bookFrame.classList.add("is-visible");
     }
     if (fsBtn) fsBtn.hidden = false;
+    setExitFsVisible(!!document.fullscreenElement);
   }
 
   function reloadPdfForMode() {
     if (!currentBookUrl || !bookFrame?.classList.contains("is-visible")) return;
     const fullscreen = !!document.fullscreenElement;
-    bookFrame.src = pdfSrc(currentBookUrl, { toolbar: fullscreen, zoom: 110 });
+    // forza reload del viewer con/senza toolbar
+    bookFrame.src = "about:blank";
+    window.setTimeout(() => {
+      bookFrame.src = pdfSrc(currentBookUrl, { toolbar: fullscreen, zoom: 110 });
+    }, 30);
   }
 
   async function refreshBook() {
@@ -133,10 +143,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("fullscreenchange", () => {
     const on = !!document.fullscreenElement;
-    if (exitFsBtn) exitFsBtn.hidden = !on;
-    if (fsBtn) fsBtn.textContent = on ? "Schermo intero" : "Schermo intero";
+    setExitFsVisible(on);
     reloadPdfForMode();
   });
+
+  // stato iniziale: mai mostrare "esci" fuori dal fullscreen
+  setExitFsVisible(false);
 
   proposeForm?.addEventListener("submit", (e) => {
     e.preventDefault();

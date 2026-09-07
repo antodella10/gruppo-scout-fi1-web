@@ -233,6 +233,7 @@ h3,
 /* —— Sections —— */
 .section {
   padding: 3.5rem 0;
+  scroll-margin-top: calc(var(--nav-h) + 4.5rem);
 }
 
 .section-head {
@@ -1127,12 +1128,22 @@ select:focus {
 }
 
 .pdf-exit-fs {
+  display: none !important;
   position: absolute;
   top: 0.85rem;
   right: 0.85rem;
   z-index: 5;
   background: rgba(255, 255, 255, 0.94) !important;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.pdf-exit-fs.is-visible,
+.pdf-stage:fullscreen .pdf-exit-fs.is-visible {
+  display: inline-flex !important;
+}
+
+.pdf-exit-fs[hidden] {
+  display: none !important;
 }
 
 .pdf-stage:fullscreen {

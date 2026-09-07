@@ -134,6 +134,16 @@ document.addEventListener("DOMContentLoaded", () => {
     paintCalendar(calEl, listEl, labelEl);
   }
 
+  function scrollToHashSoon() {
+    const hash = location.hash;
+    if (!hash || hash.length < 2) return;
+    window.setTimeout(() => {
+      const el = document.querySelector(hash);
+      if (!el || el.closest("[hidden]")) return;
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  }
+
   function applyBranchView(branca) {
     selectedBranca = branca;
     BranchView.persist(branca);
@@ -164,9 +174,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         refreshCalendar();
         viewRoot.classList.remove("is-switching");
+        scrollToHashSoon();
       }, 180);
     } else {
       refreshCalendar();
+      scrollToHashSoon();
     }
 
     gruppoBtn?.classList.toggle("is-active", !branca);

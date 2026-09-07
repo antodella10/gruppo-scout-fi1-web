@@ -43,7 +43,8 @@ const BranchView = (() => {
       const url = new URL(location.href);
       if (branca) url.searchParams.set("branca", branca);
       else url.searchParams.delete("branca");
-      history.replaceState({}, "", url);
+      // preserva l'ancora (#chi-siamo, #contatti, …)
+      history.replaceState({}, "", url.pathname + url.search + url.hash);
     }
     wireHomeLinks();
   }
@@ -55,7 +56,8 @@ const BranchView = (() => {
   }
 
   function groupHomeHref(base = "", hash = "") {
-    return `${base}index.html?branca=gruppo${hash || ""}`;
+    const h = hash && hash.startsWith("#") ? hash : hash ? `#${hash}` : "";
+    return `${base}index.html?branca=gruppo${h}`;
   }
 
   function wireHomeLinks() {
