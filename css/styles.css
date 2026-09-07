@@ -847,23 +847,117 @@ select:focus {
   background: var(--line);
 }
 
-.view-branch-label {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.branch-menu {
+  position: relative;
 }
 
-.view-branch-select {
-  width: auto;
-  min-width: 10rem;
+.branch-menu-trigger {
+  appearance: none;
   border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 0.45rem 0.9rem;
   background: var(--white);
-  font-weight: 600;
+  color: var(--green-deep);
+  font: inherit;
+  font-weight: 700;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.branch-menu-trigger:hover,
+.branch-menu.is-open .branch-menu-trigger,
+.branch-menu-trigger.is-active {
+  border-color: rgba(31, 122, 58, 0.35);
+  background: var(--green-soft);
+}
+
+.branch-menu-caret {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid currentColor;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.branch-menu.is-open .branch-menu-caret {
+  transform: rotate(180deg);
+}
+
+.branch-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  min-width: 12.5rem;
+  max-height: 14rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 0.4rem;
+  box-shadow: 0 16px 36px rgba(20, 85, 40, 0.14);
+  z-index: 60;
+  display: grid;
+  gap: 0.3rem;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.branch-menu:hover .branch-menu-panel,
+.branch-menu.is-open .branch-menu-panel,
+.branch-menu:focus-within .branch-menu-panel {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.branch-menu-item {
+  appearance: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  cursor: pointer;
   color: var(--ink);
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.branch-menu-item:hover,
+.branch-menu-item.is-selected {
+  filter: brightness(0.97);
+  transform: translateX(2px);
+}
+
+.branch-menu-item.is-selected {
+  outline: 2px solid rgba(31, 122, 58, 0.25);
+  outline-offset: -2px;
+}
+
+/* pastelli solo nel menu */
+.pastel-lupetti {
+  background: #ffe8c8;
+}
+
+.pastel-reparto {
+  background: #d8f0e4;
+}
+
+.pastel-noviziato {
+  background: #e4e0ff;
+}
+
+.pastel-clan {
+  background: #ffe0ea;
 }
 
 .view-current {

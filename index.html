@@ -47,14 +47,18 @@
       <div class="container view-bar-inner">
         <button type="button" class="view-gruppo is-active" id="view-gruppo">Gruppo</button>
         <div class="view-divider" aria-hidden="true"></div>
-        <label class="view-branch-label" for="branch-select">Branca</label>
-        <select id="branch-select" class="view-branch-select" aria-label="Seleziona branca">
-          <option value="">—</option>
-          <option value="lupetti">Lupetti</option>
-          <option value="reparto">Reparto</option>
-          <option value="noviziato">Noviziato</option>
-          <option value="clan">Clan</option>
-        </select>
+        <div class="branch-menu" id="branch-menu">
+          <button type="button" class="branch-menu-trigger" id="branch-menu-trigger" aria-expanded="false" aria-haspopup="true">
+            Branca
+            <span class="branch-menu-caret" aria-hidden="true"></span>
+          </button>
+          <div class="branch-menu-panel" id="branch-menu-panel" role="menu">
+            <button type="button" class="branch-menu-item pastel-lupetti" role="menuitem" data-branca="lupetti">Lupetti</button>
+            <button type="button" class="branch-menu-item pastel-reparto" role="menuitem" data-branca="reparto">Reparto</button>
+            <button type="button" class="branch-menu-item pastel-noviziato" role="menuitem" data-branca="noviziato">Noviziato</button>
+            <button type="button" class="branch-menu-item pastel-clan" role="menuitem" data-branca="clan">Clan</button>
+          </div>
+        </div>
         <span class="view-current" id="view-label">Vista gruppo</span>
       </div>
     </div>

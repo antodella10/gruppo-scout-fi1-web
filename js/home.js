@@ -11,7 +11,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const nextBtn = document.getElementById("month-next");
   const viewRoot = document.getElementById("view-root");
   const gruppoBtn = document.getElementById("view-gruppo");
-  const branchSelect = document.getElementById("branch-select");
+  const branchMenu = document.getElementById("branch-menu");
+  const branchTrigger = document.getElementById("branch-menu-trigger");
+  const branchPanel = document.getElementById("branch-menu-panel");
   const viewLabel = document.getElementById("view-label");
   const calLead = document.getElementById("cal-lead");
   const sediLead = document.getElementById("sedi-lead");
@@ -107,14 +109,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     gruppoBtn?.classList.toggle("is-active", !branca);
-    if (branchSelect) branchSelect.value = branca || "";
+    branchTrigger?.classList.toggle("is-active", !!branca);
+    branchPanel?.querySelectorAll("[data-branca]").forEach((btn) => {
+      btn.classList.toggle("is-selected", btn.dataset.branca === branca);
+    });
+    closeBranchMenu();
+  }
+
+  function openBranchMenu() {
+    if (!branchMenu || !branchTrigger) return;
+    branchMenu.classList.add("is-open");
+    branchTrigger.setAttribute("aria-expanded", "true");
+  }
+
+  function closeBranchMenu() {
+    if (!branchMenu || !branchTrigger) return;
+    branchMenu.classList.remove("is-open");
+    branchTrigger.setAttribute("aria-expanded", "false");
   }
 
   gruppoBtn?.addEventListener("click", () => applyBranchView(null));
 
-  branchSelect?.addEventListener("change", () => {
-    const val = branchSelect.value;
-    applyBranchView(val || null);
+  branchTrigger?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (branchMenu?.classList.contains("is-open")) closeBranchMenu();
+    else openBranchMenu();
+  });
+
+  branchPanel?.addEventListener("click", (e) => {
+    const item = e.target.closest("[data-branca]");
+    if (!item) return;
+    applyBranchView(item.dataset.branca);
+  });
+
+  // chiudi su click fuori (utile su touch)
+  document.addEventListener("click", (e) => {
+    if (!branchMenu?.contains(e.target)) closeBranchMenu();
   });
 
   prevBtn?.addEventListener("click", () => {
