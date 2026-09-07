@@ -727,6 +727,77 @@ select:focus {
   padding: 0.4rem 0.8rem;
   font-weight: 700;
   font-size: 0.9rem;
+  position: relative;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.28rem;
+  border-radius: 999px;
+  background: #c44536;
+  color: white;
+  font-size: 0.68rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--paper);
+}
+
+.song-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.song-row {
+  appearance: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--white);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.song-row:hover {
+  border-color: rgba(31, 122, 58, 0.35);
+  background: var(--green-soft);
+  transform: translateY(-1px);
+}
+
+.song-title {
+  font-weight: 700;
+  color: var(--green-deep);
+}
+
+.song-action {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.proposal-mini {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+}
+
+.proposal-mini li {
+  margin: 0.25rem 0;
 }
 
 /* —— View bar (gruppo > branca) —— */

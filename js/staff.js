@@ -112,6 +112,31 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshPending();
   }
 
+  // —— Canzoniere (staff reparto + admin) ——
+  const czPanel = document.getElementById("reparto-canzoniere-panel");
+  const czPreview = document.getElementById("reparto-proposals-preview");
+  if (czPanel && typeof CanzoniereStore !== "undefined" && CanzoniereStore.canManage(user)) {
+    czPanel.hidden = false;
+    const pending = CanzoniereStore.getProposals().filter((p) => p.status === "pending");
+    if (czPreview) {
+      if (!pending.length) {
+        czPreview.innerHTML = `<div class="empty-state">Nessuna proposta canzone in attesa.</div>`;
+      } else {
+        czPreview.innerHTML = `
+          <div class="alert alert-ok" style="margin:0">
+            <strong>${pending.length}</strong> proposta/e in attesa —
+            <a href="./canzoniere.html" style="color:inherit;font-weight:800;text-decoration:underline">vedile qui</a>
+          </div>
+          <ul class="proposal-mini">
+            ${pending
+              .slice(0, 5)
+              .map((p) => `<li><strong>${escapeHtml(p.title)}</strong> <span>· ${escapeHtml(p.fromName)}</span></li>`)
+              .join("")}
+          </ul>`;
+      }
+    }
+  }
+
   // —— Events ——
   const eventForm = document.getElementById("event-form");
   const eventList = document.getElementById("staff-event-list");

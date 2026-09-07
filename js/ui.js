@@ -120,13 +120,21 @@ function updateNavAuth() {
   const user = ScoutStore.getSession();
   const base = slot.dataset.base || "";
   if (user) {
-    const br = user.isAdmin
+    const full = ScoutStore.getCurrentUser() || user;
+    const br = full.isAdmin
       ? "Admin"
-      : user.branca
-        ? ScoutStore.branchLabel(user.branca)
+      : full.branca
+        ? ScoutStore.branchLabel(full.branca)
         : "";
+    let badge = "";
+    if (typeof CanzoniereStore !== "undefined" && CanzoniereStore.canManage(full)) {
+      const n = CanzoniereStore.pendingProposalsCount();
+      if (n > 0) {
+        badge = `<span class="notif-badge" title="Proposte canzoni">${n > 9 ? "9+" : n}</span>`;
+      }
+    }
     slot.innerHTML = `
-      <span class="user-chip">${escapeHtml(user.nome)} ${escapeHtml(user.cognome)}${br ? " · " + escapeHtml(br) : ""}</span>
+      <span class="user-chip">${escapeHtml(full.nome)} ${escapeHtml(full.cognome)}${br ? " · " + escapeHtml(br) : ""}${badge}</span>
       <a class="btn btn-primary btn-small" href="${base}staff/">Area staff</a>
     `;
   } else {

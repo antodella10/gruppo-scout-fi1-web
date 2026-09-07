@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canzoniere · Reparto Firenze 1</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="#canzoni">Canzoni</a>
+        <a href="#proponi">Proponi</a>
+      </div>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="staff-shell">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="hero-kicker" style="display:inline-block;background:var(--green-soft);color:var(--green-deep);margin-bottom:.6rem">Reparto</p>
+          <h2 style="margin:0">Canzoniere</h2>
+          <p>Il canzoniere completo e le canzoni sfuse del reparto.</p>
+        </div>
+      </div>
+
+      <div class="staff-grid">
+        <section class="panel" id="canzoniere-book">
+          <h2>Canzoniere completo</h2>
+          <p class="hint" id="book-status">Caricamento…</p>
+          <button type="button" class="btn btn-primary" id="open-book" hidden>Apri canzoniere PDF</button>
+        </section>
+
+        <section class="panel" id="proponi">
+          <h2>Proponi canzoni</h2>
+          <p class="hint">Hai una canzone da aggiungere? Mandala allo staff reparto.</p>
+          <div id="propose-alert" class="alert alert-ok" hidden></div>
+          <form id="propose-form" class="form-grid">
+            <label>
+              Titolo canzone
+              <input type="text" name="title" required placeholder="Es. Bella ciao">
+            </label>
+            <label>
+              Il tuo nome (opzionale)
+              <input type="text" name="fromName" placeholder="Nome o pattuglia">
+            </label>
+            <label>
+              Note
+              <textarea name="notes" rows="3" placeholder="Link, strofe, perché ti piace…"></textarea>
+            </label>
+            <button class="btn btn-yellow" type="submit">Invia proposta</button>
+          </form>
+        </section>
+
+        <section class="panel wide" id="canzoni">
+          <h2>Canzoni</h2>
+          <p class="hint">Canzoni sfuse in ordine alfabetico. Clicca un titolo per aprire il PDF.</p>
+          <div class="song-list" id="songs-list"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div>© 2026 Firenze 1 · FederScout</div>
+      <a href="../index.html">Torna alla home</a>
+    </div>
+  </footer>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/canzoniere-store.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/canzoniere-public.js"></script>
+</body>
+</html>

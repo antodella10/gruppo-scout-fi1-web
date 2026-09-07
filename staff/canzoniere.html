@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestione canzoniere · Staff reparto</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="staff-shell">
+    <div class="container">
+      <div class="staff-hero">
+        <div>
+          <h1>Canzoniere reparto</h1>
+          <p>Sostituisci il canzoniere, aggiungi canzoni sfuse e gestisci le proposte.</p>
+        </div>
+        <a class="btn btn-ghost" href="./index.html">← Area staff</a>
+      </div>
+
+      <div id="cz-alert" class="alert alert-ok" hidden></div>
+
+      <div class="staff-grid">
+        <section class="panel">
+          <h2>Canzoniere completo</h2>
+          <p class="hint" id="book-meta">Nessun canzoniere caricato.</p>
+          <form id="book-form" class="form-grid">
+            <label>
+              Nuovo PDF canzoniere
+              <input type="file" name="bookPdf" accept="application/pdf" required>
+            </label>
+            <button class="btn btn-primary" type="submit">Carica / sostituisci</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Aggiungi canzone sfusa</h2>
+          <p class="hint">Ogni canzone è un PDF singolo, poi compare in lista alfabetica.</p>
+          <form id="song-form" class="form-grid">
+            <label>
+              Titolo
+              <input type="text" name="title" required placeholder="Titolo canzone">
+            </label>
+            <label>
+              PDF canzone
+              <input type="file" name="songPdf" accept="application/pdf" required>
+            </label>
+            <button class="btn btn-primary" type="submit">Aggiungi</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Proposte ragazzi</h2>
+          <p class="hint">Richieste dalla pagina pubblica. Segna come fatta dopo aver caricato il PDF.</p>
+          <div id="proposals-admin"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Canzoni caricate</h2>
+          <div id="songs-admin"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/canzoniere-store.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/canzoniere-staff.js"></script>
+</body>
+</html>
