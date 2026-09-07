@@ -48,24 +48,21 @@
               Branca
               <select name="branca" id="event-branca"></select>
             </label>
-            <label class="check-row">
-              <input type="checkbox" name="allDay" id="event-allday">
-              <span>Tutto il giorno</span>
-            </label>
             <div class="form-row-2">
               <label>
-                Da
+                Data inizio
                 <input type="date" name="dateStart" id="event-date-start" required>
               </label>
               <label>
-                A
+                Data fine
                 <input type="date" name="dateEnd" id="event-date-end">
               </label>
             </div>
-            <label id="event-time-wrap">
+            <label>
               Ora
-              <input type="time" name="time" id="event-time">
+              <input type="time" name="time" id="event-time" placeholder="Opzionale">
             </label>
+            <p class="hint" style="margin:0">Se non indichi l’ora, l’evento vale per tutto il giorno.</p>
             <label>
               Luogo
               <input type="text" name="place" placeholder="Sede, parco, …">

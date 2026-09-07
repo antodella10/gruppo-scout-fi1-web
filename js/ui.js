@@ -50,11 +50,12 @@ function formatEventRange(event) {
   const start = event.dateStart || event.date || "";
   const end = event.dateEnd || start;
   if (!start) return "";
-  if (event.allDay) {
-    if (end && end !== start) return `Tutto il giorno · ${start} → ${end}`;
-    return `Tutto il giorno · ${start}`;
+  const allDay = event.allDay || !event.time;
+  if (allDay) {
+    if (end && end !== start) return `${start} → ${end}`;
+    return start;
   }
-  const time = event.time ? `${event.time} · ` : "";
+  const time = `${event.time} · `;
   if (end && end !== start) return `${time}${start} → ${end}`;
   return `${time}${start}`;
 }

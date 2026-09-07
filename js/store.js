@@ -288,7 +288,8 @@ const ScoutStore = (() => {
     }
     if (!dateEnd) dateEnd = dateStart;
 
-    const allDay = !!event.allDay;
+    const time = String(event.time || "").trim();
+    const allDay = event.allDay === true || !time;
     const description = String(event.description ?? event.notes ?? "").trim();
 
     return {
@@ -296,7 +297,7 @@ const ScoutStore = (() => {
       dateStart,
       dateEnd,
       date: dateStart,
-      time: allDay ? "" : event.time || "",
+      time: allDay ? "" : time,
       allDay,
       place: String(event.place || "").trim(),
       description,

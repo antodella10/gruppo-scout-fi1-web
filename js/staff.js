@@ -15,10 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
       : `Staff ${ScoutStore.branchLabel(user.branca)}`;
   }
 
+  const eventHint = document.getElementById("event-hint");
   if (eventHint) {
     eventHint.textContent = isAdmin
       ? "Come admin puoi creare e modificare qualsiasi evento di qualsiasi branca."
-      : `Puoi creare eventi Gruppo, Staff ${ScoutStore.branchLabel(user.branca)} e Co.Ca. (e ${ScoutStore.branchLabel(user.branca)}).`;
+      : `Puoi creare eventi Gruppo, ${ScoutStore.branchLabel(user.branca)}, Staff ${ScoutStore.branchLabel(user.branca)} e Co.Ca.`;
   }
 
   document.getElementById("logout-btn")?.addEventListener("click", () => {
@@ -165,13 +166,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const scopeSelect = document.getElementById("event-scope");
   const brancaWrap = document.getElementById("event-branca-wrap");
   const brancaSelect = document.getElementById("event-branca");
-  const allDayInput = document.getElementById("event-allday");
-  const timeWrap = document.getElementById("event-time-wrap");
   const submitBtn = document.getElementById("event-submit");
   const cancelEditBtn = document.getElementById("cancel-edit");
   let editingId = null;
 
-  // Staff generico: niente selettore "Branca"
+  // Staff generico: niente campo/tendina "Branca"
   if (!isAdmin && brancaWrap) {
     brancaWrap.remove();
   }
@@ -191,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
           .join("");
       }
     } else {
-      // Staff generico: tipi con nome branca, senza campo/selettore "Branca"
+      // Niente "Branca": tipi con il nome della propria branca
       const brancaLabel = ScoutStore.branchLabel(user.branca);
       scopeSelect.innerHTML = `
         <option value="gruppo">Gruppo</option>
@@ -201,11 +200,10 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }
     syncBrancaVisibility();
-    syncAllDay();
   }
 
   function syncBrancaVisibility() {
-    if (!brancaWrap || !scopeSelect || !isAdmin) {
+    if (!isAdmin || !brancaWrap || !scopeSelect) {
       if (brancaWrap) brancaWrap.hidden = true;
       return;
     }
@@ -214,15 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (brancaSelect) brancaSelect.required = needs;
   }
 
-  function syncAllDay() {
-    const on = !!allDayInput?.checked;
-    if (timeWrap) timeWrap.hidden = on;
-    const timeInput = document.getElementById("event-time");
-    if (timeInput) timeInput.disabled = on;
-  }
-
   scopeSelect?.addEventListener("change", syncBrancaVisibility);
-  allDayInput?.addEventListener("change", syncAllDay);
 
   function showAlert(msg, ok = true) {
     if (!eventAlert) return;
@@ -273,13 +263,11 @@ document.addEventListener("DOMContentLoaded", () => {
     eventForm.title.value = event.title;
     eventForm.dateStart.value = event.dateStart || event.date || "";
     eventForm.dateEnd.value = event.dateEnd || event.dateStart || event.date || "";
-    if (allDayInput) allDayInput.checked = !!event.allDay;
-    eventForm.time.value = event.time || "";
+    eventForm.time.value = event.allDay ? "" : event.time || "";
     eventForm.place.value = event.place || "";
     eventForm.description.value = event.description || event.notes || "";
     scopeSelect.value = event.scope;
     syncBrancaVisibility();
-    syncAllDay();
     if (brancaSelect && event.branca) brancaSelect.value = event.branca;
     if (submitBtn) submitBtn.textContent = "Salva modifiche";
     if (cancelEditBtn) cancelEditBtn.hidden = false;
@@ -291,12 +279,13 @@ document.addEventListener("DOMContentLoaded", () => {
   eventForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     const data = new FormData(eventForm);
+    const time = String(data.get("time") || "").trim();
     const payload = {
       title: data.get("title"),
       dateStart: data.get("dateStart"),
       dateEnd: data.get("dateEnd") || data.get("dateStart"),
-      allDay: !!allDayInput?.checked,
-      time: data.get("time"),
+      allDay: !time,
+      time,
       place: data.get("place"),
       description: data.get("description"),
       scope: data.get("scope"),
