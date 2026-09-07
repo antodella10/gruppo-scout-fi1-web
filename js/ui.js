@@ -142,4 +142,8 @@ function updateNavAuth() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", updateNavAuth);
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof BranchView !== "undefined") BranchView.wireHomeLinks();
+  updateNavAuth();
+});
+

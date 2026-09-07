@@ -18,6 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const calLead = document.getElementById("cal-lead");
   const sediLead = document.getElementById("sedi-lead");
   const sediTitle = document.getElementById("sedi-title");
+  const layoutDefault = document.getElementById("layout-default");
+  const layoutReparto = document.getElementById("layout-reparto");
+  const navGruppo = document.getElementById("nav-links-gruppo");
+  const navReparto = document.getElementById("nav-links-reparto");
+  const nextEventEl = document.getElementById("reparto-next-event");
 
   let selectedBranca = null;
   let viewDate = new Date();
@@ -41,9 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     reparto: {
       sediTitle: "Reparto",
-      sediLead: "Esplorazione, pattuglie e avventura.",
-      calLead: "Calendario reparto e gruppo.",
-      heroLine: "Reparto in strada: uscite, imprese e spirito di pattuglia.",
+      sediLead: "",
+      calLead: "",
+      heroLine: "",
       viewLabel: "Vista Reparto",
     },
     noviziato: {
@@ -66,7 +71,39 @@ document.addEventListener("DOMContentLoaded", () => {
     return ScoutStore.getVisibleEvents(selectedBranca, user);
   }
 
+  function nearestEvent() {
+    const today = ymd(new Date());
+    return currentEvents().find((e) => e.date >= today) || null;
+  }
+
+  function renderRepartoNext() {
+    if (!nextEventEl) return;
+    const ev = nearestEvent();
+    if (!ev) {
+      nextEventEl.innerHTML = `<div class="empty-state">Nessun evento in programma per il reparto.</div>`;
+      return;
+    }
+    const dateLabel = new Date(ev.date + "T12:00:00").toLocaleDateString("it-IT", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    nextEventEl.innerHTML = `
+      <div class="next-event-inner">
+        ${eventBadge(ev)}
+        <h3 style="margin:.6rem 0 .35rem;font-size:1.7rem">${escapeHtml(ev.title)}</h3>
+        <p class="next-event-meta"><strong>Data:</strong> ${escapeHtml(dateLabel)}${ev.time ? " · " + escapeHtml(ev.time) : ""}</p>
+        <p class="next-event-meta"><strong>Luogo:</strong> ${escapeHtml(ev.place || "Da definire")}</p>
+        ${ev.notes ? `<p class="next-event-desc">${escapeHtml(ev.notes)}</p>` : ""}
+      </div>`;
+  }
+
   function refreshCalendar() {
+    if (selectedBranca === "reparto") {
+      renderRepartoNext();
+      return;
+    }
     if (embed && embed.includes("google.com/calendar") && gcalWrap && gcalFrame) {
       gcalWrap.hidden = false;
       gcalFrame.src = embed;
@@ -82,24 +119,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function applyBranchView(branca) {
     selectedBranca = branca;
+    BranchView.persist(branca);
     const copy = BRANCH_COPY[branca || "null"] || BRANCH_COPY.null;
+    const isReparto = branca === "reparto";
 
     if (viewRoot) {
       viewRoot.classList.add("is-switching");
       window.setTimeout(() => {
-        if (sediTitle) sediTitle.textContent = copy.sediTitle;
-        if (sediLead) sediLead.textContent = copy.sediLead;
-        if (calLead) calLead.textContent = copy.calLead;
         if (viewLabel) viewLabel.textContent = copy.viewLabel;
-        const heroP = document.getElementById("hero-lead");
-        if (heroP) heroP.textContent = copy.heroLine;
-
         viewRoot.dataset.branca = branca || "gruppo";
-        document.querySelectorAll("[data-branca-panel]").forEach((el) => {
-          const only = el.getAttribute("data-branca-panel");
-          if (only === "gruppo") el.hidden = !!branca;
-          else el.hidden = branca !== only;
-        });
+
+        if (layoutDefault) layoutDefault.hidden = isReparto;
+        if (layoutReparto) layoutReparto.hidden = !isReparto;
+        if (navGruppo) navGruppo.hidden = isReparto;
+        if (navReparto) navReparto.hidden = !isReparto;
+
+        if (!isReparto) {
+          if (sediTitle) sediTitle.textContent = copy.sediTitle;
+          if (sediLead) sediLead.textContent = copy.sediLead;
+          if (calLead) calLead.textContent = copy.calLead;
+          const heroP = document.getElementById("hero-lead");
+          if (heroP) heroP.textContent = copy.heroLine;
+
+          document.querySelectorAll("#layout-default [data-branca-panel]").forEach((el) => {
+            const only = el.getAttribute("data-branca-panel");
+            if (only === "gruppo") el.hidden = !!branca;
+            else el.hidden = branca !== only;
+          });
+        }
 
         refreshCalendar();
         viewRoot.classList.remove("is-switching");
@@ -142,7 +189,6 @@ document.addEventListener("DOMContentLoaded", () => {
     applyBranchView(item.dataset.branca);
   });
 
-  // chiudi su click fuori (utile su touch)
   document.addEventListener("click", (e) => {
     if (!branchMenu?.contains(e.target)) closeBranchMenu();
   });
@@ -169,5 +215,5 @@ document.addEventListener("DOMContentLoaded", () => {
     alert(`${date}\n\n${titles}`);
   });
 
-  applyBranchView(null);
+  applyBranchView(BranchView.resolveInitial());
 });

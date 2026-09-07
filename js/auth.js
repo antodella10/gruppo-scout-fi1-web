@@ -39,7 +39,11 @@ document.addEventListener("DOMContentLoaded", () => {
         email: data.get("email"),
         password: data.get("password"),
       });
-      location.href = "./index.html";
+      const logged = ScoutStore.getCurrentUser();
+      if (logged && !ScoutStore.isAdminUser(logged) && logged.branca && typeof BranchView !== "undefined") {
+        BranchView.persist(logged.branca, { updateUrl: false });
+      }
+      location.href = BranchView.homeHref("../");
     } catch (err) {
       showError(err.message || "Accesso non riuscito.");
     }
@@ -66,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      location.href = "./index.html";
+      location.href = typeof BranchView !== "undefined" ? BranchView.homeHref("../") : "./index.html";
     } catch (err) {
       showError(err.message || "Registrazione non riuscita.");
     }

@@ -1,35 +1,48 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Su queste pagine restiamo in contesto reparto per logo/home
+  BranchView.persist("reparto", { updateUrl: false });
+
   const bookStatus = document.getElementById("book-status");
-  const openBookBtn = document.getElementById("open-book");
+  const bookEmpty = document.getElementById("book-empty");
+  const bookFrame = document.getElementById("book-frame");
   const songsList = document.getElementById("songs-list");
   const proposeForm = document.getElementById("propose-form");
   const proposeAlert = document.getElementById("propose-alert");
 
+  let currentBookUrl = null;
+
   async function refreshBook() {
     const book = CanzoniereStore.getBook();
+    if (!bookFrame && !bookEmpty) return;
+
     if (!book) {
+      if (bookEmpty) bookEmpty.hidden = false;
       if (bookStatus) bookStatus.textContent = "Il canzoniere non è ancora stato caricato dallo staff.";
-      if (openBookBtn) openBookBtn.hidden = true;
+      if (bookFrame) {
+        bookFrame.hidden = true;
+        bookFrame.removeAttribute("src");
+      }
       return;
     }
-    if (bookStatus) {
-      bookStatus.textContent = `Aggiornato ${new Date(book.updatedAt).toLocaleDateString("it-IT")}${book.fileName ? " · " + book.fileName : ""}`;
-    }
-    if (openBookBtn) {
-      openBookBtn.hidden = false;
-      openBookBtn.onclick = async () => {
-        try {
-          await CanzoniereStore.openPdf(book.fileId);
-        } catch (err) {
-          alert(err.message);
-        }
-      };
+
+    try {
+      if (currentBookUrl) URL.revokeObjectURL(currentBookUrl);
+      currentBookUrl = await CanzoniereStore.getPdfUrl(book.fileId);
+      if (bookFrame) {
+        bookFrame.src = currentBookUrl;
+        bookFrame.hidden = false;
+      }
+      if (bookEmpty) bookEmpty.hidden = true;
+    } catch (err) {
+      if (bookEmpty) bookEmpty.hidden = false;
+      if (bookStatus) bookStatus.textContent = err.message || "Impossibile aprire il PDF.";
+      if (bookFrame) bookFrame.hidden = true;
     }
   }
 
   function refreshSongs() {
-    const songs = CanzoniereStore.getSongs();
     if (!songsList) return;
+    const songs = CanzoniereStore.getSongs();
     if (!songs.length) {
       songsList.innerHTML = `<div class="empty-state">Nessuna canzone sfusa ancora.</div>`;
       return;
@@ -70,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
         proposeAlert.className = "alert alert-ok";
         proposeAlert.textContent = "Proposta inviata! Lo staff reparto la vedrà nelle notifiche.";
       }
-      // refresh badge if staff is logged in on another tab later
+      updateNavAuth();
     } catch (err) {
       if (proposeAlert) {
         proposeAlert.hidden = false;

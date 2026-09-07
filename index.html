@@ -11,38 +11,26 @@
 <body>
   <nav class="site-nav">
     <div class="container">
-      <a class="brand" href="#home">
+      <a class="brand" href="index.html" data-home-link data-home-base="">
         <img src="photos/logo.jpeg" alt="Logo Gruppo Scout Firenze 1">
         <span class="brand-text">Firenze 1</span>
       </a>
-      <div class="nav-links">
+      <div class="nav-links" id="nav-links-gruppo">
         <a href="#sedi">Sedi</a>
         <a href="#calendario">Calendario</a>
         <a href="#chi-siamo">Chi siamo</a>
         <a href="#contatti">Contatti</a>
+      </div>
+      <div class="nav-links" id="nav-links-reparto" hidden>
+        <a href="index.html" data-home-link data-home-base="">Home</a>
+        <a href="#reparto-prossimo">Prossimo evento</a>
+        <a href="canzoniere/">Canzoniere</a>
       </div>
       <div class="nav-actions" data-auth-slot data-base=""></div>
     </div>
   </nav>
 
   <div id="view-root" data-branca="gruppo">
-    <header class="hero" id="home">
-      <div class="container">
-        <div class="hero-panel">
-          <div class="hero-content">
-            <div class="hero-kicker">FederScout · Associazione Mariano Silvani</div>
-            <h1>Firenze 1</h1>
-            <p id="hero-lead">Avventura, servizio e crescita tra le colline fiorentine. Un gruppo FederScout, tante strade — un unico sentiero insieme.</p>
-            <div class="inline-actions">
-              <a class="btn btn-yellow" href="#calendario">Calendario</a>
-              <a class="btn btn-ghost" href="#contatti" style="color:white;border-color:rgba(255,255,255,.35)">Contattaci</a>
-            </div>
-          </div>
-          <img class="hero-logo" src="photos/logo.jpeg" alt="">
-        </div>
-      </div>
-    </header>
-
     <div class="view-bar" id="view-bar">
       <div class="container view-bar-inner">
         <button type="button" class="view-gruppo is-active" id="view-gruppo">Gruppo</button>
@@ -63,155 +51,185 @@
       </div>
     </div>
 
-    <section class="section" id="sedi">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <h2 id="sedi-title">Dove ci trovi</h2>
-            <p id="sedi-lead">Sedi, campo estivo e San Giorgio — i momenti e i luoghi del gruppo.</p>
-          </div>
-        </div>
-
-        <div class="dest-grid" data-branca-panel="gruppo">
-          <a class="dest-card sede-a" href="#contatti">
-            <span>Sede</span>
-            <h3>Sede principale</h3>
-            <p>Indirizzo da completare — sede del gruppo Firenze 1.</p>
-          </a>
-          <a class="dest-card sede-b" href="#contatti">
-            <span>Sede</span>
-            <h3>Seconda sede</h3>
-            <p>Se avete più locali, questa casella è pronta per i dettagli.</p>
-          </a>
-          <a class="dest-card campo" href="#calendario">
-            <span>Estate</span>
-            <h3>Campo estivo</h3>
-            <p>L’avventura dell’anno: natura, comunità e ricordi che restano.</p>
-          </a>
-          <a class="dest-card sangiorgio" href="#calendario">
-            <span>Festa del gruppo</span>
-            <h3>San Giorgio</h3>
-            <p>La festa della promessa e della comunità.</p>
-          </a>
-        </div>
-
-        <div class="dest-grid" data-branca-panel="lupetti" hidden>
-          <a class="dest-card sede-a" href="#calendario">
-            <span>Branca</span>
-            <h3>Ritrovi lupetti</h3>
-            <p>Orari e sede del branco — da completare.</p>
-          </a>
-          <a class="dest-card campo" href="#calendario">
-            <span>Anno scout</span>
-            <h3>Attività e uscite</h3>
-            <p>Giochi, natura e momenti di branco nel calendario lupetti.</p>
-          </a>
-        </div>
-
-        <div class="dest-grid" data-branca-panel="reparto" hidden>
-          <a class="dest-card sede-b" href="#calendario">
-            <span>Branca</span>
-            <h3>Ritrovi reparto</h3>
-            <p>Pattuglie, uscite e imprese — dettagli da completare.</p>
-          </a>
-          <a class="dest-card campo" href="canzoniere/">
-            <span>Canzoniere</span>
-            <h3>Canzoniere &amp; canzoni</h3>
-            <p>Apri il canzoniere PDF, le canzoni sfuse e proponi nuove canzoni.</p>
-          </a>
-        </div>
-
-        <div class="dest-grid" data-branca-panel="noviziato" hidden>
-          <a class="dest-card sangiorgio" href="#calendario">
-            <span>Branca</span>
-            <h3>Cammino di noviziato</h3>
-            <p>Incontri, servizio e discernimento — da completare.</p>
-          </a>
-          <a class="dest-card sede-a" href="#calendario">
-            <span>Comunità</span>
-            <h3>Prossimi appuntamenti</h3>
-            <p>Vedi il calendario noviziato qui sotto.</p>
-          </a>
-        </div>
-
-        <div class="dest-grid" data-branca-panel="clan" hidden>
-          <a class="dest-card sede-b" href="#calendario">
-            <span>Branca</span>
-            <h3>Vita di clan</h3>
-            <p>Servizio, strada e comunità — dettagli da completare.</p>
-          </a>
-          <a class="dest-card sangiorgio" href="#calendario">
-            <span>Servizio</span>
-            <h3>Impegni e route</h3>
-            <p>Gli eventi clan nel calendario dedicato.</p>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="calendario">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <h2>Calendario attività</h2>
-            <p id="cal-lead">Appuntamenti di gruppo.</p>
-          </div>
-        </div>
-        <div id="gcal-home-wrap" class="panel" hidden style="margin-bottom:1.25rem">
-          <iframe id="gcal-home" class="gcal-frame" title="Calendario attività"></iframe>
-        </div>
-        <div class="calendar-layout" id="local-calendar-wrap">
-          <div class="panel">
-            <div class="month-bar">
-              <button type="button" class="btn btn-ghost btn-small" id="month-prev" aria-label="Mese precedente">←</button>
-              <h3 id="month-label">Mese</h3>
-              <button type="button" class="btn btn-ghost btn-small" id="month-next" aria-label="Mese successivo">→</button>
+    <!-- —— Layout gruppo / altre branche —— -->
+    <div id="layout-default">
+      <header class="hero" id="home">
+        <div class="container">
+          <div class="hero-panel">
+            <div class="hero-content">
+              <div class="hero-kicker">FederScout · Associazione Mariano Silvani</div>
+              <h1>Firenze 1</h1>
+              <p id="hero-lead">Avventura, servizio e crescita tra le colline fiorentine. Un gruppo FederScout, tante strade — un unico sentiero insieme.</p>
+              <div class="inline-actions">
+                <a class="btn btn-yellow" href="#calendario">Calendario</a>
+                <a class="btn btn-ghost" href="#contatti" style="color:white;border-color:rgba(255,255,255,.35)">Contattaci</a>
+              </div>
             </div>
-            <div class="cal-grid" id="cal-grid"></div>
-          </div>
-          <div class="panel">
-            <h3 style="margin:0 0 1rem;font-family:'Bricolage Grotesque',sans-serif;color:var(--green-deep)">Prossimi appuntamenti</h3>
-            <div class="event-list" id="event-list"></div>
+            <img class="hero-logo" src="photos/logo.jpeg" alt="">
           </div>
         </div>
-      </div>
-    </section>
+      </header>
 
-    <section class="section" id="chi-siamo">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <h2>Chi siamo</h2>
-            <p>Una comunità FederScout a Firenze, unita dal gioco, dal servizio e dalla voglia di lasciare il mondo un po’ migliore.</p>
+      <section class="section" id="sedi">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <h2 id="sedi-title">Dove ci trovi</h2>
+              <p id="sedi-lead">Sedi, campo estivo e San Giorgio.</p>
+            </div>
+          </div>
+
+          <div class="dest-grid" data-branca-panel="gruppo">
+            <a class="dest-card sede-a" href="#contatti">
+              <span>Sede</span>
+              <h3>Sede principale</h3>
+              <p>Indirizzo da completare — sede del gruppo Firenze 1.</p>
+            </a>
+            <a class="dest-card sede-b" href="#contatti">
+              <span>Sede</span>
+              <h3>Seconda sede</h3>
+              <p>Se avete più locali, questa casella è pronta per i dettagli.</p>
+            </a>
+            <a class="dest-card campo" href="#calendario">
+              <span>Estate</span>
+              <h3>Campo estivo</h3>
+              <p>L’avventura dell’anno: natura, comunità e ricordi che restano.</p>
+            </a>
+            <a class="dest-card sangiorgio" href="#calendario">
+              <span>Festa del gruppo</span>
+              <h3>San Giorgio</h3>
+              <p>La festa della promessa e della comunità.</p>
+            </a>
+          </div>
+
+          <div class="dest-grid" data-branca-panel="lupetti" hidden>
+            <a class="dest-card sede-a" href="#calendario">
+              <span>Branca</span>
+              <h3>Ritrovi lupetti</h3>
+              <p>Orari e sede del branco — da completare.</p>
+            </a>
+            <a class="dest-card campo" href="#calendario">
+              <span>Anno scout</span>
+              <h3>Attività e uscite</h3>
+              <p>Giochi, natura e momenti di branco nel calendario lupetti.</p>
+            </a>
+          </div>
+
+          <div class="dest-grid" data-branca-panel="noviziato" hidden>
+            <a class="dest-card sangiorgio" href="#calendario">
+              <span>Branca</span>
+              <h3>Cammino di noviziato</h3>
+              <p>Incontri, servizio e discernimento — da completare.</p>
+            </a>
+            <a class="dest-card sede-a" href="#calendario">
+              <span>Comunità</span>
+              <h3>Prossimi appuntamenti</h3>
+              <p>Vedi il calendario noviziato qui sotto.</p>
+            </a>
+          </div>
+
+          <div class="dest-grid" data-branca-panel="clan" hidden>
+            <a class="dest-card sede-b" href="#calendario">
+              <span>Branca</span>
+              <h3>Vita di clan</h3>
+              <p>Servizio, strada e comunità — dettagli da completare.</p>
+            </a>
+            <a class="dest-card sangiorgio" href="#calendario">
+              <span>Servizio</span>
+              <h3>Impegni e route</h3>
+              <p>Gli eventi clan nel calendario dedicato.</p>
+            </a>
           </div>
         </div>
-        <div class="about-grid">
-          <div class="panel about-copy">
-            <p>
-              Siamo il <strong>Gruppo Scout Firenze 1</strong> —
-              <strong>FederScout, Associazione Mariano Silvani</strong>.
-              Attraverso le branche — lupetti, reparto, noviziato e clan —
-              accompagniamo i ragazzi e le ragazze in un percorso di crescita.
-            </p>
-            <p>
-              Dalle uscite del fine settimana al campo estivo, ogni attività è un pezzo di strada verso la promessa:
-              lasciare il mondo un po’ migliore di come lo abbiamo trovato.
-            </p>
+      </section>
+
+      <section class="section" id="calendario">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <h2>Calendario attività</h2>
+              <p id="cal-lead">Appuntamenti di gruppo.</p>
+            </div>
           </div>
-          <div class="panel" id="contatti">
-            <h3 style="margin-top:0;color:var(--green-deep);font-family:'Bricolage Grotesque',sans-serif">Unisciti a noi</h3>
-            <ul class="contact-list">
-              <li><strong>Sede:</strong> <span>[indirizzo da inserire]</span></li>
-              <li><strong>Email:</strong> <span>scoutfirenze1ms@gmail.com</span></li>
-              <li><strong>Telefono:</strong> <span>+39 …</span></li>
-            </ul>
-            <p style="margin:1.2rem 0 0;color:var(--muted);font-size:.95rem">
-              Le iscrizioni per il nuovo anno scout aprono a settembre. Scrivici per i ritrovi delle branche.
-            </p>
+          <div id="gcal-home-wrap" class="panel" hidden style="margin-bottom:1.25rem">
+            <iframe id="gcal-home" class="gcal-frame" title="Calendario attività"></iframe>
+          </div>
+          <div class="calendar-layout" id="local-calendar-wrap">
+            <div class="panel">
+              <div class="month-bar">
+                <button type="button" class="btn btn-ghost btn-small" id="month-prev" aria-label="Mese precedente">←</button>
+                <h3 id="month-label">Mese</h3>
+                <button type="button" class="btn btn-ghost btn-small" id="month-next" aria-label="Mese successivo">→</button>
+              </div>
+              <div class="cal-grid" id="cal-grid"></div>
+            </div>
+            <div class="panel">
+              <h3 style="margin:0 0 1rem;font-family:'Bricolage Grotesque',sans-serif;color:var(--green-deep)">Prossimi appuntamenti</h3>
+              <div class="event-list" id="event-list"></div>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section class="section" id="chi-siamo">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <h2>Chi siamo</h2>
+              <p>Una comunità FederScout a Firenze.</p>
+            </div>
+          </div>
+          <div class="about-grid">
+            <div class="panel about-copy">
+              <p>
+                Siamo il <strong>Gruppo Scout Firenze 1</strong> —
+                <strong>FederScout, Associazione Mariano Silvani</strong>.
+              </p>
+            </div>
+            <div class="panel" id="contatti">
+              <h3 style="margin-top:0;color:var(--green-deep);font-family:'Bricolage Grotesque',sans-serif">Unisciti a noi</h3>
+              <ul class="contact-list">
+                <li><strong>Sede:</strong> <span>[indirizzo da inserire]</span></li>
+                <li><strong>Email:</strong> <span>scoutfirenze1ms@gmail.com</span></li>
+                <li><strong>Telefono:</strong> <span>+39 …</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- —— Layout solo reparto —— -->
+    <div id="layout-reparto" hidden>
+      <section class="section" id="reparto-prossimo">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <h2>Prossimo evento</h2>
+              <p>L’appuntamento più vicino del reparto.</p>
+            </div>
+          </div>
+          <div class="panel next-event-card" id="reparto-next-event"></div>
+        </div>
+      </section>
+
+      <section class="section" style="padding-top:0">
+        <div class="container">
+          <div class="dest-grid reparto-actions">
+            <a class="dest-card campo" href="#reparto-campo" id="reparto-campo">
+              <span>Estate</span>
+              <h3>Campo estivo</h3>
+              <p>L’avventura dell’anno: natura, comunità e ricordi che restano.</p>
+            </a>
+            <a class="dest-card sangiorgio" href="canzoniere/">
+              <span>Canzoni</span>
+              <h3>Canzoniere</h3>
+              <p>Apri il canzoniere completo e le canzoni sfuse del reparto.</p>
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 
   <footer class="site-footer">
@@ -224,6 +242,7 @@
   <script src="js/config.js"></script>
   <script src="js/store.js"></script>
   <script src="js/canzoniere-store.js"></script>
+  <script src="js/branch-view.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/home.js"></script>
 </body>

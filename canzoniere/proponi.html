@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Canzoniere · Reparto Firenze 1</title>
+  <title>Proponi canzoni · Reparto Firenze 1</title>
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="icon" href="../photos/logo.jpeg">
 </head>
-<body class="canzoniere-page">
+<body>
   <nav class="site-nav">
     <div class="container">
       <a class="brand" href="../index.html" data-home-link data-home-base="../">
@@ -16,38 +16,36 @@
       </a>
       <div class="nav-links">
         <a href="../index.html" data-home-link data-home-base="../">Home</a>
-        <a href="#canzoni">Canzoni</a>
+        <a href="./">Canzoniere</a>
         <a href="proponi.html">Proponi</a>
       </div>
       <div class="nav-actions" data-auth-slot data-base="../"></div>
     </div>
   </nav>
 
-  <div class="pdf-stage" id="pdf-stage">
-    <div class="pdf-empty" id="book-empty" hidden>
-      <p id="book-status">Il canzoniere non è ancora stato caricato dallo staff.</p>
+  <main class="auth-page">
+    <div class="auth-card" style="width:min(100%,520px)">
+      <h1>Proponi una canzone</h1>
+      <p class="lead">La proposta arriva allo staff reparto.</p>
+      <div id="propose-alert" class="alert alert-ok" hidden></div>
+      <form id="propose-form" class="form-grid">
+        <label>
+          Titolo canzone
+          <input type="text" name="title" required placeholder="Es. Bella ciao">
+        </label>
+        <label>
+          Il tuo nome (opzionale)
+          <input type="text" name="fromName" placeholder="Nome o pattuglia">
+        </label>
+        <label>
+          Note
+          <textarea name="notes" rows="4" placeholder="Link, strofe, perché ti piace…"></textarea>
+        </label>
+        <button class="btn btn-yellow" type="submit">Invia proposta</button>
+      </form>
+      <p class="form-note"><a href="./">Torna al canzoniere</a></p>
     </div>
-    <iframe id="book-frame" class="pdf-frame" title="Canzoniere PDF" hidden></iframe>
-  </div>
-
-  <section class="section" id="canzoni">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2>Canzoni</h2>
-          <p>Canzoni sfuse in ordine alfabetico.</p>
-        </div>
-      </div>
-      <div class="song-list" id="songs-list"></div>
-    </div>
-  </section>
-
-  <footer class="site-footer">
-    <div class="container">
-      <div>© 2026 Firenze 1 · FederScout</div>
-      <a href="../index.html" data-home-link data-home-base="../">Torna alla home</a>
-    </div>
-  </footer>
+  </main>
 
   <script src="../js/config.js"></script>
   <script src="../js/store.js"></script>

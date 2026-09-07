@@ -85,12 +85,15 @@ const CanzoniereStore = (() => {
     });
   }
 
-  async function openPdf(fileId) {
+  async function getPdfUrl(fileId) {
     const record = await getFile(fileId);
     if (!record?.blob) throw new Error("PDF non trovato.");
-    const url = URL.createObjectURL(record.blob);
+    return URL.createObjectURL(record.blob);
+  }
+
+  async function openPdf(fileId) {
+    const url = await getPdfUrl(fileId);
     window.open(url, "_blank", "noopener");
-    // revoke later to keep tab working
     window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
     return url;
   }
@@ -214,5 +217,6 @@ const CanzoniereStore = (() => {
     proposeSong,
     setProposalStatus,
     openPdf,
+    getPdfUrl,
   };
 })();

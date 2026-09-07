@@ -1010,6 +1010,62 @@ select:focus {
   color: #7a5a00;
 }
 
+.reparto-actions .dest-card {
+  grid-column: span 6;
+  min-height: 240px;
+}
+
+.next-event-card {
+  padding: 1.6rem 1.7rem;
+}
+
+.next-event-meta {
+  margin: 0.25rem 0;
+  color: var(--muted);
+}
+
+.next-event-desc {
+  margin: 0.9rem 0 0;
+  font-size: 1.05rem;
+}
+
+/* Canzoniere full-page PDF */
+.canzoniere-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.pdf-stage {
+  flex: 1 1 auto;
+  min-height: calc(100vh - var(--nav-h));
+  background: #1a241c;
+  position: relative;
+}
+
+.pdf-frame {
+  width: 100%;
+  height: calc(100vh - var(--nav-h));
+  border: 0;
+  display: block;
+  background: #2a332c;
+}
+
+.pdf-empty {
+  min-height: calc(100vh - var(--nav-h));
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 2rem;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .reparto-actions .dest-card {
+    grid-column: span 12;
+  }
+}
+
 @keyframes rise {
   from {
     opacity: 0;
