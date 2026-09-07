@@ -9,6 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const labelEl = document.getElementById("month-label");
   const prevBtn = document.getElementById("month-prev");
   const nextBtn = document.getElementById("month-next");
+  const calElRep = document.getElementById("cal-grid-reparto");
+  const listElRep = document.getElementById("event-list-reparto");
+  const labelElRep = document.getElementById("month-label-reparto");
+  const prevBtnRep = document.getElementById("month-prev-reparto");
+  const nextBtnRep = document.getElementById("month-next-reparto");
   const viewRoot = document.getElementById("view-root");
   const gruppoBtn = document.getElementById("view-gruppo");
   const branchMenu = document.getElementById("branch-menu");
@@ -47,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reparto: {
       sediTitle: "Reparto",
       sediLead: "",
-      calLead: "",
+      calLead: "Eventi reparto e di gruppo.",
       heroLine: "",
       viewLabel: "Vista Reparto",
     },
@@ -99,22 +104,29 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>`;
   }
 
+  function paintCalendar(targetCal, targetList, targetLabel) {
+    if (!targetCal || !targetList || !targetLabel) return;
+    const events = currentEvents();
+    targetLabel.textContent = formatMonthYear(viewDate);
+    renderMonthCalendar(targetCal, events, viewDate);
+    renderEventList(targetList, events);
+  }
+
   function refreshCalendar() {
     if (selectedBranca === "reparto") {
       renderRepartoNext();
+      paintCalendar(calElRep, listElRep, labelElRep);
       return;
     }
+
     if (embed && embed.includes("google.com/calendar") && gcalWrap && gcalFrame) {
       gcalWrap.hidden = false;
       gcalFrame.src = embed;
       if (localWrap) localWrap.hidden = true;
       return;
     }
-    if (!calEl || !listEl || !labelEl) return;
-    const events = currentEvents();
-    labelEl.textContent = formatMonthYear(viewDate);
-    renderMonthCalendar(calEl, events, viewDate);
-    renderEventList(listEl, events);
+
+    paintCalendar(calEl, listEl, labelEl);
   }
 
   function applyBranchView(branca) {
@@ -175,6 +187,20 @@ document.addEventListener("DOMContentLoaded", () => {
     branchTrigger.setAttribute("aria-expanded", "false");
   }
 
+  function onDayClick(calNode) {
+    calNode?.addEventListener("click", (e) => {
+      const day = e.target.closest(".cal-day.has-event");
+      if (!day) return;
+      const date = day.dataset.date;
+      const match = currentEvents().filter((ev) => ev.date === date);
+      if (!match.length) return;
+      const titles = match
+        .map((m) => `• [${ScoutStore.scopeLabel(m.scope, m.branca)}] ${m.title}${m.time ? " (" + m.time + ")" : ""}`)
+        .join("\n");
+      alert(`${date}\n\n${titles}`);
+    });
+  }
+
   gruppoBtn?.addEventListener("click", () => applyBranchView(null));
 
   branchTrigger?.addEventListener("click", (e) => {
@@ -193,27 +219,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!branchMenu?.contains(e.target)) closeBranchMenu();
   });
 
-  prevBtn?.addEventListener("click", () => {
-    viewDate.setMonth(viewDate.getMonth() - 1);
-    refreshCalendar();
-  });
+  function bindMonthNav(prev, next) {
+    prev?.addEventListener("click", () => {
+      viewDate.setMonth(viewDate.getMonth() - 1);
+      refreshCalendar();
+    });
+    next?.addEventListener("click", () => {
+      viewDate.setMonth(viewDate.getMonth() + 1);
+      refreshCalendar();
+    });
+  }
 
-  nextBtn?.addEventListener("click", () => {
-    viewDate.setMonth(viewDate.getMonth() + 1);
-    refreshCalendar();
-  });
-
-  calEl?.addEventListener("click", (e) => {
-    const day = e.target.closest(".cal-day.has-event");
-    if (!day) return;
-    const date = day.dataset.date;
-    const match = currentEvents().filter((ev) => ev.date === date);
-    if (!match.length) return;
-    const titles = match
-      .map((m) => `• [${ScoutStore.scopeLabel(m.scope, m.branca)}] ${m.title}${m.time ? " (" + m.time + ")" : ""}`)
-      .join("\n");
-    alert(`${date}\n\n${titles}`);
-  });
+  bindMonthNav(prevBtn, nextBtn);
+  bindMonthNav(prevBtnRep, nextBtnRep);
+  onDayClick(calEl);
+  onDayClick(calElRep);
 
   applyBranchView(BranchView.resolveInitial());
 });
