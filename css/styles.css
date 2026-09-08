@@ -1815,6 +1815,44 @@ a.home-tile:hover {
 }
 
 .dash-grid-side {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.dash-side-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.dash-side-title {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--green-deep);
+  font-family: "Bricolage Grotesque", sans-serif;
+}
+
+.dash-customize-panel {
+  margin-bottom: 0.85rem;
+}
+
+.dash-customize-list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.dash-customize-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+
   grid-template-columns: 1fr;
 }
 

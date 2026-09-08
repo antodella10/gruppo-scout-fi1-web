@@ -33,18 +33,7 @@
   </header>
 
   <main class="section">
-    <div class="container news-list">
-      <article class="panel news-item">
-        <h3>Benvenuti sul nuovo sito</h3>
-        <p class="hint" style="margin:0 0 .5rem">Settembre 2026</p>
-        <p>Qui troverete sedi, orari, calendario e le novità del Firenze 1. Restate sintonizzati!</p>
-      </article>
-      <article class="panel news-item">
-        <h3>Anno scout in avvio</h3>
-        <p class="hint" style="margin:0 0 .5rem">Settembre 2026</p>
-        <p>Le branche ripartono con le riunioni settimanali. Controlla gli orari in home e il calendario attività.</p>
-      </article>
-    </div>
+    <div class="container news-list" id="news-list"></div>
   </main>
 
   <footer class="site-footer">
@@ -59,11 +48,29 @@
   <script src="js/cloud-sync.js"></script>
   <script src="js/store.js"></script>
   <script src="js/canzoniere-store.js"></script>
+  <script src="js/news-store.js"></script>
   <script src="js/branch-view.js"></script>
   <script src="js/ui.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       renderSocialFollow(document.getElementById("footer-social"));
+      const listEl = document.getElementById("news-list");
+      const items = NewsStore.getNews();
+      if (!listEl) return;
+      if (!items.length) {
+        listEl.innerHTML = `<div class="empty-state">Nessuna notizia al momento.</div>`;
+        return;
+      }
+      listEl.innerHTML = items
+        .map(
+          (n) => `
+        <article class="panel news-item">
+          <h3>${escapeHtml(n.title)}</h3>
+          <p class="hint" style="margin:0 0 .5rem">${escapeHtml(NewsStore.formatDate(n.date))}</p>
+          <p>${escapeHtml(n.body)}</p>
+        </article>`
+        )
+        .join("");
     });
   </script>
 </body>

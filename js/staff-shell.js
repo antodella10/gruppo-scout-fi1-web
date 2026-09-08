@@ -27,6 +27,7 @@ window.StaffShell = (() => {
       { id: "home", href: "./index.html", label: "Dashboard" },
       canMeetings(user) ? { id: "riunioni", href: "./riunioni.html", label: "Gestione riunioni" } : null,
       canCanzoniere(user) ? { id: "canzoniere", href: "./canzoniere.html", label: "Canzoniere reparto" } : null,
+      admin ? { id: "notizie", href: "./notizie.html", label: "Gestione notizie" } : null,
       admin ? { id: "richieste", href: "./richieste.html", label: "Richieste staff" } : null,
       admin ? { id: "social", href: "./social.html", label: "Link social" } : null,
       admin ? { id: "calendari", href: "./calendari.html", label: "Calendari Google" } : null,

@@ -64,6 +64,18 @@ document.addEventListener("DOMContentLoaded", () => {
     renderMeetingHoursList(document.getElementById("meeting-hours-list"), { compact: true });
     renderSocialFollow(document.getElementById("contact-social"));
     renderSocialFollow(document.getElementById("footer-social"));
+    const preview = document.getElementById("news-preview");
+    if (preview && typeof NewsStore !== "undefined") {
+      const latest = NewsStore.getLatest();
+      if (latest) {
+        const excerpt =
+          latest.body.length > 110 ? `${latest.body.slice(0, 107).trim()}…` : latest.body;
+        preview.innerHTML = `
+          <p class="news-preview-date hint">${escapeHtml(NewsStore.formatDate(latest.date))}</p>
+          <p class="news-preview-title"><strong>${escapeHtml(latest.title)}</strong></p>
+          <p class="news-preview-text">${escapeHtml(excerpt)}</p>`;
+      }
+    }
   }
 
   function mergeEvents() {

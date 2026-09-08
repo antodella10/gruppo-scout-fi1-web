@@ -78,6 +78,20 @@
         </section>
 
         <div class="staff-side">
+          <div class="dash-side-head">
+            <h2 class="dash-side-title">Scorciatoie</h2>
+            <button type="button" class="btn btn-ghost btn-small" id="dash-customize-btn" aria-expanded="false">
+              Personalizza dashboard
+            </button>
+          </div>
+          <div id="dash-customize-panel" class="panel dash-customize-panel" hidden>
+            <p class="hint" style="margin-top:0">Scegli quali tile mostrare qui. Il menu hamburger resta completo.</p>
+            <div id="dash-customize-list" class="dash-customize-list"></div>
+            <div class="inline-actions" style="margin-top:0.85rem">
+              <button type="button" class="btn btn-primary btn-small" id="dash-customize-save">Salva</button>
+              <button type="button" class="btn btn-ghost btn-small" id="dash-customize-reset">Mostra tutte</button>
+            </div>
+          </div>
           <div class="dash-grid dash-grid-side" id="staff-dash"></div>
         </div>
       </div>
@@ -89,6 +103,7 @@
   <script src="../js/store.js"></script>
   <script src="../js/canzoniere-store.js"></script>
   <script src="../js/shop-store.js"></script>
+  <script src="../js/news-store.js"></script>
   <script src="../js/branch-view.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/staff-shell.js"></script>
