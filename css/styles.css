@@ -682,6 +682,44 @@ select:focus {
   color: var(--green-deep);
 }
 
+.alert.is-flashing {
+  animation: alert-flash 0.85s ease;
+}
+
+.alert-ok.is-flashing {
+  animation-name: alert-flash-ok;
+}
+
+.alert-error.is-flashing {
+  animation-name: alert-flash-err;
+}
+
+@keyframes alert-flash-ok {
+  0% {
+    background: #9be6b0;
+    box-shadow: 0 0 0 0 rgba(31, 122, 58, 0.45);
+    transform: scale(1.01);
+  }
+  100% {
+    background: var(--green-soft);
+    box-shadow: 0 0 0 14px transparent;
+    transform: scale(1);
+  }
+}
+
+@keyframes alert-flash-err {
+  0% {
+    background: #ffc9c9;
+    box-shadow: 0 0 0 0 rgba(180, 40, 40, 0.35);
+    transform: scale(1.01);
+  }
+  100% {
+    background: #fdecea;
+    box-shadow: 0 0 0 14px transparent;
+    transform: scale(1);
+  }
+}
+
 .staff-shell {
   padding: 2rem 0 3rem;
 }
