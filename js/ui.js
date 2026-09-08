@@ -198,14 +198,14 @@ function renderSocialFollow(container) {
   const ig = social.instagram?.[igKey] || social.instagram?.reparto || {};
   const igUrl = ig.url || "";
   const parts = [];
-  if (fbUrl) {
-    parts.push(
-      `<a class="social-icon-btn social-icon-fb" href="${escapeHtml(fbUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(social.facebook.label || "Facebook")}" aria-label="${escapeHtml(social.facebook.label || "Facebook")}">${socialIconFb()}</a>`
-    );
-  }
   if (igUrl) {
     parts.push(
       `<a class="social-icon-btn social-icon-ig" href="${escapeHtml(igUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(ig.label || "Instagram")}" aria-label="${escapeHtml(ig.label || "Instagram")}">${socialIconIg()}</a>`
+    );
+  }
+  if (fbUrl) {
+    parts.push(
+      `<a class="social-icon-btn social-icon-fb" href="${escapeHtml(fbUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(social.facebook.label || "Facebook")}" aria-label="${escapeHtml(social.facebook.label || "Facebook")}">${socialIconFb()}</a>`
     );
   }
   if (!parts.length) {
@@ -214,7 +214,7 @@ function renderSocialFollow(container) {
   }
   container.innerHTML = `
     <div class="social-follow">
-      <span class="social-follow-label">Seguici</span>
+      <span class="social-follow-label">Seguici:</span>
       <div class="social-icon-row">${parts.join("")}</div>
     </div>`;
 }
@@ -270,11 +270,24 @@ function renderSocialLinks(container, { compact = false, full = false } = {}) {
   return renderSocialFollow(container);
 }
 
-function renderMeetingHoursList(container) {
+function renderMeetingHoursList(container, { compact = false } = {}) {
   if (!container || typeof ScoutStore === "undefined") return;
   const hours = ScoutStore.getMeetingHours();
   if (!hours.length) {
     container.innerHTML = `<div class="empty-state">Orari non ancora impostati.</div>`;
+    return;
+  }
+  if (compact) {
+    container.innerHTML = `
+      <ul class="meeting-hours-compact">
+        ${hours
+          .map((h) => {
+            const label = h.label || ScoutStore.branchLabel(h.branca);
+            const when = [h.day, h.time].filter(Boolean).join(" · ") || "Da definire";
+            return `<li><span class="mh-branca">${escapeHtml(label)}</span><span class="mh-when">${escapeHtml(when)}</span></li>`;
+          })
+          .join("")}
+      </ul>`;
     return;
   }
   container.innerHTML = `

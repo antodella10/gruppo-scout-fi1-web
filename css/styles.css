@@ -1202,7 +1202,156 @@ body.staff-menu-open {
   color: #1a56db;
 }
 
-/* —— Home highlights / orari / social —— */
+/* —— Home tiles (wireframe) —— */
+.home-tiles {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.1rem;
+}
+
+.home-tile {
+  grid-column: span 4;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  padding: 1.25rem 1.35rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--white);
+  box-shadow: 0 10px 30px rgba(20, 85, 40, 0.06);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+a.home-tile:hover {
+  transform: translateY(-2px);
+  border-color: rgba(31, 122, 58, 0.35);
+  box-shadow: 0 14px 34px rgba(20, 85, 40, 0.1);
+}
+
+.home-tile h2 {
+  margin: 0 0 0.85rem;
+  font-size: 1.25rem;
+  color: var(--green-deep);
+  font-family: "Bricolage Grotesque", sans-serif;
+}
+
+.home-tile-body {
+  flex: 1;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.home-tile-body p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.home-tile-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.home-tile-list li {
+  font-weight: 700;
+  color: var(--green-deep);
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  background: #f3f8f3;
+}
+
+.home-tile-orari {
+  grid-column: span 6;
+  background:
+    linear-gradient(160deg, rgba(31, 122, 58, 0.08), transparent 55%),
+    var(--white);
+}
+
+.home-tile-notizie {
+  grid-column: span 3;
+}
+
+.home-tile-sedi {
+  grid-column: span 3;
+}
+
+.home-tile-iscrizioni {
+  grid-column: span 4;
+  background:
+    linear-gradient(160deg, rgba(240, 194, 26, 0.16), transparent 55%),
+    var(--white);
+}
+
+.home-tile-chisiamo {
+  grid-column: span 8;
+}
+
+.meeting-hours-compact {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.meeting-hours-compact li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 10px;
+  background: #f3f8f3;
+  font-size: 0.9rem;
+}
+
+.meeting-hours-compact .mh-branca {
+  font-weight: 800;
+  color: var(--green-deep);
+}
+
+.meeting-hours-compact .mh-when {
+  color: var(--muted);
+}
+
+.news-preview-date {
+  margin: 0 0 0.35rem;
+}
+
+.news-preview-title {
+  margin: 0 0 0.35rem;
+  color: var(--ink);
+}
+
+.news-preview-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.sede-page-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.sede-page-card h2 {
+  margin: 0 0 0.5rem;
+  color: var(--green-deep);
+  font-family: "Bricolage Grotesque", sans-serif;
+}
+
+.sede-page-card p {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+
+/* —— Home highlights / orari / social (legacy helpers) —— */
 .highlights-grid .dest-card {
   grid-column: span 4;
   min-height: 200px;
@@ -1719,9 +1868,20 @@ body.staff-menu-open {
   .dest-card.sede-b,
   .dest-card.campo,
   .dest-card.sangiorgio,
-  .highlights-grid .dest-card {
+  .highlights-grid .dest-card,
+  .home-tile,
+  .home-tile-orari,
+  .home-tile-notizie,
+  .home-tile-sedi,
+  .home-tile-iscrizioni,
+  .home-tile-chisiamo {
     grid-column: span 12;
-    min-height: 200px;
+    min-height: 180px;
+  }
+
+  .home-tiles,
+  .sede-page-grid {
+    grid-template-columns: 1fr;
   }
 
   .meeting-hours-list li {

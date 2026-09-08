@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const layoutDefault = document.getElementById("layout-default");
   const layoutReparto = document.getElementById("layout-reparto");
   const nextEventEl = document.getElementById("reparto-next-event");
-  const iscrizioniTile = document.getElementById("tile-iscrizioni");
 
   let selectedBranca = null;
   let viewDate = new Date();
@@ -61,21 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   };
 
-  if (iscrizioniTile) {
-    const formUrl = (window.SCOUT_CONFIG?.iscrizioniFormUrl || "").trim();
-    if (formUrl && !formUrl.includes("PLACEHOLDER")) {
-      iscrizioniTile.href = formUrl;
-    } else {
-      iscrizioniTile.href = "#contatti";
-      iscrizioniTile.removeAttribute("target");
-      iscrizioniTile.querySelector("p") &&
-        (iscrizioniTile.querySelector("p").textContent =
-          "Form iscrizioni in arrivo — intanto scrivici dai contatti.");
-    }
-  }
-
   function paintGroupExtras() {
-    renderMeetingHoursList(document.getElementById("meeting-hours-list"));
+    renderMeetingHoursList(document.getElementById("meeting-hours-list"), { compact: true });
     renderSocialFollow(document.getElementById("contact-social"));
     renderSocialFollow(document.getElementById("footer-social"));
   }

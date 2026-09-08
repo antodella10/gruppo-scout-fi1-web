@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notizie · Firenze 1</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="index.html" data-home-link data-home-base="">
+        <img src="photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html?branca=gruppo" data-group-home data-home-base="">Home</a>
+        <a href="chi-siamo.html">Chi siamo</a>
+        <a href="index.html?branca=gruppo#calendario" data-group-home data-home-base="" data-hash="#calendario">Calendario</a>
+        <a href="index.html?branca=gruppo#contatti" data-group-home data-home-base="" data-hash="#contatti">Contatti</a>
+      </div>
+      <div class="nav-actions" data-auth-slot data-base=""></div>
+    </div>
+  </nav>
+
+  <header class="page-hero">
+    <div class="container">
+      <p class="hero-kicker" style="color:var(--green)">Aggiornamenti</p>
+      <h1>Notizie</h1>
+      <p class="page-hero-lead">Comunicazioni del gruppo.</p>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container news-list">
+      <article class="panel news-item">
+        <h3>Benvenuti sul nuovo sito</h3>
+        <p class="hint" style="margin:0 0 .5rem">Settembre 2026</p>
+        <p>Qui troverete sedi, orari, calendario e le novità del Firenze 1. Restate sintonizzati!</p>
+      </article>
+      <article class="panel news-item">
+        <h3>Anno scout in avvio</h3>
+        <p class="hint" style="margin:0 0 .5rem">Settembre 2026</p>
+        <p>Le branche ripartono con le riunioni settimanali. Controlla gli orari in home e il calendario attività.</p>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>© 2026 Firenze 1 · FederScout — Associazione Mariano Silvani</div>
+      <div id="footer-social" class="social-block"></div>
+      <a href="staff/login.html">Area staff</a>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/canzoniere-store.js"></script>
+  <script src="js/branch-view.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      renderSocialFollow(document.getElementById("footer-social"));
+    });
+  </script>
+</body>
+</html>

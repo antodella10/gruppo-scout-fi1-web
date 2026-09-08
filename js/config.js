@@ -10,13 +10,15 @@ window.SCOUT_CONFIG = {
     {
       id: "girone",
       name: "Girone",
-      blurb: "Sede di Girone — apri la mappa per indicazioni.",
+      blurb:
+        "Sede di Girone: uno dei punti di ritrovo del gruppo per riunioni e attività. Apri la mappa per le indicazioni.",
       mapsUrl: "https://maps.app.goo.gl/UdYqCGBqoHMPbJ1v7",
     },
     {
       id: "quarate",
       name: "Quarate",
-      blurb: "Sede di Quarate — apri la mappa per indicazioni.",
+      blurb:
+        "Sede di Quarate: l’altra casa del Firenze 1. Qui si svolgono incontri e momenti di branca. Apri la mappa per arrivarci.",
       mapsUrl: "https://maps.app.goo.gl/vZ8S7TNm4LQBSBT26",
     },
   ],

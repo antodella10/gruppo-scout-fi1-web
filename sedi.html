@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sedi · Firenze 1</title>
+  <meta name="description" content="Sedi del Gruppo Scout Firenze 1 a Girone e Quarate.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="index.html" data-home-link data-home-base="">
+        <img src="photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html?branca=gruppo" data-group-home data-home-base="">Home</a>
+        <a href="chi-siamo.html">Chi siamo</a>
+        <a href="index.html?branca=gruppo#calendario" data-group-home data-home-base="" data-hash="#calendario">Calendario</a>
+        <a href="index.html?branca=gruppo#contatti" data-group-home data-home-base="" data-hash="#contatti">Contatti</a>
+      </div>
+      <div class="nav-actions" data-auth-slot data-base=""></div>
+    </div>
+  </nav>
+
+  <header class="page-hero">
+    <div class="container">
+      <p class="hero-kicker" style="color:var(--green)">Dove ci trovi</p>
+      <h1>Sedi</h1>
+      <p class="page-hero-lead">Due punti di ritrovo del gruppo: Girone e Quarate.</p>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container sede-page-grid" id="sede-page-list"></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>© 2026 Firenze 1 · FederScout — Associazione Mariano Silvani</div>
+      <div id="footer-social" class="social-block"></div>
+      <a href="staff/login.html">Area staff</a>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/canzoniere-store.js"></script>
+  <script src="js/branch-view.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const list = document.getElementById("sede-page-list");
+      const sedi = window.SCOUT_CONFIG?.sedi || [];
+      if (list) {
+        list.innerHTML = sedi
+          .map(
+            (s) => `
+          <article class="panel sede-page-card">
+            <h2>${escapeHtml(s.name)}</h2>
+            <p>${escapeHtml(s.blurb || "")}</p>
+            <a class="btn btn-primary" href="${escapeHtml(s.mapsUrl)}" target="_blank" rel="noopener noreferrer">Apri in Google Maps</a>
+          </article>`
+          )
+          .join("");
+      }
+      renderSocialFollow(document.getElementById("footer-social"));
+    });
+  </script>
+</body>
+</html>

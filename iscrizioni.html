@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iscrizioni · Firenze 1</title>
+  <meta name="description" content="Come iscriversi al Gruppo Scout Firenze 1.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="index.html" data-home-link data-home-base="">
+        <img src="photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html?branca=gruppo" data-group-home data-home-base="">Home</a>
+        <a href="chi-siamo.html">Chi siamo</a>
+        <a href="index.html?branca=gruppo#calendario" data-group-home data-home-base="" data-hash="#calendario">Calendario</a>
+        <a href="index.html?branca=gruppo#contatti" data-group-home data-home-base="" data-hash="#contatti">Contatti</a>
+      </div>
+      <div class="nav-actions" data-auth-slot data-base=""></div>
+    </div>
+  </nav>
+
+  <header class="page-hero">
+    <div class="container">
+      <p class="hero-kicker" style="color:var(--green)">Unisciti a noi</p>
+      <h1>Iscrizioni</h1>
+      <p class="page-hero-lead">Vuoi entrare nel Firenze 1? Ecco come fare.</p>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container">
+      <div class="panel about-copy">
+        <h2>Come iscriversi</h2>
+        <p>
+          Compila il form di iscrizione: ti contatteremo per presentarti il gruppo,
+          le branche e i prossimi passi. Per dubbi scrivi a
+          <a href="mailto:scoutfirenze1ms@gmail.com">scoutfirenze1ms@gmail.com</a>.
+        </p>
+        <div class="inline-actions" style="margin-top:1.25rem">
+          <a class="btn btn-primary" id="iscrizioni-form-btn" href="#" target="_blank" rel="noopener noreferrer">Apri form iscrizioni</a>
+          <a class="btn btn-ghost" href="index.html?branca=gruppo#contatti">Contatti</a>
+        </div>
+        <p class="hint" id="iscrizioni-form-hint" hidden style="margin-top:1rem">
+          Il form Google sarà collegato a breve. Intanto scrivici via email.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>© 2026 Firenze 1 · FederScout — Associazione Mariano Silvani</div>
+      <div id="footer-social" class="social-block"></div>
+      <a href="staff/login.html">Area staff</a>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/canzoniere-store.js"></script>
+  <script src="js/branch-view.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("iscrizioni-form-btn");
+      const hint = document.getElementById("iscrizioni-form-hint");
+      const url = (window.SCOUT_CONFIG?.iscrizioniFormUrl || "").trim();
+      if (btn && url && !url.includes("PLACEHOLDER")) {
+        btn.href = url;
+      } else if (btn) {
+        btn.href = "mailto:scoutfirenze1ms@gmail.com";
+        btn.removeAttribute("target");
+        btn.textContent = "Scrivici via email";
+        if (hint) hint.hidden = false;
+      }
+      renderSocialFollow(document.getElementById("footer-social"));
+    });
+  </script>
+</body>
+</html>

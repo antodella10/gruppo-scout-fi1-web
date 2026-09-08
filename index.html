@@ -54,92 +54,52 @@
               <div class="hero-kicker">FederScout · Associazione Mariano Silvani</div>
               <h1>Firenze 1</h1>
               <p id="hero-lead">Avventura, servizio e crescita tra le colline fiorentine. Un gruppo FederScout, tante strade — un unico sentiero insieme.</p>
-              <div class="inline-actions">
-                <a class="btn btn-yellow" href="#calendario">Calendario</a>
-                <a class="btn btn-ghost" href="#contatti" style="color:white;border-color:rgba(255,255,255,.35)">Contattaci</a>
-              </div>
             </div>
-            <img class="hero-logo" src="photos/logo.jpeg" alt="">
+            <img class="hero-logo" src="photos/logo.jpeg" alt="Logo Firenze 1">
           </div>
         </div>
       </header>
 
-      <section class="section" id="highlights" data-branca-panel="gruppo">
+      <section class="section" id="home-tiles" data-branca-panel="gruppo">
         <div class="container">
-          <div class="dest-grid highlights-grid">
-            <a class="dest-card tile-notizie" href="#notizie">
-              <span>Aggiornamenti</span>
-              <h3>Notizie</h3>
-              <p>Novità e comunicazioni del gruppo.</p>
-            </a>
-            <a class="dest-card tile-iscrizioni" id="tile-iscrizioni" href="#" target="_blank" rel="noopener noreferrer">
-              <span>Unisciti a noi</span>
-              <h3>Iscrizioni</h3>
-              <p>Apri il form Google per iscriverti.</p>
-            </a>
-            <a class="dest-card tile-chisiamo" href="chi-siamo.html">
-              <span>Il gruppo</span>
-              <h3>Chi siamo</h3>
-              <p>La storia del Firenze 1 — apri la pagina.</p>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="sedi" data-branca-panel="gruppo">
-        <div class="container">
-          <div class="section-head">
-            <div>
-              <h2 id="sedi-title">Sedi</h2>
-              <p id="sedi-lead">Girone e Quarate — dove ci troviamo.</p>
-            </div>
-          </div>
-          <div class="dest-grid" id="sedi-grid">
-            <a class="dest-card sede-a" href="https://maps.app.goo.gl/UdYqCGBqoHMPbJ1v7" target="_blank" rel="noopener noreferrer">
-              <span>Sede</span>
-              <h3>Girone</h3>
-              <p>Apri in Google Maps per indicazioni.</p>
-            </a>
-            <a class="dest-card sede-b" href="https://maps.app.goo.gl/vZ8S7TNm4LQBSBT26" target="_blank" rel="noopener noreferrer">
-              <span>Sede</span>
-              <h3>Quarate</h3>
-              <p>Apri in Google Maps per indicazioni.</p>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="orari" data-branca-panel="gruppo">
-        <div class="container">
-          <div class="section-head">
-            <div>
+          <div class="home-tiles">
+            <div class="home-tile home-tile-orari">
               <h2>Orario riunioni</h2>
-              <p>Giorno e orario delle riunioni di ogni branca.</p>
+              <div id="meeting-hours-list" class="home-tile-body"></div>
             </div>
-          </div>
-          <div class="panel" id="meeting-hours-list"></div>
-        </div>
-      </section>
 
-      <section class="section" id="notizie" data-branca-panel="gruppo">
-        <div class="container">
-          <div class="section-head">
-            <div>
+            <a class="home-tile home-tile-notizie" href="notizie.html">
               <h2>Notizie</h2>
-              <p>Comunicazioni del gruppo.</p>
-            </div>
-          </div>
-          <div class="news-list">
-            <article class="panel news-item">
-              <h3>Benvenuti sul nuovo sito</h3>
-              <p class="hint" style="margin:0 0 .5rem">Settembre 2026</p>
-              <p>Qui troverete sedi, orari, calendario e le novità del Firenze 1. Restate sintonizzati!</p>
-            </article>
-            <article class="panel news-item">
-              <h3>Anno scout in avvio</h3>
-              <p class="hint" style="margin:0 0 .5rem">Settembre 2026</p>
-              <p>Le branche ripartono con le riunioni settimanali. Controlla gli orari qui sopra e il calendario attività.</p>
-            </article>
+              <div class="home-tile-body" id="news-preview">
+                <p class="news-preview-date hint">Settembre 2026</p>
+                <p class="news-preview-title"><strong>Benvenuti sul nuovo sito</strong></p>
+                <p class="news-preview-text">Qui troverete sedi, orari, calendario e le novità del Firenze 1.</p>
+              </div>
+            </a>
+
+            <a class="home-tile home-tile-sedi" href="sedi.html">
+              <h2>Sedi</h2>
+              <div class="home-tile-body">
+                <ul class="home-tile-list">
+                  <li>Girone</li>
+                  <li>Quarate</li>
+                </ul>
+              </div>
+            </a>
+
+            <a class="home-tile home-tile-iscrizioni" href="iscrizioni.html">
+              <h2>Iscrizioni</h2>
+              <div class="home-tile-body">
+                <p>Info e form per unirti al gruppo.</p>
+              </div>
+            </a>
+
+            <a class="home-tile home-tile-chisiamo" href="chi-siamo.html">
+              <h2>Chi siamo</h2>
+              <div class="home-tile-body">
+                <p>La storia del Gruppo Scout Firenze 1 — FederScout, Associazione Mariano Silvani.</p>
+              </div>
+            </a>
           </div>
         </div>
       </section>
@@ -148,7 +108,7 @@
         <div class="container">
           <div class="section-head">
             <div>
-              <h2>Calendario attività</h2>
+              <h2>Calendario</h2>
               <p id="cal-lead">Appuntamenti di gruppo.</p>
             </div>
           </div>
@@ -175,16 +135,14 @@
           <div class="section-head">
             <div>
               <h2>Contatti</h2>
-              <p>Scrivici o seguici sui social.</p>
             </div>
           </div>
           <div class="panel contact-panel">
             <ul class="contact-list">
               <li><strong>Email:</strong> <a href="mailto:scoutfirenze1ms@gmail.com">scoutfirenze1ms@gmail.com</a></li>
-              <li><strong>Sedi:</strong> Girone e Quarate (vedi mappe sopra)</li>
+              <li><strong>Sedi:</strong> <a href="sedi.html">Girone e Quarate</a></li>
             </ul>
             <div id="contact-social" class="social-block" style="margin-top:1.25rem"></div>
-            <p class="hint" style="margin:.75rem 0 0">Tutti i profili li trovi anche in <a href="chi-siamo.html">Chi siamo</a>.</p>
           </div>
         </div>
       </section>
