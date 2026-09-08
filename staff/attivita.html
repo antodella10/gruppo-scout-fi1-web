@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestione attività · Staff</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html" data-home-link data-home-base="../">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="staff-shell">
+    <div class="container">
+      <div class="staff-hero">
+        <div>
+          <h1>Gestione attività</h1>
+          <p id="staff-meta" data-static="1">Crea e modifica gli eventi del calendario.</p>
+        </div>
+        <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
+      </div>
+
+      <section class="panel">
+        <p class="hint" id="event-hint"></p>
+        <div id="event-alert" class="alert alert-ok" hidden></div>
+        <form id="event-form" class="form-grid">
+          <label>
+            Titolo
+            <input type="text" name="title" required placeholder="Es. Uscita">
+          </label>
+          <label>
+            Tipo evento
+            <select name="scope" id="event-scope" required></select>
+          </label>
+          <label id="event-branca-wrap" hidden>
+            Branca
+            <select name="branca" id="event-branca"></select>
+          </label>
+          <div class="form-row-2">
+            <label>
+              Data inizio
+              <input type="date" name="dateStart" id="event-date-start" required>
+            </label>
+            <label>
+              Data fine
+              <input type="date" name="dateEnd" id="event-date-end">
+            </label>
+          </div>
+          <label>
+            Ora
+            <input type="time" name="time" id="event-time" placeholder="Opzionale">
+          </label>
+          <p class="hint" style="margin:0">Se non indichi l’ora, l’evento vale per tutto il giorno.</p>
+          <label>
+            Luogo
+            <input type="text" name="place" placeholder="Sede, parco, …">
+          </label>
+          <label>
+            Descrizione
+            <textarea name="description" rows="2" placeholder="Opzionale"></textarea>
+          </label>
+          <div class="inline-actions">
+            <button class="btn btn-primary" type="submit" id="event-submit">Aggiungi attività</button>
+            <button class="btn btn-ghost" type="button" id="cancel-edit" hidden>Annulla modifica</button>
+          </div>
+        </form>
+        <hr style="border:none;border-top:1px solid var(--line);margin:1.25rem 0">
+        <div id="staff-event-list"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/canzoniere-store.js"></script>
+  <script src="../js/branch-view.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/staff-shell.js"></script>
+  <script src="../js/staff.js"></script>
+</body>
+</html>

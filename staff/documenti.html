@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Area staff · Firenze 1</title>
+  <title>Documenti · Staff</title>
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="icon" href="../photos/logo.jpeg">
 </head>
@@ -22,12 +22,15 @@
     <div class="container">
       <div class="staff-hero">
         <div>
-          <h1>Ciao, <span id="staff-name">staff</span></h1>
-          <p id="staff-meta">Area personale</p>
+          <h1>File e documenti</h1>
+          <p id="staff-meta" data-static="1">Spazio riservato allo staff.</p>
         </div>
+        <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
       </div>
 
-      <div class="dash-grid" id="staff-dash"></div>
+      <section class="panel">
+        <div class="placeholder-box">Presto: documenti staff e cartelle OneDrive.</div>
+      </section>
     </div>
   </main>
 
@@ -37,6 +40,10 @@
   <script src="../js/branch-view.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/staff-shell.js"></script>
-  <script src="../js/staff-dashboard.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      StaffShell.boot({ active: "documenti" });
+    });
+  </script>
 </body>
 </html>

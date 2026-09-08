@@ -163,7 +163,7 @@ function updateNavAuth() {
     slot.innerHTML = `
       <span class="user-chip">${escapeHtml(full.nome)} ${escapeHtml(full.cognome)}${br ? " · " + escapeHtml(br) : ""}${badge}</span>
       <a class="btn btn-primary btn-small" href="${base}staff/">Area staff</a>
-      <button type="button" class="btn btn-ghost btn-small" data-nav-logout>Esci</button>
+      <button type="button" class="btn btn-ghost btn-small nav-logout" data-nav-logout>Esci</button>
     `;
     slot.querySelector("[data-nav-logout]")?.addEventListener("click", () => {
       ScoutStore.logout();

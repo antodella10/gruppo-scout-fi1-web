@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendari Google · Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html" data-home-link data-home-base="../">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="staff-shell">
+    <div class="container">
+      <div class="staff-hero">
+        <div>
+          <h1>Calendari Google</h1>
+          <p id="staff-meta" data-static="1">Collega un calendario pubblico a gruppo o branca.</p>
+        </div>
+        <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
+      </div>
+
+      <section class="panel">
+        <p class="hint">
+          Il calendario deve essere <strong>pubblico</strong> (Google Calendar → Impostazioni → Accessibilità pubblico).
+          Gli eventi vengono uniti al calendario del sito.
+        </p>
+        <form id="gcal-form" class="form-grid">
+          <label>
+            Branca
+            <select name="gcalBranca" required>
+              <option value="gruppo">Gruppo</option>
+              <option value="lupetti">Lupetti</option>
+              <option value="reparto">Reparto</option>
+              <option value="noviziato">Noviziato</option>
+              <option value="clan">Clan</option>
+            </select>
+          </label>
+          <label>
+            URL o ID calendario
+            <input type="text" name="googleEmbed" placeholder="URL incorporamento oppure ID (…@group.calendar.google.com)" required>
+          </label>
+          <button class="btn btn-primary" type="submit">Aggiungi calendario</button>
+        </form>
+        <div id="gcal-list" style="margin-top:1rem"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/google-calendar.js"></script>
+  <script src="../js/canzoniere-store.js"></script>
+  <script src="../js/branch-view.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/staff-shell.js"></script>
+  <script src="../js/staff-calendari.js"></script>
+</body>
+</html>

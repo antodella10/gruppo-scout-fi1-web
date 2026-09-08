@@ -47,15 +47,23 @@ window.SCOUT_SCOPES = {
   coca: { id: "coca", label: "Co.Ca." },
 };
 
-/** Solo lupetti + reparto (Girone / Quarate). */
+/** Lupetti + Reparto, ciascuno diviso Girone / Quarate. */
 window.SCOUT_DEFAULT_MEETING_HOURS = [
   {
-    id: "lupetti",
-    label: "Lupetti",
+    id: "lupetti-girone",
+    label: "Lupetti — Girone",
     branca: "lupetti",
     day: "Sabato",
     time: "15:30–17:00",
     place: "Girone",
+  },
+  {
+    id: "lupetti-quarate",
+    label: "Lupetti — Quarate",
+    branca: "lupetti",
+    day: "Sabato",
+    time: "15:30–17:00",
+    place: "Quarate",
   },
   {
     id: "reparto-girone",

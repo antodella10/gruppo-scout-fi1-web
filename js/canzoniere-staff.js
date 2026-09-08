@@ -1,9 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const user = ScoutStore.getCurrentUser();
-  if (!user) {
-    location.href = "./login.html";
-    return;
-  }
+  const user = StaffShell.boot({ active: "canzoniere" });
+  if (!user) return;
   if (!CanzoniereStore.canManage(user)) {
     location.href = "./index.html";
     return;

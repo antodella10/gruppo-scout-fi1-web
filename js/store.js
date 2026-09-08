@@ -476,9 +476,12 @@ const ScoutStore = (() => {
       .map((h) => {
         if (!h) return null;
         if (h.id) {
+          const id = h.id === "lupetti" ? "lupetti-girone" : h.id;
+          const label =
+            h.id === "lupetti" ? "Lupetti — Girone" : h.label || id;
           return {
-            id: h.id,
-            label: h.label || h.id,
+            id,
+            label,
             branca: h.branca || "",
             day: h.day || "",
             time: h.time || "",
@@ -486,10 +489,11 @@ const ScoutStore = (() => {
           };
         }
         // vecchio formato per sola branca
-        if (h.branca === "lupetti") {
+        // vecchio formato / id unificato lupetti
+        if (h.branca === "lupetti" || h.id === "lupetti") {
           return {
-            id: "lupetti",
-            label: "Lupetti",
+            id: "lupetti-girone",
+            label: "Lupetti — Girone",
             branca: "lupetti",
             day: h.day || "",
             time: h.time || "",
