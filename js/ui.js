@@ -182,30 +182,66 @@ function socialIconIg() {
   return `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4zm5 4.5A4.5 4.5 0 1 0 16.5 12 4.5 4.5 0 0 0 12 7.5zm5.2-.9a1.1 1.1 0 1 0 1.1 1.1 1.1 1.1 0 0 0-1.1-1.1zM12 9.5A2.5 2.5 0 1 1 9.5 12 2.5 2.5 0 0 1 12 9.5z"/></svg>`;
 }
 
-/** Home: “Seguici” con sole icone (FB + IG scelto in admin). */
+/** Home: “Seguici” con icone (aggiorna link esistenti o li crea). */
 function renderSocialFollow(container) {
   if (!container) return;
-  const social =
-    typeof ScoutStore !== "undefined" && ScoutStore.getSocialLinks
-      ? ScoutStore.getSocialLinks()
-      : null;
-  if (!social) {
-    container.innerHTML = "";
+
+  let social = null;
+  try {
+    if (typeof ScoutStore !== "undefined" && ScoutStore.getSocialLinks) {
+      social = ScoutStore.getSocialLinks();
+    }
+  } catch (err) {
+    console.warn("[social]", err);
+  }
+  if (!social) social = window.SCOUT_CONFIG?.social || {};
+
+  const fbRaw = social.facebook;
+  const fbUrl =
+    (typeof fbRaw === "object" ? fbRaw?.url : fbRaw) ||
+    window.SCOUT_CONFIG?.social?.facebook?.url ||
+    "https://www.facebook.com/scoutfirenze1/?locale=it_IT";
+  const fbLabel =
+    (typeof fbRaw === "object" && fbRaw?.label) || "Facebook";
+
+  const igKey = social.homeInstagram || window.SCOUT_CONFIG?.social?.homeInstagram || "reparto";
+  const igMap = social.instagram || window.SCOUT_CONFIG?.social?.instagram || {};
+  const igRaw = igMap[igKey] || igMap.reparto || {};
+  const igUrl =
+    (typeof igRaw === "object" ? igRaw?.url : igRaw) ||
+    window.SCOUT_CONFIG?.social?.instagram?.reparto?.url ||
+    "https://www.instagram.com/riparto.fi1";
+  const igLabel =
+    (typeof igRaw === "object" && igRaw?.label) || "Instagram";
+
+  // Se le icone sono già in pagina, aggiorna solo gli href
+  const existingIg = container.querySelector('[data-social="ig"]');
+  const existingFb = container.querySelector('[data-social="fb"]');
+  if (existingIg || existingFb) {
+    if (existingIg) {
+      existingIg.href = igUrl;
+      existingIg.title = igLabel;
+      existingIg.setAttribute("aria-label", igLabel);
+      existingIg.hidden = !igUrl;
+    }
+    if (existingFb) {
+      existingFb.href = fbUrl;
+      existingFb.title = fbLabel;
+      existingFb.setAttribute("aria-label", fbLabel);
+      existingFb.hidden = !fbUrl;
+    }
     return;
   }
-  const fbUrl = social.facebook?.url || "";
-  const igKey = social.homeInstagram || "reparto";
-  const ig = social.instagram?.[igKey] || social.instagram?.reparto || {};
-  const igUrl = ig.url || "";
+
   const parts = [];
   if (igUrl) {
     parts.push(
-      `<a class="social-icon-btn social-icon-ig" href="${escapeHtml(igUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(ig.label || "Instagram")}" aria-label="${escapeHtml(ig.label || "Instagram")}">${socialIconIg()}</a>`
+      `<a class="social-icon-btn social-icon-ig" data-social="ig" href="${escapeHtml(igUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(igLabel)}" aria-label="${escapeHtml(igLabel)}">${socialIconIg()}</a>`
     );
   }
   if (fbUrl) {
     parts.push(
-      `<a class="social-icon-btn social-icon-fb" href="${escapeHtml(fbUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(social.facebook.label || "Facebook")}" aria-label="${escapeHtml(social.facebook.label || "Facebook")}">${socialIconFb()}</a>`
+      `<a class="social-icon-btn social-icon-fb" data-social="fb" href="${escapeHtml(fbUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(fbLabel)}" aria-label="${escapeHtml(fbLabel)}">${socialIconFb()}</a>`
     );
   }
   if (!parts.length) {
@@ -310,5 +346,8 @@ function renderMeetingHoursList(container, { compact = false } = {}) {
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof BranchView !== "undefined") BranchView.wireHomeLinks();
   updateNavAuth();
+  // Social anche senza home.js (pagine statiche / fallback)
+  renderSocialFollow(document.getElementById("contact-social"));
+  renderSocialFollow(document.getElementById("footer-social"));
 });
 
