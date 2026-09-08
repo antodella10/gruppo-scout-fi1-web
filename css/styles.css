@@ -1364,15 +1364,28 @@ a.home-tile:hover {
   grid-column: span 3;
 }
 
-.home-tile-iscrizioni {
+.home-tile-iscrizioni,
+.home-tile-negozio,
+.home-tile-chisiamo {
   grid-column: span 4;
+}
+
+.home-tile-iscrizioni {
   background:
     linear-gradient(160deg, rgba(240, 194, 26, 0.16), transparent 55%),
     var(--white);
 }
 
+.home-tile-negozio {
+  background:
+    linear-gradient(160deg, rgba(196, 120, 40, 0.14), transparent 55%),
+    var(--white);
+}
+
 .home-tile-chisiamo {
-  grid-column: span 8;
+  background:
+    linear-gradient(160deg, rgba(31, 122, 58, 0.08), transparent 55%),
+    var(--white);
 }
 
 .meeting-hours-compact {
@@ -1402,6 +1415,181 @@ a.home-tile:hover {
 .meeting-hours-compact .mh-when {
   color: var(--muted);
 }
+
+/* —— Negozio / Magazzino di Kala Nag —— */
+.shop-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 1.1rem;
+}
+
+.shop-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 600;
+  color: var(--green-deep);
+}
+
+.shop-sort select {
+  font: inherit;
+  padding: 0.4rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--white);
+}
+
+.shop-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.shop-item {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 1rem 1.15rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: 0 8px 24px rgba(20, 85, 40, 0.05);
+}
+
+.shop-item-media {
+  width: 140px;
+  height: 140px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f3f0ea;
+  display: grid;
+  place-items: center;
+}
+
+.shop-item-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.shop-item-placeholder {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #a07a4a;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.shop-item-body {
+  min-width: 0;
+}
+
+.shop-item-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+}
+
+.shop-item-name {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--green-deep);
+  font-family: "Bricolage Grotesque", sans-serif;
+}
+
+.shop-item-type {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.shop-item-price {
+  margin: 0.45rem 0 0.2rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.shop-item-avail {
+  margin: 0 0 0.55rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.shop-item-avail.is-yes {
+  color: var(--green);
+}
+
+.shop-item-avail.is-no {
+  color: #a33;
+}
+
+.shop-item-notes {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.shop-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  margin-top: 1.6rem;
+}
+
+.shop-admin-row {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.shop-admin-row:last-child {
+  border-bottom: 0;
+}
+
+.shop-admin-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f0ea;
+  display: grid;
+  place-items: center;
+  font-size: 0.65rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.shop-admin-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shop-admin-meta {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.shop-admin-meta strong {
+  color: var(--green-deep);
+}
+
 
 .news-preview-date {
   margin: 0 0 0.35rem;
@@ -1973,6 +2161,23 @@ a.home-tile:hover {
     display: none;
   }
 
+  .shop-item {
+    grid-template-columns: 1fr;
+  }
+
+  .shop-item-media {
+    width: 100%;
+    height: 200px;
+  }
+
+  .shop-admin-row {
+    grid-template-columns: 64px 1fr;
+  }
+
+  .shop-admin-row .inline-actions {
+    grid-column: 1 / -1;
+  }
+
   .dest-card.sede-a,
   .dest-card.sede-b,
   .dest-card.campo,
@@ -1983,6 +2188,7 @@ a.home-tile:hover {
   .home-tile-notizie,
   .home-tile-sedi,
   .home-tile-iscrizioni,
+  .home-tile-negozio,
   .home-tile-chisiamo {
     grid-column: span 12;
     min-height: 180px;

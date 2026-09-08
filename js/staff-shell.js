@@ -30,6 +30,7 @@ window.StaffShell = (() => {
       admin ? { id: "richieste", href: "./richieste.html", label: "Richieste staff" } : null,
       admin ? { id: "social", href: "./social.html", label: "Link social" } : null,
       admin ? { id: "calendari", href: "./calendari.html", label: "Calendari Google" } : null,
+      admin ? { id: "negozio", href: "./negozio.html", label: "Negozio / Kala Nag" } : null,
       { id: "documenti", href: "./documenti.html", label: "File e documenti" },
     ].filter(Boolean);
   }

@@ -68,6 +68,17 @@ document.addEventListener("DOMContentLoaded", () => {
         ? `<strong>${calendars.length}</strong> calendari collegati`
         : "Nessun calendario collegato",
     });
+
+    const shopCount =
+      typeof ShopStore !== "undefined" ? ShopStore.getItems().length : 0;
+    tiles.push({
+      href: "./negozio.html",
+      title: "Negozio · Kala Nag",
+      hint: "Catalogo oggetti, prezzi e disponibilità.",
+      preview: shopCount
+        ? `<strong>${shopCount}</strong> oggett${shopCount === 1 ? "o" : "i"} in catalogo`
+        : "Catalogo vuoto",
+    });
   }
 
   tiles.push({

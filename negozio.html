@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Negozio · Magazzino di Kala Nag · Firenze 1</title>
+  <meta name="description" content="Magazzino di Kala Nag: articoli del Gruppo Scout Firenze 1 da ordinare e ritirare in sede.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="index.html" data-home-link data-home-base="">
+        <img src="photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html?branca=gruppo" data-group-home data-home-base="">Home</a>
+        <a href="chi-siamo.html">Chi siamo</a>
+        <a href="index.html?branca=gruppo#calendario" data-group-home data-home-base="" data-hash="#calendario">Calendario</a>
+        <a href="index.html?branca=gruppo#contatti" data-group-home data-home-base="" data-hash="#contatti">Contatti</a>
+      </div>
+      <div class="nav-actions" data-auth-slot data-base=""></div>
+    </div>
+  </nav>
+
+  <header class="page-hero">
+    <div class="container">
+      <p class="hero-kicker" style="color:var(--green)">Negozio del gruppo</p>
+      <h1>Magazzino di Kala Nag</h1>
+      <p class="page-hero-lead">
+        Articoli disponibili da ordinare e ritirare in sede (Girone o Quarate).
+        Non è possibile pagare online: lo staff ti conferma disponibilità e ritiro.
+      </p>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container">
+      <div class="shop-toolbar">
+        <label class="shop-sort">
+          Ordina per
+          <select id="shop-sort">
+            <option value="name">Nome (A–Z)</option>
+            <option value="type">Tipologia</option>
+          </select>
+        </label>
+        <p class="hint" id="shop-count"></p>
+      </div>
+      <div id="shop-list" class="shop-list" aria-live="polite"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>© 2026 Firenze 1 · FederScout — Associazione Mariano Silvani</div>
+      <div id="footer-social" class="social-block"></div>
+      <a href="staff/login.html">Area staff</a>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/cloud-sync.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/canzoniere-store.js"></script>
+  <script src="js/shop-store.js"></script>
+  <script src="js/branch-view.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/shop-public.js"></script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Negozio · Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html" data-home-link data-home-base="../">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="staff-shell">
+    <div class="container">
+      <div class="staff-hero">
+        <div>
+          <h1>Magazzino di Kala Nag</h1>
+          <p id="staff-meta" data-static="1">Aggiungi, modifica o togli oggetti del negozio. Gli ordini arrivano via email.</p>
+        </div>
+        <div class="inline-actions">
+          <a class="btn btn-ghost" href="../negozio.html" target="_blank" rel="noopener">Vedi pagina pubblica</a>
+          <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
+        </div>
+      </div>
+
+      <div id="shop-alert" class="alert alert-ok" hidden></div>
+
+      <div class="staff-grid">
+        <section class="panel">
+          <h2 id="shop-form-title">Nuovo oggetto</h2>
+          <form id="shop-form" class="form-grid">
+            <input type="hidden" name="id" value="">
+            <label>
+              Nome
+              <input type="text" name="name" required placeholder="Es. Foulard Firenze 1">
+            </label>
+            <div class="form-row-2">
+              <label>
+                Prezzo (€)
+                <input type="number" name="price" required min="0" step="0.01" placeholder="0.00">
+              </label>
+              <label>
+                Tipologia
+                <input type="text" name="type" list="shop-types" required placeholder="Abbigliamento">
+                <datalist id="shop-types"></datalist>
+              </label>
+            </div>
+            <div class="form-row-2">
+              <label class="shop-check">
+                <input type="checkbox" name="available" checked>
+                Disponibile all’ordine
+              </label>
+              <label>
+                Nota disponibilità (opzionale)
+                <input type="text" name="stockLabel" placeholder="Es. Ultimi 3 pezzi">
+              </label>
+            </div>
+            <label>
+              Note (opzionale)
+              <textarea name="notes" rows="2" placeholder="Taglie, dettagli, ecc."></textarea>
+            </label>
+            <label>
+              Foto
+              <input type="file" name="image" accept="image/*">
+            </label>
+            <p class="hint" id="shop-edit-hint" hidden>Lascia la foto vuota per tenere quella attuale.</p>
+            <div class="inline-actions">
+              <button class="btn btn-primary" type="submit">Salva</button>
+              <button class="btn btn-ghost" type="button" id="shop-reset" hidden>Annulla modifica</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel wide">
+          <div class="section-head" style="margin-bottom:0.75rem">
+            <div>
+              <h2>Oggetti in catalogo</h2>
+              <p class="hint" style="margin:0">Elenco modificabile. Ordinamento come in pagina pubblica.</p>
+            </div>
+            <label class="shop-sort">
+              Ordina
+              <select id="shop-admin-sort">
+                <option value="name">Nome</option>
+                <option value="type">Tipologia</option>
+              </select>
+            </label>
+          </div>
+          <div id="shop-admin-list"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/cloud-sync.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/canzoniere-store.js"></script>
+  <script src="../js/shop-store.js"></script>
+  <script src="../js/branch-view.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/staff-shell.js"></script>
+  <script src="../js/shop-staff.js"></script>
+</body>
+</html>
