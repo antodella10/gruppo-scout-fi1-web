@@ -1,5 +1,11 @@
 window.SCOUT_CONFIG = {
   adminEmail: "scoutfirenze1ms@gmail.com",
+  /**
+   * Chiave scrittura sync (account staff + canzoniere cloud).
+   * Deve coincidere con la env Netlify SCOUT_WRITE_KEY se la imposti;
+   * altrimenti resta questo valore di default.
+   */
+  syncWriteKey: "firenze1-ms-sync",
   homeCalendarEmbed: "",
   /** Opzionale: chiave API Google Calendar (alternativa alla function Netlify). */
   googleCalendarApiKey: "",

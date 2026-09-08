@@ -6,7 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const bookFrame = document.getElementById("book-frame");
   const bookMeta = document.getElementById("book-meta-line");
   const downloadBtn = document.getElementById("pdf-download");
+  const openBtn = document.getElementById("pdf-open");
   const pdfStage = document.getElementById("pdf-stage");
+  const mobilePanel = document.getElementById("pdf-mobile-panel");
   const fsBtn = document.getElementById("pdf-fullscreen");
   const exitFsBtn = document.getElementById("pdf-exit-fs");
   const songsList = document.getElementById("songs-list");
@@ -15,6 +17,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentBookUrl = null;
   let currentBookName = "canzoniere.pdf";
+
+  function prefersNativePdf() {
+    const ua = navigator.userAgent || "";
+    return /iPhone|iPad|iPod|Android/i.test(ua);
+  }
 
   function pdfSrc(url, { toolbar = false, zoom = 110 } = {}) {
     if (toolbar) {
@@ -41,8 +48,10 @@ document.addEventListener("DOMContentLoaded", () => {
       bookFrame.removeAttribute("src");
       bookFrame.classList.remove("is-visible");
     }
+    if (mobilePanel) mobilePanel.hidden = true;
     if (fsBtn) fsBtn.hidden = true;
     if (downloadBtn) downloadBtn.hidden = true;
+    if (openBtn) openBtn.hidden = true;
     setExitFsVisible(false);
   }
 
@@ -51,21 +60,30 @@ document.addEventListener("DOMContentLoaded", () => {
       bookEmpty.hidden = true;
       bookEmpty.classList.remove("is-visible");
     }
+    const mobile = prefersNativePdf();
+    if (mobilePanel) mobilePanel.hidden = !mobile;
     if (bookFrame) {
-      const fullscreen = !!document.fullscreenElement;
-      bookFrame.src = pdfSrc(url, { toolbar: fullscreen, zoom: 110 });
-      bookFrame.hidden = false;
-      bookFrame.classList.add("is-visible");
+      if (mobile) {
+        bookFrame.hidden = true;
+        bookFrame.removeAttribute("src");
+        bookFrame.classList.remove("is-visible");
+      } else {
+        const fullscreen = !!document.fullscreenElement;
+        bookFrame.src = pdfSrc(url, { toolbar: fullscreen, zoom: 110 });
+        bookFrame.hidden = false;
+        bookFrame.classList.add("is-visible");
+      }
     }
-    if (fsBtn) fsBtn.hidden = false;
+    if (fsBtn) fsBtn.hidden = mobile;
     if (downloadBtn) downloadBtn.hidden = false;
+    if (openBtn) openBtn.hidden = false;
     setExitFsVisible(!!document.fullscreenElement);
   }
 
   function reloadPdfForMode() {
+    if (prefersNativePdf()) return;
     if (!currentBookUrl || !bookFrame?.classList.contains("is-visible")) return;
     const fullscreen = !!document.fullscreenElement;
-    // forza reload del viewer con/senza toolbar
     bookFrame.src = "about:blank";
     window.setTimeout(() => {
       bookFrame.src = pdfSrc(currentBookUrl, { toolbar: fullscreen, zoom: 110 });
@@ -129,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       if (pdfStage.requestFullscreen) await pdfStage.requestFullscreen();
       else if (pdfStage.webkitRequestFullscreen) pdfStage.webkitRequestFullscreen();
-    } catch (err) {
+    } catch {
       alert("Impossibile entrare a schermo intero su questo browser.");
     }
   }
@@ -142,8 +160,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function openCurrentBook() {
+    if (!currentBookUrl) return;
+    const a = document.createElement("a");
+    a.href = currentBookUrl;
+    a.target = "_blank";
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
   fsBtn?.addEventListener("click", enterFullscreen);
   exitFsBtn?.addEventListener("click", exitFullscreen);
+  openBtn?.addEventListener("click", openCurrentBook);
+  document.getElementById("pdf-open-mobile")?.addEventListener("click", openCurrentBook);
 
   downloadBtn?.addEventListener("click", () => {
     if (!currentBookUrl) return;
@@ -163,11 +194,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setExitFsVisible(false);
 
-  proposeForm?.addEventListener("submit", (e) => {
+  proposeForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const data = new FormData(proposeForm);
     try {
-      CanzoniereStore.proposeSong({
+      await CanzoniereStore.proposeSong({
         title: data.get("title"),
         notes: data.get("notes"),
         fromName: data.get("fromName"),
@@ -188,6 +219,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  refreshBook();
-  refreshSongs();
+  (async () => {
+    if (bookStatus) bookStatus.textContent = "Caricamento canzoniere…";
+    await CanzoniereStore.pullRemote?.().catch(() => {});
+    await refreshBook();
+    refreshSongs();
+  })();
 });

@@ -31,9 +31,14 @@ document.addEventListener("DOMContentLoaded", () => {
   emailInput?.addEventListener("input", syncAdminFields);
   syncAdminFields();
 
+  // Allinea account da cloud prima del login (necessario su telefono/altro browser).
+  ScoutStore.pullRemoteAccounts?.().catch(() => {});
+
   loginForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const data = new FormData(loginForm);
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
     try {
       await ScoutStore.loginStaff({
         email: data.get("email"),
@@ -43,9 +48,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (logged && !ScoutStore.isAdminUser(logged) && logged.branca && typeof BranchView !== "undefined") {
         BranchView.persist(logged.branca, { updateUrl: false });
       }
-      location.href = BranchView.homeHref("../");
+      location.href = "./index.html";
     } catch (err) {
       showError(err.message || "Accesso non riuscito.");
+      if (submitBtn) submitBtn.disabled = false;
     }
   });
 
@@ -53,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const data = new FormData(registerForm);
     try {
+      await ScoutStore.pullRemoteAccounts?.();
       const result = await ScoutStore.registerStaff({
         nome: data.get("nome"),
         cognome: data.get("cognome"),
@@ -70,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      location.href = typeof BranchView !== "undefined" ? BranchView.homeHref("../") : "./index.html";
+      location.href = "./index.html";
     } catch (err) {
       showError(err.message || "Registrazione non riuscita.");
     }

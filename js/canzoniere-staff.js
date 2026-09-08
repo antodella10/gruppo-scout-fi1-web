@@ -89,9 +89,16 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const file = bookForm.bookPdf.files?.[0];
     try {
-      await CanzoniereStore.setBook(file, user);
+      const result = await CanzoniereStore.setBook(file, user);
       bookForm.reset();
-      flash("Canzoniere aggiornato.");
+      if (result?.cloudOk === false) {
+        flash(
+          "Salvato qui, ma sync cloud non riuscita: su altri telefoni potrebbe non comparire. Riprova o ricarica dopo il deploy Netlify.",
+          false
+        );
+      } else {
+        flash("Canzoniere aggiornato (sincronizzato su tutti i dispositivi).");
+      }
       refreshBookMeta();
     } catch (err) {
       flash(err.message, false);
@@ -102,15 +109,34 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const data = new FormData(songForm);
     try {
-      await CanzoniereStore.addSong(
+      const result = await CanzoniereStore.addSong(
         { title: data.get("title"), file: songForm.songPdf.files?.[0] },
         user
       );
       songForm.reset();
-      flash("Canzone aggiunta.");
+      if (result?.cloudOk === false) {
+        flash("Canzone salvata qui, ma sync cloud non riuscita.", false);
+      } else {
+        flash("Canzone aggiunta (sincronizzata).");
+      }
       refreshSongs();
     } catch (err) {
       flash(err.message, false);
+    }
+  });
+
+  document.getElementById("sync-cloud-btn")?.addEventListener("click", async () => {
+    try {
+      flash("Sincronizzazione in corso…");
+      const result = await CanzoniereStore.pushLocalFilesToCloud();
+      flash(
+        result?.ok
+          ? "PDF ripubblicati sul cloud: ora compaiono anche da telefono."
+          : "Sync parziale o fallita. Controlla la connessione / deploy Netlify.",
+        !!result?.ok
+      );
+    } catch (err) {
+      flash(err.message || "Sync fallita.", false);
     }
   });
 
@@ -129,17 +155,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  proposalsAdmin?.addEventListener("click", (e) => {
+  proposalsAdmin?.addEventListener("click", async (e) => {
     const done = e.target.closest("[data-prop-done]");
     const reject = e.target.closest("[data-prop-reject]");
     try {
       if (done) {
-        CanzoniereStore.setProposalStatus(done.dataset.propDone, "done", user);
+        await CanzoniereStore.setProposalStatus(done.dataset.propDone, "done", user);
         refreshProposals();
         updateNavAuth();
       }
       if (reject) {
-        CanzoniereStore.setProposalStatus(reject.dataset.propReject, "rejected", user);
+        await CanzoniereStore.setProposalStatus(reject.dataset.propReject, "rejected", user);
         refreshProposals();
         updateNavAuth();
       }
@@ -148,7 +174,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  refreshBookMeta();
-  refreshSongs();
-  refreshProposals();
+  (async () => {
+    await CanzoniereStore.pullRemote?.().catch(() => {});
+    refreshBookMeta();
+    refreshSongs();
+    refreshProposals();
+  })();
 });

@@ -1,4 +1,4 @@
-/* Canzoniere reparto: metadati in localStorage, PDF in IndexedDB. */
+/* Canzoniere reparto: metadati localStorage + cloud, PDF IndexedDB + Netlify Blobs. */
 
 const CanzoniereStore = (() => {
   const META_KEY = "firenze1_canzoniere_meta_v1";
@@ -63,6 +63,23 @@ const CanzoniereStore = (() => {
     });
   }
 
+  async function putBlobRecord(id, blob, name = `${id}.pdf`) {
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, "readwrite");
+      tx.objectStore(STORE).put({
+        id,
+        name,
+        type: "application/pdf",
+        size: blob.size,
+        blob,
+        updatedAt: new Date().toISOString(),
+      });
+      tx.oncomplete = () => resolve(id);
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
   async function getFile(id) {
     if (!id) return null;
     const db = await openDb();
@@ -85,16 +102,101 @@ const CanzoniereStore = (() => {
     });
   }
 
+  async function pushMeta() {
+    if (typeof CloudSync === "undefined") return;
+    await CloudSync.putCanzoniereMeta(readMeta());
+  }
+
+  async function syncPdfToCloud(fileId, file) {
+    if (typeof CloudSync === "undefined" || !CloudSync.available()) {
+      return { ok: false, reason: "cloud-non-disponibile" };
+    }
+    try {
+      await CloudSync.uploadPdf(fileId, file);
+      return { ok: true };
+    } catch (err) {
+      console.warn("[CanzoniereStore] upload cloud", err);
+      return { ok: false, reason: err.message || "upload-fallito" };
+    }
+  }
+
+  async function pushLocalFilesToCloud() {
+    if (typeof CloudSync === "undefined" || !CloudSync.available()) return { ok: false };
+    const meta = readMeta();
+    let ok = true;
+    async function one(fileId, fileName) {
+      if (!fileId) return;
+      const rec = await getFile(fileId);
+      if (!rec?.blob) return;
+      const file = new File([rec.blob], fileName || `${fileId}.pdf`, { type: "application/pdf" });
+      try {
+        await CloudSync.uploadPdf(fileId, file);
+      } catch (err) {
+        console.warn("[CanzoniereStore] reupload", fileId, err);
+        ok = false;
+      }
+    }
+    if (meta.book?.fileId) await one(meta.book.fileId, meta.book.fileName);
+    for (const song of meta.songs || []) {
+      await one(song.fileId, song.fileName || `${song.title}.pdf`);
+    }
+    await pushMeta();
+    return { ok };
+  }
+
+  /** Allinea meta dal cloud (telefono/altro browser vedono lo stesso canzoniere). */
+  async function pullRemote() {
+    if (typeof CloudSync === "undefined") return false;
+    const remote = await CloudSync.getCanzoniereMeta();
+    if (!remote) return false;
+    const hasRemote =
+      remote.book ||
+      (Array.isArray(remote.songs) && remote.songs.length) ||
+      (Array.isArray(remote.proposals) && remote.proposals.length);
+    const local = readMeta();
+    const hasLocal =
+      local.book ||
+      (local.songs || []).length ||
+      (local.proposals || []).length;
+
+    if (hasRemote) {
+      writeMeta({
+        book: remote.book || null,
+        songs: Array.isArray(remote.songs) ? remote.songs : [],
+        proposals: Array.isArray(remote.proposals) ? remote.proposals : [],
+      });
+      return true;
+    }
+    if (hasLocal) {
+      await pushLocalFilesToCloud();
+    }
+    return false;
+  }
+
   async function getPdfUrl(fileId) {
     const record = await getFile(fileId);
-    if (!record?.blob) throw new Error("PDF non trovato.");
-    return URL.createObjectURL(record.blob);
+    if (record?.blob) return URL.createObjectURL(record.blob);
+
+    if (typeof CloudSync !== "undefined" && CloudSync.available()) {
+      const res = await fetch(CloudSync.pdfUrl(fileId), { credentials: "omit" });
+      if (!res.ok) throw new Error("PDF non trovato sul cloud.");
+      const blob = await res.blob();
+      await putBlobRecord(fileId, blob).catch(() => {});
+      return URL.createObjectURL(blob);
+    }
+    throw new Error("PDF non trovato.");
   }
 
   async function openPdf(fileId) {
     const url = await getPdfUrl(fileId);
-    window.open(url, "_blank", "noopener");
-    window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    const a = document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 120_000);
     return url;
   }
 
@@ -137,8 +239,13 @@ const CanzoniereStore = (() => {
       updatedBy: user.id,
     };
     writeMeta(meta);
-    if (oldId) await deleteFile(oldId).catch(() => {});
-    return meta.book;
+    const cloud = await syncPdfToCloud(fileId, file);
+    await pushMeta();
+    if (oldId) {
+      await deleteFile(oldId).catch(() => {});
+      if (typeof CloudSync !== "undefined") await CloudSync.deletePdf(oldId);
+    }
+    return { book: meta.book, cloudOk: cloud.ok };
   }
 
   async function addSong({ title, file }, user) {
@@ -159,7 +266,9 @@ const CanzoniereStore = (() => {
     meta.songs = meta.songs || [];
     meta.songs.push(song);
     writeMeta(meta);
-    return song;
+    const cloud = await syncPdfToCloud(fileId, file);
+    await pushMeta();
+    return { song, cloudOk: cloud.ok };
   }
 
   async function deleteSong(songId, user) {
@@ -170,9 +279,12 @@ const CanzoniereStore = (() => {
     meta.songs = meta.songs.filter((s) => s.id !== songId);
     writeMeta(meta);
     await deleteFile(song.fileId).catch(() => {});
+    if (typeof CloudSync !== "undefined") await CloudSync.deletePdf(song.fileId);
+    await pushMeta();
   }
 
-  function proposeSong({ title, notes, fromName }) {
+  async function proposeSong({ title, notes, fromName }) {
+    await pullRemote().catch(() => {});
     const clean = String(title || "").trim();
     if (!clean) throw new Error("Inserisci il titolo della canzone.");
     const meta = readMeta();
@@ -187,10 +299,11 @@ const CanzoniereStore = (() => {
     meta.proposals = meta.proposals || [];
     meta.proposals.unshift(proposal);
     writeMeta(meta);
+    await pushMeta();
     return proposal;
   }
 
-  function setProposalStatus(id, status, user) {
+  async function setProposalStatus(id, status, user) {
     if (!canManage(user)) throw new Error("Non autorizzato.");
     if (!["pending", "done", "rejected"].includes(status)) {
       throw new Error("Stato non valido.");
@@ -202,6 +315,7 @@ const CanzoniereStore = (() => {
     item.resolvedAt = new Date().toISOString();
     item.resolvedBy = user.id;
     writeMeta(meta);
+    await pushMeta();
     return item;
   }
 
@@ -218,5 +332,8 @@ const CanzoniereStore = (() => {
     setProposalStatus,
     openPdf,
     getPdfUrl,
+    pullRemote,
+    pushMeta,
+    pushLocalFilesToCloud,
   };
 })();

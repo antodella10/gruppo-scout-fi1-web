@@ -28,17 +28,17 @@ document.addEventListener("DOMContentLoaded", () => {
       .join("");
   }
 
-  pendingList?.addEventListener("click", (e) => {
+  pendingList?.addEventListener("click", async (e) => {
     const approve = e.target.closest("[data-approve]");
     const reject = e.target.closest("[data-reject]");
     try {
       if (approve) {
-        ScoutStore.approvePending(approve.dataset.approve, user);
+        await ScoutStore.approvePending(approve.dataset.approve, user);
         refreshPending();
       }
       if (reject) {
         if (!confirm("Rifiutare questa richiesta?")) return;
-        ScoutStore.rejectPending(reject.dataset.reject, user);
+        await ScoutStore.rejectPending(reject.dataset.reject, user);
         refreshPending();
       }
     } catch (err) {
@@ -46,5 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  refreshPending();
+  (async () => {
+    await ScoutStore.pullRemoteAccounts?.().catch(() => {});
+    refreshPending();
+  })();
 });

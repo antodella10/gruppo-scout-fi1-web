@@ -30,9 +30,45 @@ const ScoutStore = (() => {
   }
 
   async function hashPassword(password) {
-    const data = new TextEncoder().encode(password);
-    const digest = await crypto.subtle.digest("SHA-256", data);
-    return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    if (!globalThis.crypto?.subtle?.digest) {
+      throw new Error(
+        "Questo browser non supporta l’accesso sicuro. Apri il sito da HTTPS (es. Netlify), non da file locale."
+      );
+    }
+    try {
+      const data = new TextEncoder().encode(password);
+      const digest = await crypto.subtle.digest("SHA-256", data);
+      return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    } catch {
+      throw new Error(
+        "Impossibile calcolare la password su questo dispositivo. Riprova da Chrome/Safari aggiornato su HTTPS."
+      );
+    }
+  }
+
+  async function pushRemoteAccounts() {
+    if (typeof CloudSync === "undefined") return;
+    await CloudSync.putAccounts(getUsers(), getPending());
+  }
+
+  /** Scarica account dal cloud (così login funziona anche da un altro telefono/PC). */
+  async function pullRemoteAccounts() {
+    if (typeof CloudSync === "undefined") return false;
+    const remote = await CloudSync.getAccounts();
+    if (!remote) return false;
+    const remoteUsers = Array.isArray(remote.users) ? remote.users : [];
+    const remotePending = Array.isArray(remote.pending) ? remote.pending : [];
+    if (remoteUsers.length || remotePending.length) {
+      saveUsers(remoteUsers);
+      savePending(remotePending);
+      return true;
+    }
+    const localUsers = getUsers();
+    const localPending = getPending();
+    if (localUsers.length || localPending.length) {
+      await CloudSync.putAccounts(localUsers, localPending);
+    }
+    return false;
   }
 
   function getUsers() {
@@ -139,6 +175,7 @@ const ScoutStore = (() => {
       users.push(user);
       saveUsers(users);
       setSession(user);
+      await pushRemoteAccounts();
       return { user, pendingApproval: false };
     }
 
@@ -159,6 +196,7 @@ const ScoutStore = (() => {
     };
     pending.push(pendingUser);
     savePending(pending);
+    await pushRemoteAccounts();
     return { user: pendingUser, pendingApproval: true };
   }
 
@@ -167,7 +205,7 @@ const ScoutStore = (() => {
     return getPending().sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
   }
 
-  function approvePending(pendingId, adminUser) {
+  async function approvePending(pendingId, adminUser) {
     if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può approvare.");
     const pending = getPending();
     const idx = pending.findIndex((u) => u.id === pendingId);
@@ -177,6 +215,7 @@ const ScoutStore = (() => {
     if (users.some((u) => u.email === item.email)) {
       pending.splice(idx, 1);
       savePending(pending);
+      await pushRemoteAccounts();
       throw new Error("Questa email è già registrata.");
     }
     const user = {
@@ -196,15 +235,18 @@ const ScoutStore = (() => {
     saveUsers(users);
     pending.splice(idx, 1);
     savePending(pending);
+    await pushRemoteAccounts();
     return user;
   }
 
-  function rejectPending(pendingId, adminUser) {
+  async function rejectPending(pendingId, adminUser) {
     if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può rifiutare.");
     savePending(getPending().filter((u) => u.id !== pendingId));
+    await pushRemoteAccounts();
   }
 
   async function loginStaff({ email, password }) {
+    await pullRemoteAccounts();
     const users = getUsers();
     const pending = getPending();
     const normalized = email.trim().toLowerCase();
@@ -225,6 +267,7 @@ const ScoutStore = (() => {
     }
     saveUsers(users.map((u) => (u.id === user.id ? user : u)));
     setSession(user);
+    await pushRemoteAccounts();
     return user;
   }
 
@@ -691,6 +734,8 @@ const ScoutStore = (() => {
     rejectPending,
     loginStaff,
     logout,
+    pullRemoteAccounts,
+    pushRemoteAccounts,
     getCurrentUser,
     getSession,
     getEvents,

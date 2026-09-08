@@ -123,6 +123,7 @@ window.StaffShell = (() => {
     }
     fillHero(user);
     mountMenu(user, { active });
+    ScoutStore.pullRemoteAccounts?.().catch(() => {});
     return user;
   }
 
