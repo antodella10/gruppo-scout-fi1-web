@@ -68,8 +68,9 @@ document.addEventListener("DOMContentLoaded", () => {
         bookFrame.removeAttribute("src");
         bookFrame.classList.remove("is-visible");
       } else {
-        const fullscreen = !!document.fullscreenElement;
-        bookFrame.src = pdfSrc(url, { toolbar: fullscreen, zoom: 110 });
+        // non ricaricare se è già lo stesso PDF (evita schermo bianco)
+        const next = pdfSrc(url, { toolbar: true, zoom: 100 });
+        if (bookFrame.getAttribute("src") !== next) bookFrame.src = next;
         bookFrame.hidden = false;
         bookFrame.classList.add("is-visible");
       }
@@ -78,16 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (downloadBtn) downloadBtn.hidden = false;
     if (openBtn) openBtn.hidden = false;
     setExitFsVisible(!!document.fullscreenElement);
-  }
-
-  function reloadPdfForMode() {
-    if (prefersNativePdf()) return;
-    if (!currentBookUrl || !bookFrame?.classList.contains("is-visible")) return;
-    const fullscreen = !!document.fullscreenElement;
-    bookFrame.src = "about:blank";
-    window.setTimeout(() => {
-      bookFrame.src = pdfSrc(currentBookUrl, { toolbar: fullscreen, zoom: 110 });
-    }, 30);
   }
 
   async function refreshBook() {
@@ -142,13 +133,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  function fsTarget() {
+    if (bookFrame?.classList.contains("is-visible")) return bookFrame;
+    return pdfStage;
+  }
+
   async function enterFullscreen() {
-    if (!pdfStage) return;
+    const el = fsTarget();
+    if (!el) return;
     try {
-      if (pdfStage.requestFullscreen) await pdfStage.requestFullscreen();
-      else if (pdfStage.webkitRequestFullscreen) pdfStage.webkitRequestFullscreen();
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (pdfStage?.requestFullscreen) await pdfStage.requestFullscreen();
     } catch {
-      alert("Impossibile entrare a schermo intero su questo browser.");
+      // fallback: apri PDF in nuova scheda
+      openCurrentBook();
     }
   }
 
@@ -188,8 +187,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("fullscreenchange", () => {
     const on = !!document.fullscreenElement;
-    setExitFsVisible(on);
-    reloadPdfForMode();
+    setExitFsVisible(on && document.fullscreenElement === pdfStage);
+    // se fullscreen è sull’iframe, il bottone esci non serve (Esc / UI browser)
+    if (pdfStage) pdfStage.classList.toggle("is-fs", document.fullscreenElement === pdfStage);
   });
 
   setExitFsVisible(false);

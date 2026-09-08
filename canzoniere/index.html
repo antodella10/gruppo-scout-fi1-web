@@ -39,7 +39,6 @@
       </div>
       <div class="inline-actions">
         <a class="btn btn-ghost btn-small" href="#canzoni">Canzoni</a>
-        <a class="btn btn-yellow btn-small" href="proponi.html">Proponi</a>
         <button type="button" class="btn btn-primary btn-small" id="pdf-open" hidden>Apri PDF</button>
         <button type="button" class="btn btn-primary btn-small" id="pdf-fullscreen">Schermo intero</button>
       </div>
@@ -53,18 +52,19 @@
         <p>Su telefono il canzoniere si apre meglio nell’app PDF del dispositivo.</p>
         <button type="button" class="btn btn-primary" id="pdf-open-mobile">Apri canzoniere</button>
       </div>
-      <iframe id="book-frame" class="pdf-frame" title="Canzoniere PDF" hidden></iframe>
+      <iframe id="book-frame" class="pdf-frame" title="Canzoniere PDF" allowfullscreen hidden></iframe>
       <button type="button" class="pdf-exit-fs btn btn-ghost btn-small" id="pdf-exit-fs" hidden>Esci schermo intero</button>
     </div>
   </main>
 
   <section class="section" id="canzoni">
     <div class="container">
-      <div class="section-head">
+      <div class="section-head section-head-songs">
         <div>
           <h2>Canzoni</h2>
           <p>Canzoni sfuse in ordine alfabetico.</p>
         </div>
+        <a class="btn btn-yellow" href="proponi.html">Proponi nuova canzone</a>
       </div>
       <div class="song-list" id="songs-list"></div>
     </div>
