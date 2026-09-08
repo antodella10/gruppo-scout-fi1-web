@@ -17,7 +17,7 @@
       </a>
       <div class="nav-links">
         <a href="index.html?branca=gruppo" data-group-home data-home-base="">Home</a>
-        <a href="index.html?branca=gruppo#chi-siamo" data-group-home data-home-base="" data-hash="#chi-siamo">Chi siamo</a>
+        <a href="chi-siamo.html">Chi siamo</a>
         <a href="index.html?branca=gruppo#calendario" data-group-home data-home-base="" data-hash="#calendario">Calendario</a>
         <a href="index.html?branca=gruppo#contatti" data-group-home data-home-base="" data-hash="#contatti">Contatti</a>
       </div>
@@ -64,75 +64,82 @@
         </div>
       </header>
 
-      <section class="section" id="sedi">
+      <section class="section" id="highlights" data-branca-panel="gruppo">
+        <div class="container">
+          <div class="dest-grid highlights-grid">
+            <a class="dest-card tile-notizie" href="#notizie">
+              <span>Aggiornamenti</span>
+              <h3>Notizie</h3>
+              <p>Novità e comunicazioni del gruppo.</p>
+            </a>
+            <a class="dest-card tile-iscrizioni" id="tile-iscrizioni" href="#" target="_blank" rel="noopener noreferrer">
+              <span>Unisciti a noi</span>
+              <h3>Iscrizioni</h3>
+              <p>Apri il form Google per iscriverti.</p>
+            </a>
+            <a class="dest-card tile-chisiamo" href="chi-siamo.html">
+              <span>Il gruppo</span>
+              <h3>Chi siamo</h3>
+              <p>La storia del Firenze 1 — apri la pagina.</p>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="sedi" data-branca-panel="gruppo">
         <div class="container">
           <div class="section-head">
             <div>
-              <h2 id="sedi-title">Dove ci trovi</h2>
-              <p id="sedi-lead">Sedi, campo estivo e San Giorgio.</p>
+              <h2 id="sedi-title">Sedi</h2>
+              <p id="sedi-lead">Girone e Quarate — dove ci troviamo.</p>
             </div>
           </div>
-
-          <div class="dest-grid" data-branca-panel="gruppo">
-            <a class="dest-card sede-a" href="#contatti">
+          <div class="dest-grid" id="sedi-grid">
+            <a class="dest-card sede-a" href="https://maps.app.goo.gl/UdYqCGBqoHMPbJ1v7" target="_blank" rel="noopener noreferrer">
               <span>Sede</span>
-              <h3>Sede principale</h3>
-              <p>Indirizzo da completare — sede del gruppo Firenze 1.</p>
+              <h3>Girone</h3>
+              <p>Apri in Google Maps per indicazioni.</p>
             </a>
-            <a class="dest-card sede-b" href="#contatti">
+            <a class="dest-card sede-b" href="https://maps.app.goo.gl/vZ8S7TNm4LQBSBT26" target="_blank" rel="noopener noreferrer">
               <span>Sede</span>
-              <h3>Seconda sede</h3>
-              <p>Se avete più locali, questa casella è pronta per i dettagli.</p>
-            </a>
-            <a class="dest-card campo" href="#calendario">
-              <span>Estate</span>
-              <h3>Campo estivo</h3>
-              <p>L’avventura dell’anno: natura, comunità e ricordi che restano.</p>
-            </a>
-            <a class="dest-card sangiorgio" href="#calendario">
-              <span>Festa del gruppo</span>
-              <h3>San Giorgio</h3>
-              <p>La festa della promessa e della comunità.</p>
+              <h3>Quarate</h3>
+              <p>Apri in Google Maps per indicazioni.</p>
             </a>
           </div>
+        </div>
+      </section>
 
-          <div class="dest-grid" data-branca-panel="lupetti" hidden>
-            <a class="dest-card sede-a" href="#calendario">
-              <span>Branca</span>
-              <h3>Ritrovi lupetti</h3>
-              <p>Orari e sede del branco — da completare.</p>
-            </a>
-            <a class="dest-card campo" href="#calendario">
-              <span>Anno scout</span>
-              <h3>Attività e uscite</h3>
-              <p>Giochi, natura e momenti di branco nel calendario lupetti.</p>
-            </a>
+      <section class="section" id="orari" data-branca-panel="gruppo">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <h2>Orario riunioni</h2>
+              <p>Giorno e orario delle riunioni di ogni branca.</p>
+            </div>
           </div>
+          <div class="panel" id="meeting-hours-list"></div>
+        </div>
+      </section>
 
-          <div class="dest-grid" data-branca-panel="noviziato" hidden>
-            <a class="dest-card sangiorgio" href="#calendario">
-              <span>Branca</span>
-              <h3>Cammino di noviziato</h3>
-              <p>Incontri, servizio e discernimento — da completare.</p>
-            </a>
-            <a class="dest-card sede-a" href="#calendario">
-              <span>Comunità</span>
-              <h3>Prossimi appuntamenti</h3>
-              <p>Vedi il calendario noviziato qui sotto.</p>
-            </a>
+      <section class="section" id="notizie" data-branca-panel="gruppo">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <h2>Notizie</h2>
+              <p>Comunicazioni del gruppo.</p>
+            </div>
           </div>
-
-          <div class="dest-grid" data-branca-panel="clan" hidden>
-            <a class="dest-card sede-b" href="#calendario">
-              <span>Branca</span>
-              <h3>Vita di clan</h3>
-              <p>Servizio, strada e comunità — dettagli da completare.</p>
-            </a>
-            <a class="dest-card sangiorgio" href="#calendario">
-              <span>Servizio</span>
-              <h3>Impegni e route</h3>
-              <p>Gli eventi clan nel calendario dedicato.</p>
-            </a>
+          <div class="news-list">
+            <article class="panel news-item">
+              <h3>Benvenuti sul nuovo sito</h3>
+              <p class="hint" style="margin:0 0 .5rem">Settembre 2026</p>
+              <p>Qui troverete sedi, orari, calendario e le novità del Firenze 1. Restate sintonizzati!</p>
+            </article>
+            <article class="panel news-item">
+              <h3>Anno scout in avvio</h3>
+              <p class="hint" style="margin:0 0 .5rem">Settembre 2026</p>
+              <p>Le branche ripartono con le riunioni settimanali. Controlla gli orari qui sopra e il calendario attività.</p>
+            </article>
           </div>
         </div>
       </section>
@@ -163,38 +170,38 @@
         </div>
       </section>
 
-      <section class="section" id="chi-siamo">
-        <div class="container">
-          <div class="section-head">
-            <div>
-              <h2>Chi siamo</h2>
-              <p>Una comunità FederScout a Firenze.</p>
-            </div>
-          </div>
-          <div class="panel about-copy">
-            <p>
-              Siamo il <strong>Gruppo Scout Firenze 1</strong> —
-              <strong>FederScout, Associazione Mariano Silvani</strong>.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="contatti">
+      <section class="section" id="contatti" data-branca-panel="gruppo">
         <div class="container">
           <div class="section-head">
             <div>
               <h2>Contatti</h2>
-              <p>Unisciti a noi.</p>
+              <p>Scrivici o seguici sui social.</p>
             </div>
           </div>
-          <div class="panel">
+          <div class="panel contact-panel">
             <ul class="contact-list">
-              <li><strong>Sede:</strong> <span>[indirizzo da inserire]</span></li>
-              <li><strong>Email:</strong> <span>scoutfirenze1ms@gmail.com</span></li>
-              <li><strong>Telefono:</strong> <span>+39 …</span></li>
+              <li><strong>Email:</strong> <a href="mailto:scoutfirenze1ms@gmail.com">scoutfirenze1ms@gmail.com</a></li>
+              <li><strong>Sedi:</strong> Girone e Quarate (vedi mappe sopra)</li>
             </ul>
+            <div id="contact-social" class="social-block" style="margin-top:1.1rem"></div>
           </div>
+        </div>
+      </section>
+
+      <!-- Pannelli semplificati per altre branche (non reparto) -->
+      <section class="section" data-branca-panel="lupetti" hidden>
+        <div class="container">
+          <div class="section-head"><div><h2>Lupetti</h2><p>Calendario e vita di branco.</p></div></div>
+        </div>
+      </section>
+      <section class="section" data-branca-panel="noviziato" hidden>
+        <div class="container">
+          <div class="section-head"><div><h2>Noviziato</h2><p>Cammino, servizio e discernimento.</p></div></div>
+        </div>
+      </section>
+      <section class="section" data-branca-panel="clan" hidden>
+        <div class="container">
+          <div class="section-head"><div><h2>Clan</h2><p>Servizio, strada e comunità.</p></div></div>
         </div>
       </section>
     </div>
@@ -259,8 +266,9 @@
   </div>
 
   <footer class="site-footer">
-    <div class="container">
+    <div class="container footer-inner">
       <div>© 2026 Firenze 1 · FederScout — Associazione Mariano Silvani</div>
+      <div id="footer-social" class="social-block"></div>
       <a href="staff/login.html">Area staff</a>
     </div>
   </footer>

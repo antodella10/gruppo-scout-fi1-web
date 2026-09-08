@@ -169,6 +169,67 @@ function updateNavAuth() {
   }
 }
 
+function renderSocialLinks(container, { compact = false } = {}) {
+  if (!container) return;
+  const social = window.SCOUT_CONFIG?.social || {};
+  const fb = (social.facebook || "").trim();
+  const ig = social.instagram || {};
+  const igEntries = [
+    ["gruppo", "Gruppo"],
+    ...Object.values(window.SCOUT_BRANCHES || {}).map((b) => [b.id, b.label]),
+  ]
+    .map(([id, label]) => ({ id, label, url: String(ig[id] || "").trim() }))
+    .filter((x) => x.url);
+
+  const parts = [];
+  if (fb) {
+    parts.push(
+      `<a class="social-link social-fb" href="${escapeHtml(fb)}" target="_blank" rel="noopener noreferrer">Facebook</a>`
+    );
+  }
+  if (igEntries.length) {
+    const igList = igEntries
+      .map(
+        (x) =>
+          `<a class="social-ig-item" href="${escapeHtml(x.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(x.label)}</a>`
+      )
+      .join("");
+    parts.push(
+      `<div class="social-ig ${compact ? "is-compact" : ""}"><span class="social-ig-label">Instagram</span><div class="social-ig-list">${igList}</div></div>`
+    );
+  }
+
+  if (!parts.length) {
+    container.innerHTML = `<p class="hint" style="margin:0">Social in arrivo — i link si configurano in <code>js/config.js</code>.</p>`;
+    return;
+  }
+  container.innerHTML = `<div class="social-row">${parts.join("")}</div>`;
+}
+
+function renderMeetingHoursList(container) {
+  if (!container || typeof ScoutStore === "undefined") return;
+  const hours = ScoutStore.getMeetingHours();
+  if (!hours.length) {
+    container.innerHTML = `<div class="empty-state">Orari non ancora impostati.</div>`;
+    return;
+  }
+  container.innerHTML = `
+    <ul class="meeting-hours-list">
+      ${hours
+        .map((h) => {
+          const label = ScoutStore.branchLabel(h.branca);
+          const when = [h.day, h.time].filter(Boolean).join(" · ") || "Da definire";
+          const place = h.place ? `<span class="mh-place">${escapeHtml(h.place)}</span>` : "";
+          return `<li>
+            <span class="mh-branca">${escapeHtml(label)}</span>
+            <span class="mh-when">${escapeHtml(when)}</span>
+            ${place}
+          </li>`;
+        })
+        .join("")}
+    </ul>`;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof BranchView !== "undefined") BranchView.wireHomeLinks();
   updateNavAuth();

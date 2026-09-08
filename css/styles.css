@@ -1040,6 +1040,228 @@ select:focus {
   color: #1a56db;
 }
 
+/* —— Home highlights / orari / social —— */
+.highlights-grid .dest-card {
+  grid-column: span 4;
+  min-height: 200px;
+}
+
+.dest-card.tile-notizie {
+  background-image:
+    linear-gradient(135deg, rgba(31, 122, 58, 0.72), rgba(20, 85, 40, 0.35)),
+    url("https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80");
+}
+
+.dest-card.tile-iscrizioni {
+  background-image:
+    linear-gradient(135deg, rgba(240, 194, 26, 0.65), rgba(31, 122, 58, 0.45)),
+    url("https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80");
+}
+
+.dest-card.tile-chisiamo {
+  background-image:
+    linear-gradient(135deg, rgba(29, 79, 145, 0.55), rgba(31, 122, 58, 0.4)),
+    url("https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80");
+}
+
+.meeting-hours-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.meeting-hours-list li {
+  display: grid;
+  grid-template-columns: 8rem 1fr auto;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f7faf7;
+}
+
+.mh-branca {
+  font-weight: 800;
+  color: var(--green-deep);
+  font-family: "Bricolage Grotesque", sans-serif;
+}
+
+.mh-when {
+  color: var(--ink);
+}
+
+.mh-place {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.news-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.news-item h3 {
+  margin: 0 0 0.25rem;
+  font-family: "Bricolage Grotesque", sans-serif;
+  color: var(--green-deep);
+}
+
+.social-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: flex-start;
+}
+
+.social-link {
+  font-weight: 700;
+  color: var(--green-deep);
+  text-decoration: none;
+  border-bottom: 2px solid var(--yellow);
+}
+
+.social-link:hover {
+  color: var(--green);
+}
+
+.social-ig {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.social-ig-label {
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.social-ig-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+}
+
+.social-ig-item {
+  color: var(--green-deep);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.social-ig-item:hover {
+  text-decoration: underline;
+}
+
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.meeting-edit-row {
+  display: grid;
+  grid-template-columns: 7rem 1fr 1fr 1fr;
+  gap: 0.65rem;
+  align-items: end;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.mh-edit-label {
+  padding-bottom: 0.55rem;
+  color: var(--green-deep);
+}
+
+/* —— Chi siamo page —— */
+.page-hero {
+  padding: 3rem 0 1.5rem;
+  background:
+    radial-gradient(900px 400px at 0% 0%, rgba(240, 194, 26, 0.2), transparent 60%),
+    linear-gradient(180deg, #f3f9f4, transparent);
+}
+
+.page-hero h1 {
+  margin: 0.2rem 0 0.4rem;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  color: var(--green-deep);
+  font-family: "Bricolage Grotesque", sans-serif;
+}
+
+.page-hero-lead {
+  margin: 0;
+  max-width: 40rem;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+.about-layout {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.about-figure {
+  margin: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--white);
+  box-shadow: 0 10px 30px rgba(20, 85, 40, 0.06);
+}
+
+.about-figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.about-figure figcaption {
+  padding: 0.65rem 0.9rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.about-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.about-gallery-item {
+  min-height: 200px;
+  border-radius: var(--radius);
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--line);
+}
+
+.about-gallery-item.g1 {
+  background-image:
+    linear-gradient(rgba(20, 85, 40, 0.15), rgba(20, 85, 40, 0.25)),
+    url("https://images.unsplash.com/photo-1504280390227-331bef20bbe4?auto=format&fit=crop&w=1000&q=80");
+}
+
+.about-gallery-item.g2 {
+  background-image:
+    linear-gradient(rgba(20, 85, 40, 0.15), rgba(20, 85, 40, 0.25)),
+    url("https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1000&q=80");
+}
+
+.about-gallery-item.g3 {
+  background-image:
+    linear-gradient(rgba(20, 85, 40, 0.15), rgba(20, 85, 40, 0.25)),
+    url("https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1000&q=80");
+}
+
 .reparto-actions .dest-card {
   grid-column: span 6;
   min-height: 240px;
@@ -1273,9 +1495,24 @@ select:focus {
   .dest-card.sede-a,
   .dest-card.sede-b,
   .dest-card.campo,
-  .dest-card.sangiorgio {
+  .dest-card.sangiorgio,
+  .highlights-grid .dest-card {
     grid-column: span 12;
     min-height: 200px;
+  }
+
+  .meeting-hours-list li {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .meeting-edit-row {
+    grid-template-columns: 1fr;
+  }
+
+  .about-layout,
+  .about-gallery {
+    grid-template-columns: 1fr;
   }
 
   .calendar-layout,

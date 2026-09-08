@@ -19,11 +19,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const branchTriggerLabel = document.getElementById("branch-trigger-label");
   const branchPanel = document.getElementById("branch-menu-panel");
   const calLead = document.getElementById("cal-lead");
-  const sediLead = document.getElementById("sedi-lead");
-  const sediTitle = document.getElementById("sedi-title");
   const layoutDefault = document.getElementById("layout-default");
   const layoutReparto = document.getElementById("layout-reparto");
   const nextEventEl = document.getElementById("reparto-next-event");
+  const iscrizioniTile = document.getElementById("tile-iscrizioni");
 
   let selectedBranca = null;
   let viewDate = new Date();
@@ -40,37 +39,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const BRANCH_COPY = {
     null: {
-      sediTitle: "Dove ci trovi",
-      sediLead: "Sedi, campo estivo e San Giorgio.",
       calLead: "Appuntamenti di gruppo.",
       heroLine:
         "Avventura, servizio e crescita tra le colline fiorentine. Un gruppo FederScout, tante strade — un unico sentiero insieme.",
     },
     lupetti: {
-      sediTitle: "Lupetti",
-      sediLead: "Gioco, natura e vita di branco.",
       calLead: "Calendario lupetti e gruppo.",
       heroLine: "Branco in cammino: gioco, amicizia e grandi scoperte.",
     },
     reparto: {
-      sediTitle: "Reparto",
-      sediLead: "",
       calLead: "Eventi reparto e di gruppo.",
       heroLine: "",
     },
     noviziato: {
-      sediTitle: "Noviziato",
-      sediLead: "Discernimento, servizio e crescita.",
       calLead: "Calendario noviziato e gruppo.",
       heroLine: "Noviziato: un anno per scegliere e servire.",
     },
     clan: {
-      sediTitle: "Clan",
-      sediLead: "Servizio, strada e comunità.",
       calLead: "Calendario clan e gruppo.",
       heroLine: "Clan in servizio: responsabilità e comunità adulta.",
     },
   };
+
+  if (iscrizioniTile) {
+    const formUrl = (window.SCOUT_CONFIG?.iscrizioniFormUrl || "").trim();
+    if (formUrl && !formUrl.includes("PLACEHOLDER")) {
+      iscrizioniTile.href = formUrl;
+    } else {
+      iscrizioniTile.href = "#contatti";
+      iscrizioniTile.removeAttribute("target");
+      iscrizioniTile.querySelector("p") &&
+        (iscrizioniTile.querySelector("p").textContent =
+          "Form iscrizioni in arrivo — intanto scrivici dai contatti.");
+    }
+  }
+
+  function paintGroupExtras() {
+    renderMeetingHoursList(document.getElementById("meeting-hours-list"));
+    renderSocialLinks(document.getElementById("contact-social"));
+    renderSocialLinks(document.getElementById("footer-social"), { compact: true });
+  }
 
   function mergeEvents() {
     const local = ScoutStore.getVisibleEvents(selectedBranca, user);
@@ -196,8 +204,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (layoutReparto) layoutReparto.hidden = !isReparto;
 
         if (!isReparto) {
-          if (sediTitle) sediTitle.textContent = copy.sediTitle;
-          if (sediLead) sediLead.textContent = copy.sediLead;
           if (calLead) calLead.textContent = copy.calLead;
           const heroP = document.getElementById("hero-lead");
           if (heroP) heroP.textContent = copy.heroLine;
@@ -210,11 +216,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         refreshCalendar();
+        paintGroupExtras();
         viewRoot.classList.remove("is-switching");
         scrollToHashSoon();
       }, 180);
     } else {
       refreshCalendar();
+      paintGroupExtras();
       scrollToHashSoon();
     }
 

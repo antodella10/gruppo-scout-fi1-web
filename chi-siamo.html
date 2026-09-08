@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi siamo · Firenze 1</title>
+  <meta name="description" content="Storia del Gruppo Scout Firenze 1 — FederScout, Associazione Mariano Silvani.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="index.html" data-home-link data-home-base="">
+        <img src="photos/logo.jpeg" alt="Logo Gruppo Scout Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html?branca=gruppo" data-group-home data-home-base="">Home</a>
+        <a href="chi-siamo.html" aria-current="page">Chi siamo</a>
+        <a href="index.html?branca=gruppo#calendario" data-group-home data-home-base="" data-hash="#calendario">Calendario</a>
+        <a href="index.html?branca=gruppo#contatti" data-group-home data-home-base="" data-hash="#contatti">Contatti</a>
+      </div>
+      <div class="nav-actions" data-auth-slot data-base=""></div>
+    </div>
+  </nav>
+
+  <header class="page-hero">
+    <div class="container page-hero-inner">
+      <p class="hero-kicker" style="color:var(--green)">FederScout · Associazione Mariano Silvani</p>
+      <h1>Chi siamo</h1>
+      <p class="page-hero-lead">La storia e lo spirito del Gruppo Scout Firenze 1.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="container about-layout">
+        <div class="panel about-copy">
+          <h2>Il gruppo</h2>
+          <p>
+            Siamo il <strong>Gruppo Scout Firenze 1</strong>, parte di
+            <strong>FederScout — Associazione Mariano Silvani</strong>.
+            Camminiamo insieme tra gioco, avventura, servizio e comunità,
+            dalle prime scoperte dei lupetti fino alla strada del clan.
+          </p>
+          <p>
+            Questa pagina ospiterà la storia completa del gruppo: le origini,
+            i luoghi che ci hanno accolto, i campi e le persone che hanno
+            lasciato il segno. Per ora trovi un layout di anteprima —
+            i testi e le foto si potranno arricchire passo dopo passo.
+          </p>
+        </div>
+        <figure class="about-figure">
+          <img src="photos/logo.jpeg" alt="Logo Firenze 1">
+          <figcaption>Emblema del gruppo</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Momenti di gruppo</h2>
+            <p>Galleria provvisoria — sostituiremo queste immagini con le vostre foto.</p>
+          </div>
+        </div>
+        <div class="about-gallery">
+          <div class="about-gallery-item g1" role="img" aria-label="Foto attività all'aperto"></div>
+          <div class="about-gallery-item g2" role="img" aria-label="Foto vita di comunità"></div>
+          <div class="about-gallery-item g3" role="img" aria-label="Foto natura e campo"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="panel about-copy">
+          <h2>Le branche</h2>
+          <p>
+            <strong>Lupetti</strong>, <strong>Reparto</strong>, <strong>Noviziato</strong> e <strong>Clan</strong>:
+            quattro tappe di un unico cammino. Ogni branca ha il suo stile,
+            ma condividiamo sedi, valori e la stessa comunità di capi e famiglie.
+          </p>
+          <div class="inline-actions" style="margin-top:1rem">
+            <a class="btn btn-primary" href="index.html?branca=gruppo#orari">Orario riunioni</a>
+            <a class="btn btn-ghost" href="index.html?branca=gruppo#contatti">Contatti</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>© 2026 Firenze 1 · FederScout — Associazione Mariano Silvani</div>
+      <div id="footer-social" class="social-block"></div>
+      <a href="staff/login.html">Area staff</a>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/canzoniere-store.js"></script>
+  <script src="js/branch-view.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      renderSocialLinks(document.getElementById("footer-social"), { compact: true });
+    });
+  </script>
+</body>
+</html>

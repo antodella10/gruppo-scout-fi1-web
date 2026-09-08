@@ -399,6 +399,7 @@ const ScoutStore = (() => {
     return {
       googleCalendars: calendars,
       googleCalendarEmbed: raw.googleCalendarEmbed || "",
+      meetingHours: Array.isArray(raw.meetingHours) ? raw.meetingHours : [],
     };
   }
 
@@ -456,6 +457,93 @@ const ScoutStore = (() => {
     return list.filter((c) => c.branca === "gruppo" || c.branca === selectedBranca);
   }
 
+  function defaultMeetingHours() {
+    const defaults = window.SCOUT_DEFAULT_MEETING_HOURS || [];
+    return defaults.map((h) => ({
+      branca: h.branca,
+      day: h.day || "",
+      time: h.time || "",
+      place: h.place || "",
+    }));
+  }
+
+  function getMeetingHours() {
+    const settings = getSettings();
+    const saved = Array.isArray(settings.meetingHours) ? settings.meetingHours : [];
+    const byBranca = Object.fromEntries(saved.filter((h) => h && h.branca).map((h) => [h.branca, h]));
+    const order = Object.keys(window.SCOUT_BRANCHES || {});
+    const defaults = defaultMeetingHours();
+    const defBy = Object.fromEntries(defaults.map((h) => [h.branca, h]));
+    return order.map((id) => {
+      const cur = byBranca[id] || defBy[id] || { branca: id, day: "", time: "", place: "" };
+      return {
+        branca: id,
+        day: cur.day || "",
+        time: cur.time || "",
+        place: cur.place || "",
+      };
+    });
+  }
+
+  function saveMeetingHours(list, user) {
+    if (!user) throw new Error("Devi essere autenticato.");
+    const admin = isAdminUser(user);
+    const current = getMeetingHours();
+    const incoming = Array.isArray(list) ? list : [];
+    const next = current.map((row) => {
+      const patch = incoming.find((h) => h.branca === row.branca);
+      if (!patch) return row;
+      if (!admin && user.branca !== row.branca) return row;
+      return {
+        branca: row.branca,
+        day: String(patch.day || "").trim(),
+        time: String(patch.time || "").trim(),
+        place: String(patch.place || "").trim(),
+      };
+    });
+    // staff non admin: può aggiornare solo la propria riga
+    if (!admin) {
+      if (!user.branca) throw new Error("Branca non impostata.");
+      const only = incoming.find((h) => h.branca === user.branca);
+      if (!only) throw new Error("Nessun orario da salvare.");
+      const merged = current.map((row) =>
+        row.branca === user.branca
+          ? {
+              branca: row.branca,
+              day: String(only.day || "").trim(),
+              time: String(only.time || "").trim(),
+              place: String(only.place || "").trim(),
+            }
+          : row
+      );
+      write(KEYS.settings, { ...getSettings(), meetingHours: merged });
+      return merged;
+    }
+    write(KEYS.settings, { ...getSettings(), meetingHours: next });
+    return next;
+  }
+
+  function updateMeetingHour(branca, patch, user) {
+    if (!user) throw new Error("Devi essere autenticato.");
+    const admin = isAdminUser(user);
+    if (!admin && user.branca !== branca) {
+      throw new Error("Puoi modificare solo l’orario della tua branca.");
+    }
+    if (!window.SCOUT_BRANCHES?.[branca]) throw new Error("Branca non valida.");
+    const list = getMeetingHours().map((row) =>
+      row.branca === branca
+        ? {
+            branca,
+            day: String(patch.day ?? row.day ?? "").trim(),
+            time: String(patch.time ?? row.time ?? "").trim(),
+            place: String(patch.place ?? row.place ?? "").trim(),
+          }
+        : row
+    );
+    write(KEYS.settings, { ...getSettings(), meetingHours: list });
+    return list;
+  }
+
   return {
     ADMIN_EMAIL,
     isAdminEmail,
@@ -483,5 +571,8 @@ const ScoutStore = (() => {
     addGoogleCalendar,
     removeGoogleCalendar,
     getGoogleCalendarsForView,
+    getMeetingHours,
+    saveMeetingHours,
+    updateMeetingHour,
   };
 })();
