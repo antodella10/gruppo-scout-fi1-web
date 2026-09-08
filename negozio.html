@@ -31,7 +31,7 @@
       <h1>Magazzino di Kala Nag</h1>
       <p class="page-hero-lead">
         Articoli disponibili da ordinare e ritirare in sede (Girone o Quarate).
-        Non è possibile pagare online: lo staff ti conferma disponibilità e ritiro.
+        Non è possibile pagare online: invii una richiesta e lo staff ti conferma il ritiro.
       </p>
     </div>
   </header>
@@ -51,6 +51,39 @@
       <div id="shop-list" class="shop-list" aria-live="polite"></div>
     </div>
   </main>
+
+  <dialog id="shop-order-dialog" class="shop-dialog">
+    <form method="dialog" id="shop-order-form" class="form-grid">
+      <h2>Ordina per ritiro in sede</h2>
+      <p class="hint" id="shop-order-item-label"></p>
+      <input type="hidden" name="itemId" value="">
+      <label>
+        Nome e cognome
+        <input type="text" name="fromName" required autocomplete="name" placeholder="Mario Rossi">
+      </label>
+      <label>
+        Telefono (opzionale)
+        <input type="tel" name="phone" autocomplete="tel" placeholder="333…">
+      </label>
+      <label>
+        Sede di ritiro
+        <select name="sede" required>
+          <option value="">Scegli…</option>
+          <option value="Girone">Girone</option>
+          <option value="Quarate">Quarate</option>
+        </select>
+      </label>
+      <label>
+        Note (opzionale)
+        <textarea name="notes" rows="2" placeholder="Taglia, quantità…"></textarea>
+      </label>
+      <div id="shop-order-alert" class="alert alert-ok" hidden></div>
+      <div class="inline-actions">
+        <button class="btn btn-primary" type="submit" value="confirm">Invia richiesta</button>
+        <button class="btn btn-ghost" type="submit" value="cancel">Annulla</button>
+      </div>
+    </form>
+  </dialog>
 
   <footer class="site-footer">
     <div class="container footer-inner">

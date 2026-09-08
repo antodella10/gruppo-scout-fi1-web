@@ -2,6 +2,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const listEl = document.getElementById("shop-list");
   const sortEl = document.getElementById("shop-sort");
   const countEl = document.getElementById("shop-count");
+  const dialog = document.getElementById("shop-order-dialog");
+  const orderForm = document.getElementById("shop-order-form");
+  const orderLabel = document.getElementById("shop-order-item-label");
+  const orderAlert = document.getElementById("shop-order-alert");
   const urlCache = new Map();
 
   async function imageSrc(imageId) {
@@ -10,6 +14,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const url = await ShopStore.getImageUrl(imageId);
     if (url) urlCache.set(imageId, url);
     return url || "";
+  }
+
+  function openOrder(itemId) {
+    const item = ShopStore.getItem(itemId);
+    if (!item || !item.available) return;
+    if (!dialog || !orderForm) return;
+    orderForm.reset();
+    orderForm.itemId.value = item.id;
+    if (orderLabel) {
+      orderLabel.textContent = `${item.name} · ${ShopStore.formatPrice(item.price)} · ritiro in sede`;
+    }
+    if (orderAlert) {
+      orderAlert.hidden = true;
+      orderAlert.textContent = "";
+    }
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else dialog.setAttribute("open", "");
   }
 
   async function render() {
@@ -46,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="inline-actions">
             ${
               item.available
-                ? `<a class="btn btn-primary btn-small" href="${ShopStore.orderMailto(item)}">Ordina · ritiro in sede</a>`
+                ? `<button type="button" class="btn btn-primary btn-small" data-order="${escapeHtml(item.id)}">Ordina · ritiro in sede</button>`
                 : `<span class="hint">Al momento non ordinabile</span>`
             }
           </div>
@@ -65,6 +86,43 @@ document.addEventListener("DOMContentLoaded", () => {
       })
     );
   }
+
+  listEl?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-order]");
+    if (!btn) return;
+    openOrder(btn.dataset.order);
+  });
+
+  orderForm?.addEventListener("submit", (e) => {
+    const submitter = e.submitter;
+    if (submitter?.value === "cancel") return;
+    e.preventDefault();
+    const data = new FormData(orderForm);
+    try {
+      ShopStore.placeOrder({
+        itemId: data.get("itemId"),
+        fromName: data.get("fromName"),
+        phone: data.get("phone"),
+        sede: data.get("sede"),
+        notes: data.get("notes"),
+      });
+      if (orderAlert) {
+        orderAlert.hidden = false;
+        orderAlert.className = "alert alert-ok";
+        orderAlert.textContent = "Richiesta inviata! L’admin la vedrà nell’area negozio.";
+      }
+      window.setTimeout(() => {
+        if (typeof dialog?.close === "function") dialog.close();
+        else dialog?.removeAttribute("open");
+      }, 900);
+    } catch (err) {
+      if (orderAlert) {
+        orderAlert.hidden = false;
+        orderAlert.className = "alert alert-error";
+        orderAlert.textContent = err.message || "Invio non riuscito.";
+      }
+    }
+  });
 
   sortEl?.addEventListener("change", () => {
     render().catch((err) => alert(err.message));

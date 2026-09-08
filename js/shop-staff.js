@@ -4,22 +4,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const form = document.getElementById("shop-form");
   const listEl = document.getElementById("shop-admin-list");
+  const ordersEl = document.getElementById("shop-orders");
   const sortEl = document.getElementById("shop-admin-sort");
   const alertBox = document.getElementById("shop-alert");
   const formTitle = document.getElementById("shop-form-title");
   const resetBtn = document.getElementById("shop-reset");
   const editHint = document.getElementById("shop-edit-hint");
-  const typesList = document.getElementById("shop-types");
+  const typeSelect = document.getElementById("shop-type-select");
   const urlCache = new Map();
 
   function flash(msg, ok = true) {
     flashAlert(alertBox, msg, ok);
   }
 
-  function fillTypes() {
-    if (!typesList) return;
-    typesList.innerHTML = ShopStore.listTypes()
-      .map((t) => `<option value="${escapeHtml(t)}"></option>`)
+  function fillTypes(selected = "Divisa") {
+    if (!typeSelect) return;
+    typeSelect.innerHTML = ShopStore.listTypes()
+      .map(
+        (t) =>
+          `<option value="${escapeHtml(t)}" ${t === selected ? "selected" : ""}>${escapeHtml(t)}</option>`
+      )
       .join("");
   }
 
@@ -27,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     form?.reset();
     if (form) form.id.value = "";
     if (form) form.available.checked = true;
+    fillTypes("Divisa");
     if (formTitle) formTitle.textContent = "Nuovo oggetto";
     if (resetBtn) resetBtn.hidden = true;
     if (editHint) editHint.hidden = true;
@@ -40,8 +45,38 @@ document.addEventListener("DOMContentLoaded", () => {
     return url || "";
   }
 
+  function refreshOrders() {
+    if (!ordersEl) return;
+    const pending = ShopStore.getOrders({ status: "pending" });
+    if (!pending.length) {
+      ordersEl.innerHTML = `<div class="empty-state">Nessuna richiesta in attesa.</div>`;
+      return;
+    }
+    ordersEl.innerHTML = pending
+      .map(
+        (o) => `
+      <div class="event-admin-item">
+        <div>
+          <strong>${escapeHtml(o.itemName)}</strong>
+          <span class="shop-item-type"> · ${escapeHtml(o.itemType || "")}</span><br>
+          <span style="color:var(--muted)">
+            ${escapeHtml(ShopStore.formatPrice(o.itemPrice))} · da ${escapeHtml(o.fromName)}
+            ${o.phone ? ` · ${escapeHtml(o.phone)}` : ""}
+            ${o.sede ? ` · ritiro ${escapeHtml(o.sede)}` : ""}
+            · ${new Date(o.createdAt).toLocaleString("it-IT")}
+            ${o.notes ? `<br>${escapeHtml(o.notes)}` : ""}
+          </span>
+        </div>
+        <div class="inline-actions">
+          <button type="button" class="btn btn-primary btn-small" data-ord-done="${escapeHtml(o.id)}">Segna fatta</button>
+          <button type="button" class="btn btn-ghost btn-small" data-ord-reject="${escapeHtml(o.id)}">Rifiuta</button>
+        </div>
+      </div>`
+      )
+      .join("");
+  }
+
   async function refreshList() {
-    fillTypes();
     if (!listEl) return;
     const items = ShopStore.getItems({ sort: sortEl?.value || "name" });
     if (!items.length) {
@@ -116,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
         form.id.value = item.id;
         form.name.value = item.name;
         form.price.value = item.price;
-        form.type.value = item.type;
+        fillTypes(item.type);
         form.available.checked = !!item.available;
         form.stockLabel.value = item.stockLabel || "";
         form.notes.value = item.notes || "";
@@ -138,5 +173,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  ordersEl?.addEventListener("click", (e) => {
+    const done = e.target.closest("[data-ord-done]");
+    const reject = e.target.closest("[data-ord-reject]");
+    try {
+      if (done) {
+        ShopStore.setOrderStatus(done.dataset.ordDone, "done", user);
+        flash("Richiesta segnata come fatta.");
+        refreshOrders();
+      }
+      if (reject) {
+        ShopStore.setOrderStatus(reject.dataset.ordReject, "rejected", user);
+        flash("Richiesta rifiutata.");
+        refreshOrders();
+      }
+    } catch (err) {
+      flash(err.message || "Operazione non riuscita.", false);
+    }
+  });
+
+  fillTypes("Divisa");
+  refreshOrders();
   refreshList();
 });

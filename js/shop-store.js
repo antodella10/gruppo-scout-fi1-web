@@ -4,7 +4,17 @@ const ShopStore = (() => {
   const META_KEY = "firenze1_shop_meta_v1";
   const DB_NAME = "firenze1_shop_db";
   const STORE = "images";
-  const TYPES = ["Abbigliamento", "Accessori", "Materiale", "Libri", "Altro"];
+  const TYPES = ["Divisa", "Distintivi", "Attrezzatura", "Altro"];
+  const TYPE_ALIASES = {
+    abbigliamento: "Divisa",
+    accessori: "Distintivi",
+    materiale: "Attrezzatura",
+    libri: "Altro",
+    divisa: "Divisa",
+    distintivi: "Distintivi",
+    attrezzatura: "Attrezzatura",
+    altro: "Altro",
+  };
 
   function readMeta() {
     try {
@@ -91,6 +101,15 @@ const ShopStore = (() => {
     return blob;
   }
 
+  function normalizeType(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "Altro";
+    const mapped = TYPE_ALIASES[raw.toLowerCase()];
+    if (mapped) return mapped;
+    const exact = TYPES.find((t) => t.toLowerCase() === raw.toLowerCase());
+    return exact || "Altro";
+  }
+
   function normalizeItem(raw) {
     return {
       id: raw.id,
@@ -98,7 +117,7 @@ const ShopStore = (() => {
       price: Number(raw.price) || 0,
       available: raw.available !== false && raw.available !== 0 && raw.available !== "0",
       stockLabel: String(raw.stockLabel || "").trim(),
-      type: String(raw.type || "Altro").trim() || "Altro",
+      type: normalizeType(raw.type),
       imageId: raw.imageId || null,
       notes: String(raw.notes || "").trim(),
       updatedAt: raw.updatedAt || new Date().toISOString(),
@@ -106,10 +125,7 @@ const ShopStore = (() => {
   }
 
   function listTypes() {
-    const fromItems = getItems().map((i) => i.type).filter(Boolean);
-    return [...new Set([...TYPES, ...fromItems])].sort((a, b) =>
-      a.localeCompare(b, "it", { sensitivity: "base" })
-    );
+    return [...TYPES];
   }
 
   function getItems({ sort = "name" } = {}) {
@@ -159,7 +175,7 @@ const ShopStore = (() => {
     item.price = price;
     item.available = payload.available !== false && payload.available !== "0" && payload.available !== 0;
     item.stockLabel = String(payload.stockLabel || "").trim();
-    item.type = String(payload.type || "Altro").trim() || "Altro";
+    item.type = normalizeType(payload.type);
     item.notes = String(payload.notes || "").trim();
     item.updatedAt = new Date().toISOString();
 
@@ -186,6 +202,59 @@ const ShopStore = (() => {
     if (item.imageId) await deleteImage(item.imageId).catch(() => {});
   }
 
+  function getOrders({ status } = {}) {
+    const orders = [...(readMeta().orders || [])].sort((a, b) =>
+      (b.createdAt || "").localeCompare(a.createdAt || "")
+    );
+    if (status) return orders.filter((o) => o.status === status);
+    return orders;
+  }
+
+  function pendingOrdersCount() {
+    return getOrders({ status: "pending" }).length;
+  }
+
+  function placeOrder({ itemId, fromName, phone, sede, notes }) {
+    const item = getItem(itemId);
+    if (!item) throw new Error("Oggetto non trovato.");
+    if (!item.available) throw new Error("Questo oggetto non è disponibile.");
+    const name = String(fromName || "").trim();
+    if (!name) throw new Error("Inserisci nome e cognome.");
+    const meta = readMeta();
+    meta.orders = meta.orders || [];
+    const order = {
+      id: uid("ord"),
+      itemId: item.id,
+      itemName: item.name,
+      itemType: item.type,
+      itemPrice: item.price,
+      fromName: name,
+      phone: String(phone || "").trim(),
+      sede: String(sede || "").trim(),
+      notes: String(notes || "").trim(),
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    };
+    meta.orders.unshift(order);
+    writeMeta(meta);
+    return order;
+  }
+
+  function setOrderStatus(orderId, status, user) {
+    if (!canManage(user)) throw new Error("Solo l’admin può gestire le richieste.");
+    if (!["pending", "done", "rejected"].includes(status)) {
+      throw new Error("Stato non valido.");
+    }
+    const meta = readMeta();
+    const order = (meta.orders || []).find((o) => o.id === orderId);
+    if (!order) throw new Error("Richiesta non trovata.");
+    order.status = status;
+    order.resolvedAt = new Date().toISOString();
+    order.resolvedBy = user.id;
+    writeMeta(meta);
+    return order;
+  }
+
   function formatPrice(price) {
     try {
       return new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(Number(price) || 0);
@@ -200,15 +269,6 @@ const ShopStore = (() => {
     return "Disponibile";
   }
 
-  function orderMailto(item) {
-    const email = window.SCOUT_CONFIG?.adminEmail || "scoutfirenze1ms@gmail.com";
-    const subject = encodeURIComponent(`Ordine negozio: ${item.name}`);
-    const body = encodeURIComponent(
-      `Ciao,\nvorrei ordinare per ritiro in sede:\n\n• ${item.name}\n• Prezzo: ${formatPrice(item.price)}\n• Tipologia: ${item.type}\n\nNome e cognome:\nTelefono:\nSede preferita (Girone / Quarate):\n\nGrazie!`
-    );
-    return `mailto:${email}?subject=${subject}&body=${body}`;
-  }
-
   return {
     TYPES,
     listTypes,
@@ -218,8 +278,11 @@ const ShopStore = (() => {
     getImageUrl,
     upsertItem,
     deleteItem,
+    getOrders,
+    pendingOrdersCount,
+    placeOrder,
+    setOrderStatus,
     formatPrice,
     availabilityLabel,
-    orderMailto,
   };
 })();

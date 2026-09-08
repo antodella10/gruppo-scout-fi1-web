@@ -23,7 +23,7 @@
       <div class="staff-hero">
         <div>
           <h1>Magazzino di Kala Nag</h1>
-          <p id="staff-meta" data-static="1">Aggiungi, modifica o togli oggetti del negozio. Gli ordini arrivano via email.</p>
+          <p id="staff-meta" data-static="1">Gestisci il catalogo e le richieste di ordine per ritiro in sede.</p>
         </div>
         <div class="inline-actions">
           <a class="btn btn-ghost" href="../negozio.html" target="_blank" rel="noopener">Vedi pagina pubblica</a>
@@ -49,8 +49,7 @@
               </label>
               <label>
                 Tipologia
-                <input type="text" name="type" list="shop-types" required placeholder="Abbigliamento">
-                <datalist id="shop-types"></datalist>
+                <select name="type" id="shop-type-select" required></select>
               </label>
             </div>
             <div class="form-row-2">
@@ -79,11 +78,17 @@
           </form>
         </section>
 
+        <section class="panel">
+          <h2>Richieste</h2>
+          <p class="hint">Ordini da ritirare in sede. Segna come fatta quando hai consegnato.</p>
+          <div id="shop-orders"></div>
+        </section>
+
         <section class="panel wide">
           <div class="section-head" style="margin-bottom:0.75rem">
             <div>
               <h2>Oggetti in catalogo</h2>
-              <p class="hint" style="margin:0">Elenco modificabile. Ordinamento come in pagina pubblica.</p>
+              <p class="hint" style="margin:0">Categorie: Divisa, Distintivi, Attrezzatura, Altro.</p>
             </div>
             <label class="shop-sort">
               Ordina
