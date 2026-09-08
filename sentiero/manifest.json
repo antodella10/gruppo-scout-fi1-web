@@ -1,0 +1,389 @@
+{
+  "libretto": null,
+  "specialita": [
+    {
+      "id": "spec_agricoltore",
+      "name": "Agricoltore",
+      "pdf": "specialita/agricoltore.pdf",
+      "image": "badges/agricoltore.png"
+    },
+    {
+      "id": "spec_allevatore",
+      "name": "Allevatore",
+      "pdf": "specialita/allevatore.pdf",
+      "image": "badges/allevatore.png"
+    },
+    {
+      "id": "spec_ambulanziere",
+      "name": "Ambulanziere",
+      "pdf": "specialita/ambulanziere.pdf",
+      "image": "badges/ambulanziere.png"
+    },
+    {
+      "id": "spec_amico-degli-animali",
+      "name": "Amico Degli Animali",
+      "pdf": "specialita/amico-degli-animali.pdf",
+      "image": "badges/amico-degli-animali.png"
+    },
+    {
+      "id": "spec_animatore",
+      "name": "Animatore",
+      "pdf": "specialita/animatore.pdf",
+      "image": "badges/animatore.png"
+    },
+    {
+      "id": "spec_artigiano",
+      "name": "Artigiano",
+      "pdf": "specialita/artigiano.pdf",
+      "image": "badges/artigiano.png"
+    },
+    {
+      "id": "spec_artista",
+      "name": "Artista",
+      "pdf": "specialita/artista.pdf",
+      "image": "badges/artista.png"
+    },
+    {
+      "id": "spec_astronomo",
+      "name": "Astronomo",
+      "pdf": "specialita/astronomo.pdf",
+      "image": "badges/astronomo.png"
+    },
+    {
+      "id": "spec_atleta",
+      "name": "Atleta",
+      "pdf": "specialita/atleta.pdf",
+      "image": "badges/atleta.png"
+    },
+    {
+      "id": "spec_attore",
+      "name": "Attore",
+      "pdf": "specialita/attore.pdf",
+      "image": "badges/attore.png"
+    },
+    {
+      "id": "spec_avventura-alpinista",
+      "name": "Avventura - Alpinista",
+      "pdf": "specialita/avventura-alpinista.pdf",
+      "image": "badges/avventura-alpinista.png"
+    },
+    {
+      "id": "spec_baby-sitter",
+      "name": "Baby Sitter",
+      "pdf": "specialita/baby-sitter.pdf",
+      "image": "badges/baby-sitter.png"
+    },
+    {
+      "id": "spec_battelliere-nocchiere-carpentiere",
+      "name": "Battelliere Nocchiere Carpentiere",
+      "pdf": "specialita/battelliere-nocchiere-carpentiere.pdf",
+      "image": "badges/battelliere-nocchiere-carpentiere.png"
+    },
+    {
+      "id": "spec_boscaiolo",
+      "name": "Boscaiolo",
+      "pdf": "specialita/boscaiolo.pdf",
+      "image": "badges/boscaiolo.png"
+    },
+    {
+      "id": "spec_botanico",
+      "name": "Botanico",
+      "pdf": "specialita/botanico.pdf",
+      "image": "badges/botanico.png"
+    },
+    {
+      "id": "spec_campista",
+      "name": "Campista",
+      "pdf": "specialita/campista.pdf",
+      "image": "badges/campista.png"
+    },
+    {
+      "id": "spec_cantante",
+      "name": "Cantante",
+      "pdf": "specialita/cantante.pdf",
+      "image": "badges/cantante.png"
+    },
+    {
+      "id": "spec_cavallerizzo",
+      "name": "Cavallerizzo",
+      "pdf": "specialita/cavallerizzo.pdf",
+      "image": "badges/cavallerizzo.png"
+    },
+    {
+      "id": "spec_ciclista",
+      "name": "Ciclista",
+      "pdf": "specialita/ciclista.pdf",
+      "image": "badges/ciclista.png"
+    },
+    {
+      "id": "spec_cineamatore",
+      "name": "Cineamatore",
+      "pdf": "specialita/cineamatore.pdf",
+      "image": "badges/cineamatore.png"
+    },
+    {
+      "id": "spec_collezionista",
+      "name": "Collezionista",
+      "pdf": "specialita/collezionista.pdf",
+      "image": "badges/collezionista.png"
+    },
+    {
+      "id": "spec_cuciniere",
+      "name": "Cuciniere",
+      "pdf": "specialita/cuciniere.pdf",
+      "image": "badges/cuciniere.png"
+    },
+    {
+      "id": "spec_difesa-personale",
+      "name": "Difesa Personale",
+      "pdf": "specialita/difesa-personale.pdf",
+      "image": "badges/difesa-personale.png"
+    },
+    {
+      "id": "spec_disegnatore",
+      "name": "Disegnatore",
+      "pdf": "specialita/disegnatore.pdf",
+      "image": "badges/disegnatore.png"
+    },
+    {
+      "id": "spec_elettronico",
+      "name": "Elettronico",
+      "pdf": "specialita/elettronico.pdf",
+      "image": "badges/elettronico.png"
+    },
+    {
+      "id": "spec_fotografo",
+      "name": "Fotografo",
+      "pdf": "specialita/fotografo.pdf",
+      "image": "badges/fotografo.png"
+    },
+    {
+      "id": "spec_fuochista",
+      "name": "Fuochista",
+      "pdf": "specialita/fuochista.pdf",
+      "image": "badges/fuochista.png"
+    },
+    {
+      "id": "spec_geologo",
+      "name": "Geologo",
+      "pdf": "specialita/geologo.pdf",
+      "image": "badges/geologo.png"
+    },
+    {
+      "id": "spec_giardiniere",
+      "name": "Giardiniere",
+      "pdf": "specialita/giardiniere.pdf",
+      "image": "badges/giardiniere.png"
+    },
+    {
+      "id": "spec_giocatore-di-squadra",
+      "name": "Giocatore Di Squadra",
+      "pdf": "specialita/giocatore-di-squadra.pdf",
+      "image": "badges/giocatore-di-squadra.png"
+    },
+    {
+      "id": "spec_giornalista",
+      "name": "Giornalista",
+      "pdf": "specialita/giornalista.pdf",
+      "image": "badges/giornalista.png"
+    },
+    {
+      "id": "spec_guida-alpina",
+      "name": "Guida Alpina",
+      "pdf": "specialita/guida-alpina.pdf",
+      "image": "badges/guida-alpina.png"
+    },
+    {
+      "id": "spec_guida-marina",
+      "name": "Guida Marina",
+      "pdf": "specialita/guida-marina.pdf",
+      "image": "badges/guida-marina.png"
+    },
+    {
+      "id": "spec_infermiere",
+      "name": "Infermiere",
+      "pdf": "specialita/infermiere.pdf",
+      "image": "badges/infermiere.png"
+    },
+    {
+      "id": "spec_informatico",
+      "name": "Informatico",
+      "pdf": "specialita/informatico.pdf",
+      "image": "badges/informatico.png"
+    },
+    {
+      "id": "spec_interprete",
+      "name": "Interprete",
+      "pdf": "specialita/interprete.pdf",
+      "image": "badges/interprete.png"
+    },
+    {
+      "id": "spec_lavori-casalinghi",
+      "name": "Lavori Casalinghi",
+      "pdf": "specialita/lavori-casalinghi.pdf",
+      "image": "badges/lavori-casalinghi.png"
+    },
+    {
+      "id": "spec_lettore",
+      "name": "Lettore",
+      "pdf": "specialita/lettore.pdf",
+      "image": "badges/lettore.png"
+    },
+    {
+      "id": "spec_liturgista",
+      "name": "Liturgista",
+      "pdf": "specialita/liturgista.pdf",
+      "image": "badges/liturgista.png"
+    },
+    {
+      "id": "spec_mani-abili",
+      "name": "Mani Abili (tuttofare)",
+      "pdf": "specialita/mani-abili.pdf",
+      "image": "badges/mani-abili.png"
+    },
+    {
+      "id": "spec_meteorologo",
+      "name": "Meteorologo",
+      "pdf": "specialita/meteorologo.pdf",
+      "image": "badges/meteorologo.png"
+    },
+    {
+      "id": "spec_modellista",
+      "name": "Modellista",
+      "pdf": "specialita/modellista.pdf",
+      "image": "badges/modellista.png"
+    },
+    {
+      "id": "spec_musicista",
+      "name": "Musicista",
+      "pdf": "specialita/musicista.pdf",
+      "image": "badges/musicista.png"
+    },
+    {
+      "id": "spec_nautico",
+      "name": "Nautico",
+      "pdf": "specialita/nautico.pdf",
+      "image": "badges/nautico.png"
+    },
+    {
+      "id": "spec_nuotatore",
+      "name": "Nuotatore",
+      "pdf": "specialita/nuotatore.pdf",
+      "image": "badges/nuotatore.png"
+    },
+    {
+      "id": "spec_operatore-di-pc",
+      "name": "Operatore Di Pc",
+      "pdf": "specialita/operatore-di-pc.pdf",
+      "image": "badges/operatore-di-pc.png"
+    },
+    {
+      "id": "spec_operatore-di-sistema",
+      "name": "Operatore Di Sistema",
+      "pdf": "specialita/operatore-di-sistema.pdf",
+      "image": "badges/operatore-di-sistema.png"
+    },
+    {
+      "id": "spec_orientatore",
+      "name": "Orientatore",
+      "pdf": "specialita/orientatore.pdf",
+      "image": "badges/orientatore.png"
+    },
+    {
+      "id": "spec_osservatore",
+      "name": "Osservatore",
+      "pdf": "specialita/osservatore.pdf",
+      "image": "badges/osservatore.png"
+    },
+    {
+      "id": "spec_pescatore",
+      "name": "Pescatore",
+      "pdf": "specialita/pescatore.pdf",
+      "image": "badges/pescatore.png"
+    },
+    {
+      "id": "spec_pioniere",
+      "name": "Pioniere",
+      "pdf": "specialita/pioniere.pdf",
+      "image": "badges/pioniere.png"
+    },
+    {
+      "id": "spec_programmatore",
+      "name": "Programmatore",
+      "pdf": "specialita/programmatore.pdf",
+      "image": "badges/programmatore.png"
+    },
+    {
+      "id": "spec_radioamatore",
+      "name": "Radioamatore",
+      "pdf": "specialita/radioamatore.pdf",
+      "image": "badges/radioamatore.png"
+    },
+    {
+      "id": "spec_raider",
+      "name": "Raider",
+      "pdf": "specialita/raider.pdf",
+      "image": "badges/raider.png"
+    },
+    {
+      "id": "spec_regista",
+      "name": "Regista",
+      "pdf": "specialita/regista.pdf",
+      "image": "badges/regista.png"
+    },
+    {
+      "id": "spec_sciatore",
+      "name": "Sciatore",
+      "pdf": "specialita/sciatore.pdf",
+      "image": "badges/sciatore.png"
+    },
+    {
+      "id": "spec_scrittore",
+      "name": "Scrittore",
+      "pdf": "specialita/scrittore.pdf",
+      "image": "badges/scrittore.png"
+    },
+    {
+      "id": "spec_scultore-in-legno",
+      "name": "Scultore In Legno",
+      "pdf": "specialita/scultore-in-legno.pdf",
+      "image": "badges/scultore-in-legno.png"
+    },
+    {
+      "id": "spec_segnalatore",
+      "name": "Segnalatore",
+      "pdf": "specialita/segnalatore.pdf",
+      "image": "badges/segnalatore.png"
+    },
+    {
+      "id": "spec_servizio",
+      "name": "Servizio",
+      "pdf": "specialita/servizio.pdf",
+      "image": "badges/servizio.png"
+    },
+    {
+      "id": "spec_special",
+      "name": "Special",
+      "pdf": "specialita/special.pdf",
+      "image": "badges/special.png"
+    },
+    {
+      "id": "spec_tiratore",
+      "name": "Tiratore",
+      "pdf": "specialita/tiratore.pdf",
+      "image": "badges/tiratore.png"
+    },
+    {
+      "id": "spec_topografo",
+      "name": "Topografo",
+      "pdf": "specialita/topografo.pdf",
+      "image": "badges/topografo.png"
+    },
+    {
+      "id": "spec_trapper",
+      "name": "Trapper",
+      "pdf": "specialita/trapper.pdf",
+      "image": "badges/trapper.png"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentiero · Staff reparto</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html" data-home-link data-home-base="../">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="staff-shell">
+    <div class="container">
+      <div class="staff-hero">
+        <div>
+          <h1>Sentiero</h1>
+          <p id="staff-meta" data-static="1">Libretto e specialità del reparto. Visibile anche all’admin.</p>
+        </div>
+        <div class="inline-actions">
+          <a class="btn btn-ghost" href="../sentiero/" target="_blank" rel="noopener">Vedi pagina pubblica</a>
+          <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
+        </div>
+      </div>
+
+      <div id="sen-alert" class="alert alert-ok" hidden></div>
+
+      <div class="staff-grid">
+        <section class="panel">
+          <h2>Libretto del sentiero</h2>
+          <p class="hint" id="libretto-meta">Nessun libretto caricato.</p>
+          <form id="libretto-form" class="form-grid">
+            <label>
+              PDF libretto
+              <input type="file" name="librettoPdf" accept="application/pdf" required>
+            </label>
+            <div class="inline-actions">
+              <button class="btn btn-primary" type="submit">Carica / sostituisci</button>
+              <button class="btn btn-ghost" type="button" id="libretto-clear" hidden>Rimuovi</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2 id="spec-form-title">Nuova specialità</h2>
+          <form id="spec-form" class="form-grid">
+            <input type="hidden" name="id" value="">
+            <label>
+              Nome
+              <input type="text" name="name" required placeholder="Es. Campista">
+            </label>
+            <label>
+              PDF specialità
+              <input type="file" name="pdf" accept="application/pdf">
+            </label>
+            <label>
+              Immagine distintivo
+              <input type="file" name="image" accept="image/*">
+            </label>
+            <p class="hint" id="spec-edit-hint" hidden>Lascia i file vuoti per tenere quelli attuali.</p>
+            <div class="inline-actions">
+              <button class="btn btn-primary" type="submit">Salva</button>
+              <button class="btn btn-ghost" type="button" id="spec-reset" hidden>Annulla</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel wide">
+          <div class="section-head" style="margin-bottom:0.75rem">
+            <div>
+              <h2>Specialità in catalogo</h2>
+              <p class="hint" style="margin:0">Ordine alfabetico come in pagina pubblica.</p>
+            </div>
+            <button type="button" class="btn btn-ghost btn-small" id="spec-reset-seed">Ripristina elenco iniziale</button>
+          </div>
+          <div id="spec-admin-list"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/cloud-sync.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/canzoniere-store.js"></script>
+  <script src="../js/sentiero-store.js"></script>
+  <script src="../js/branch-view.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/staff-shell.js"></script>
+  <script src="../js/sentiero-staff.js"></script>
+</body>
+</html>

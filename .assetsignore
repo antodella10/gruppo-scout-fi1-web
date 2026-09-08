@@ -12,3 +12,4 @@ README.md
 .DS_Store
 .env
 .env.*
+_extract_specialita.py

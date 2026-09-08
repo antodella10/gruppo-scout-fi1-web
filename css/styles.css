@@ -1971,7 +1971,7 @@ a.home-tile:hover {
 }
 
 .reparto-actions .dest-card {
-  grid-column: span 6;
+  grid-column: span 4;
   min-height: 240px;
 }
 
@@ -2178,6 +2178,75 @@ a.home-tile:hover {
   border: 0;
 }
 
+/* —— Sentiero / specialità —— */
+.spec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.spec-card {
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--white);
+  padding: 0.85rem 0.75rem 1rem;
+  display: grid;
+  gap: 0.7rem;
+  justify-items: center;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(20, 85, 40, 0.05);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  font: inherit;
+  color: inherit;
+}
+
+.spec-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(31, 122, 58, 0.35);
+  box-shadow: 0 12px 28px rgba(20, 85, 40, 0.1);
+}
+
+.spec-card-media {
+  width: 88px;
+  height: 88px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #f3f8f3;
+  display: grid;
+  place-items: center;
+}
+
+.spec-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.spec-card-placeholder {
+  color: var(--green);
+  font-size: 1.4rem;
+}
+
+.spec-card-name {
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: var(--green-deep);
+  line-height: 1.25;
+}
+
+.sentiero-libretto .section-head {
+  align-items: center;
+}
+
+.dest-card.sentiero {
+  background:
+    linear-gradient(145deg, rgba(60, 130, 90, 0.18), transparent 50%),
+    linear-gradient(160deg, #f7fbf7, #eef6ef);
+}
+
 @media (max-width: 900px) {
   .reparto-actions .dest-card {
     grid-column: span 12;
@@ -2255,6 +2324,7 @@ a.home-tile:hover {
   .dest-card.sede-b,
   .dest-card.campo,
   .dest-card.sangiorgio,
+  .dest-card.sentiero,
   .highlights-grid .dest-card,
   .home-tile,
   .home-tile-orari,

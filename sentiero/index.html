@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentiero · Reparto Firenze 1</title>
+  <meta name="description" content="Libretto del sentiero e specialità del reparto Firenze 1.">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html" data-home-link data-home-base="../">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-links">
+        <a href="../index.html?branca=gruppo" data-group-home data-home-base="../">Home</a>
+        <a href="../chi-siamo.html">Chi siamo</a>
+        <a href="../index.html?branca=gruppo#calendario" data-group-home data-home-base="../" data-hash="#calendario">Calendario</a>
+        <a href="../index.html?branca=gruppo#contatti" data-group-home data-home-base="../" data-hash="#contatti">Contatti</a>
+      </div>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <header class="page-hero">
+    <div class="container">
+      <p class="hero-kicker" style="color:var(--green)">Reparto</p>
+      <h1>Sentiero</h1>
+      <p class="page-hero-lead">Libretto del sentiero e specialità, in ordine alfabetico.</p>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container">
+      <section class="panel sentiero-libretto" id="libretto-panel">
+        <div class="section-head" style="margin-bottom:0.85rem">
+          <div>
+            <h2>Libretto del sentiero</h2>
+            <p class="hint" style="margin:0">Il PDF di riferimento per il cammino di specialità.</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="libretto-open" hidden>Apri libretto</button>
+        </div>
+        <p class="hint" id="libretto-empty">Il libretto non è ancora stato caricato dallo staff.</p>
+      </section>
+
+      <section style="margin-top:2rem">
+        <div class="section-head">
+          <div>
+            <h2>Specialità</h2>
+            <p id="spec-count">Elenco alfabetico con distintivo e PDF.</p>
+          </div>
+        </div>
+        <div id="spec-grid" class="spec-grid" aria-live="polite"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>© 2026 Firenze 1 · FederScout</div>
+      <a href="../index.html?branca=reparto" data-home-link data-home-base="../">Torna al reparto</a>
+    </div>
+  </footer>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/cloud-sync.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/canzoniere-store.js"></script>
+  <script src="../js/sentiero-store.js"></script>
+  <script src="../js/branch-view.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/sentiero-public.js"></script>
+</body>
+</html>

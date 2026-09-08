@@ -21,12 +21,17 @@ window.StaffShell = (() => {
     return typeof CanzoniereStore !== "undefined" && CanzoniereStore.canManage(user);
   }
 
+  function canSentiero(user) {
+    return typeof SentieroStore !== "undefined" && SentieroStore.canManage(user);
+  }
+
   function menuItems(user) {
     const admin = isAdmin(user);
     return [
       { id: "home", href: "./index.html", label: "Dashboard" },
       canMeetings(user) ? { id: "riunioni", href: "./riunioni.html", label: "Gestione riunioni" } : null,
       canCanzoniere(user) ? { id: "canzoniere", href: "./canzoniere.html", label: "Canzoniere reparto" } : null,
+      canSentiero(user) ? { id: "sentiero", href: "./sentiero.html", label: "Sentiero / specialità" } : null,
       admin ? { id: "notizie", href: "./notizie.html", label: "Gestione notizie" } : null,
       admin ? { id: "iscrizioni", href: "./iscrizioni.html", label: "Form iscrizioni" } : null,
       admin ? { id: "richieste", href: "./richieste.html", label: "Richieste staff" } : null,
@@ -130,5 +135,5 @@ window.StaffShell = (() => {
     return user;
   }
 
-  return { requireUser, isAdmin, menuItems, canMeetings, canCanzoniere, fillHero, mountMenu, boot };
+  return { requireUser, isAdmin, menuItems, canMeetings, canCanzoniere, canSentiero, fillHero, mountMenu, boot };
 })();

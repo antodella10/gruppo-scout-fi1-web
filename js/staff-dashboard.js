@@ -51,6 +51,16 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    if (typeof StaffShell !== "undefined" && StaffShell.canSentiero(user)) {
+      tiles.push({
+        id: "sentiero",
+        href: "./sentiero.html",
+        title: "Sentiero / specialità",
+        hint: "Libretto e catalogo specialità.",
+        preview: "Gestisci libretto e PDF",
+      });
+    }
+
     if (isAdmin) {
       tiles.push({
         id: "notizie",
