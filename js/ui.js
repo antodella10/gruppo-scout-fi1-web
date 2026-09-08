@@ -163,7 +163,7 @@ function updateNavAuth() {
     slot.innerHTML = `
       <span class="user-chip">${escapeHtml(full.nome)} ${escapeHtml(full.cognome)}${br ? " · " + escapeHtml(br) : ""}${badge}</span>
       <a class="btn btn-primary btn-small" href="${base}staff/">Area staff</a>
-      <button type="button" class="btn btn-ghost btn-small nav-logout" data-nav-logout>Esci</button>
+      <button type="button" class="btn btn-ghost btn-small" data-nav-logout>Esci</button>
     `;
     slot.querySelector("[data-nav-logout]")?.addEventListener("click", () => {
       ScoutStore.logout();
@@ -174,47 +174,100 @@ function updateNavAuth() {
   }
 }
 
-function renderSocialLinks(container, { compact = false } = {}) {
+function socialIconFb() {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 9h3V6h-3c-1.9 0-3 1.3-3 3v2H8v3h3v7h3v-7h3l1-3h-4V9c0-.3.1-.5.5-.5H14z"/></svg>`;
+}
+
+function socialIconIg() {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4zm5 4.5A4.5 4.5 0 1 0 16.5 12 4.5 4.5 0 0 0 12 7.5zm5.2-.9a1.1 1.1 0 1 0 1.1 1.1 1.1 1.1 0 0 0-1.1-1.1zM12 9.5A2.5 2.5 0 1 1 9.5 12 2.5 2.5 0 0 1 12 9.5z"/></svg>`;
+}
+
+/** Home: “Seguici” con sole icone (FB + IG scelto in admin). */
+function renderSocialFollow(container) {
   if (!container) return;
   const social =
     typeof ScoutStore !== "undefined" && ScoutStore.getSocialLinks
       ? ScoutStore.getSocialLinks()
-      : window.SCOUT_CONFIG?.social || {};
-  const fb = (social.facebook || "").trim();
-  const ig = social.instagram || {};
-  const igEntries = [
-    ["gruppo", "Firenze 1"],
-    ["lupetti", "Lupetti"],
-    ["reparto", "Reparto"],
-    ["noviziato", "Noviziato"],
-    ["clan", "Clan"],
-  ]
-    .map(([id, label]) => ({ id, label, url: String(ig[id] || "").trim() }))
-    .filter((x) => x.url);
-
+      : null;
+  if (!social) {
+    container.innerHTML = "";
+    return;
+  }
+  const fbUrl = social.facebook?.url || "";
+  const igKey = social.homeInstagram || "reparto";
+  const ig = social.instagram?.[igKey] || social.instagram?.reparto || {};
+  const igUrl = ig.url || "";
   const parts = [];
-  if (fb) {
+  if (fbUrl) {
     parts.push(
-      `<a class="social-link social-fb" href="${escapeHtml(fb)}" target="_blank" rel="noopener noreferrer">Facebook</a>`
+      `<a class="social-icon-btn social-icon-fb" href="${escapeHtml(fbUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(social.facebook.label || "Facebook")}" aria-label="${escapeHtml(social.facebook.label || "Facebook")}">${socialIconFb()}</a>`
     );
   }
-  if (igEntries.length) {
-    const igList = igEntries
-      .map(
-        (x) =>
-          `<a class="social-ig-item" href="${escapeHtml(x.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(x.label)}</a>`
-      )
-      .join("");
+  if (igUrl) {
     parts.push(
-      `<div class="social-ig ${compact ? "is-compact" : ""}"><span class="social-ig-label">Instagram</span><div class="social-ig-list">${igList}</div></div>`
+      `<a class="social-icon-btn social-icon-ig" href="${escapeHtml(igUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(ig.label || "Instagram")}" aria-label="${escapeHtml(ig.label || "Instagram")}">${socialIconIg()}</a>`
     );
   }
-
   if (!parts.length) {
+    container.innerHTML = `<p class="hint" style="margin:0">Social in arrivo.</p>`;
+    return;
+  }
+  container.innerHTML = `
+    <div class="social-follow">
+      <span class="social-follow-label">Seguici</span>
+      <div class="social-icon-row">${parts.join("")}</div>
+    </div>`;
+}
+
+/** Elenco completo (Chi siamo): tutti i link con nome. */
+function renderSocialFull(container) {
+  if (!container) return;
+  const social =
+    typeof ScoutStore !== "undefined" && ScoutStore.getSocialLinks
+      ? ScoutStore.getSocialLinks()
+      : null;
+  if (!social) {
+    container.innerHTML = "";
+    return;
+  }
+  const items = [];
+  if (social.facebook?.url) {
+    items.push({
+      kind: "fb",
+      label: social.facebook.label || "Facebook",
+      url: social.facebook.url,
+    });
+  }
+  ["gruppo", "lupetti", "reparto", "noviziato", "clan"].forEach((id) => {
+    const ig = social.instagram?.[id];
+    if (ig?.url) {
+      items.push({ kind: "ig", label: ig.label || id, url: ig.url });
+    }
+  });
+  if (!items.length) {
     container.innerHTML = `<p class="hint" style="margin:0">Social non ancora configurati.</p>`;
     return;
   }
-  container.innerHTML = `<div class="social-row">${parts.join("")}</div>`;
+  container.innerHTML = `
+    <ul class="social-full-list">
+      ${items
+        .map(
+          (it) => `
+        <li>
+          <a href="${escapeHtml(it.url)}" target="_blank" rel="noopener noreferrer">
+            <span class="social-full-icon">${it.kind === "fb" ? socialIconFb() : socialIconIg()}</span>
+            <span>${escapeHtml(it.label)}</span>
+          </a>
+        </li>`
+        )
+        .join("")}
+    </ul>`;
+}
+
+/** Compat: footer compact → icone seguici. */
+function renderSocialLinks(container, { compact = false, full = false } = {}) {
+  if (full) return renderSocialFull(container);
+  return renderSocialFollow(container);
 }
 
 function renderMeetingHoursList(container) {

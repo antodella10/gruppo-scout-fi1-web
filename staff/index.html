@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="icon" href="../photos/logo.jpeg">
 </head>
-<body>
+<body data-staff-page="home">
   <nav class="site-nav">
     <div class="container">
       <a class="brand" href="../index.html" data-home-link data-home-base="../">
@@ -27,7 +27,60 @@
         </div>
       </div>
 
-      <div class="dash-grid" id="staff-dash"></div>
+      <div class="staff-grid staff-dash-layout">
+        <section class="panel staff-main">
+          <h2>Gestione attività</h2>
+          <p class="hint" id="event-hint"></p>
+          <div id="event-alert" class="alert alert-ok" hidden></div>
+          <form id="event-form" class="form-grid">
+            <label>
+              Titolo
+              <input type="text" name="title" required placeholder="Es. Uscita">
+            </label>
+            <label>
+              Tipo evento
+              <select name="scope" id="event-scope" required></select>
+            </label>
+            <label id="event-branca-wrap" hidden>
+              Branca
+              <select name="branca" id="event-branca"></select>
+            </label>
+            <div class="form-row-2">
+              <label>
+                Data inizio
+                <input type="date" name="dateStart" id="event-date-start" required>
+              </label>
+              <label>
+                Data fine
+                <input type="date" name="dateEnd" id="event-date-end">
+              </label>
+            </div>
+            <label>
+              Ora
+              <input type="time" name="time" id="event-time" placeholder="Opzionale">
+            </label>
+            <p class="hint" style="margin:0">Se non indichi l’ora, l’evento vale per tutto il giorno.</p>
+            <label>
+              Luogo
+              <input type="text" name="place" placeholder="Sede, parco, …">
+            </label>
+            <label>
+              Descrizione
+              <textarea name="description" rows="2" placeholder="Opzionale"></textarea>
+            </label>
+            <div class="inline-actions">
+              <button class="btn btn-primary" type="submit" id="event-submit">Aggiungi attività</button>
+              <button class="btn btn-ghost" type="button" id="cancel-edit" hidden>Annulla modifica</button>
+            </div>
+          </form>
+          <hr style="border:none;border-top:1px solid var(--line);margin:1.25rem 0">
+          <div id="staff-event-list"></div>
+        </section>
+
+        <div class="staff-side">
+          <div class="dash-grid dash-grid-side" id="staff-dash"></div>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -37,6 +90,7 @@
   <script src="../js/branch-view.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/staff-shell.js"></script>
+  <script src="../js/staff.js"></script>
   <script src="../js/staff-dashboard.js"></script>
 </body>
 </html>

@@ -5,13 +5,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const socialForm = document.getElementById("social-form");
   const socialAlert = document.getElementById("social-alert");
   const current = ScoutStore.getSocialLinks();
+
   if (socialForm) {
-    socialForm.facebook.value = current.facebook || "";
-    socialForm.igGruppo.value = current.instagram.gruppo || "";
-    socialForm.igLupetti.value = current.instagram.lupetti || "";
-    socialForm.igReparto.value = current.instagram.reparto || "";
-    socialForm.igNoviziato.value = current.instagram.noviziato || "";
-    socialForm.igClan.value = current.instagram.clan || "";
+    socialForm.fbLabel.value = current.facebook.label || "Facebook";
+    socialForm.fbUrl.value = current.facebook.url || "";
+    socialForm.igGruppoLabel.value = current.instagram.gruppo.label || "Firenze 1";
+    socialForm.igGruppoUrl.value = current.instagram.gruppo.url || "";
+    socialForm.igLupettiLabel.value = current.instagram.lupetti.label || "Lupetti";
+    socialForm.igLupettiUrl.value = current.instagram.lupetti.url || "";
+    socialForm.igRepartoLabel.value = current.instagram.reparto.label || "Reparto";
+    socialForm.igRepartoUrl.value = current.instagram.reparto.url || "";
+    socialForm.igNoviziatoLabel.value = current.instagram.noviziato.label || "Noviziato";
+    socialForm.igNoviziatoUrl.value = current.instagram.noviziato.url || "";
+    socialForm.igClanLabel.value = current.instagram.clan.label || "Clan";
+    socialForm.igClanUrl.value = current.instagram.clan.url || "";
+    socialForm.homeInstagram.value = current.homeInstagram || "reparto";
   }
 
   socialForm?.addEventListener("submit", (e) => {
@@ -20,14 +28,18 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       ScoutStore.saveSocialLinks(
         {
-          facebook: data.get("facebook"),
-          instagram: {
-            gruppo: data.get("igGruppo"),
-            lupetti: data.get("igLupetti"),
-            reparto: data.get("igReparto"),
-            noviziato: data.get("igNoviziato"),
-            clan: data.get("igClan"),
+          facebook: {
+            label: data.get("fbLabel"),
+            url: data.get("fbUrl"),
           },
+          instagram: {
+            gruppo: { label: data.get("igGruppoLabel"), url: data.get("igGruppoUrl") },
+            lupetti: { label: data.get("igLupettiLabel"), url: data.get("igLupettiUrl") },
+            reparto: { label: data.get("igRepartoLabel"), url: data.get("igRepartoUrl") },
+            noviziato: { label: data.get("igNoviziatoLabel"), url: data.get("igNoviziatoUrl") },
+            clan: { label: data.get("igClanLabel"), url: data.get("igClanUrl") },
+          },
+          homeInstagram: data.get("homeInstagram") || "reparto",
         },
         user
       );

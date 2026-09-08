@@ -567,17 +567,45 @@ const ScoutStore = (() => {
     return next;
   }
 
+  function normalizeSocialEntry(raw, fallbackUrl, fallbackLabel) {
+    if (raw && typeof raw === "object") {
+      return {
+        url: String(raw.url || "").trim(),
+        label: String(raw.label || fallbackLabel || "").trim() || fallbackLabel,
+      };
+    }
+    const url = String(raw || fallbackUrl || "").trim();
+    return { url, label: fallbackLabel };
+  }
+
   function defaultSocial() {
     const cfg = window.SCOUT_CONFIG?.social || {};
+    const fbCfg = cfg.facebook;
+    const fbFallback =
+      typeof fbCfg === "string" ? fbCfg : fbCfg?.url || "";
+    const fbLabel =
+      typeof fbCfg === "object" && fbCfg?.label ? fbCfg.label : "Facebook";
+    const igCfg = cfg.instagram || {};
+    const pickIg = (id, label) => {
+      const item = igCfg[id];
+      if (item && typeof item === "object") {
+        return {
+          url: String(item.url || "").trim(),
+          label: String(item.label || label).trim() || label,
+        };
+      }
+      return { url: String(item || "").trim(), label };
+    };
     return {
-      facebook: String(cfg.facebook || "").trim(),
+      facebook: { url: String(fbFallback).trim(), label: fbLabel },
       instagram: {
-        gruppo: String(cfg.instagram?.gruppo || "").trim(),
-        lupetti: String(cfg.instagram?.lupetti || "").trim(),
-        reparto: String(cfg.instagram?.reparto || "").trim(),
-        noviziato: String(cfg.instagram?.noviziato || "").trim(),
-        clan: String(cfg.instagram?.clan || "").trim(),
+        gruppo: pickIg("gruppo", "Firenze 1"),
+        lupetti: pickIg("lupetti", "Lupetti"),
+        reparto: pickIg("reparto", "Reparto"),
+        noviziato: pickIg("noviziato", "Noviziato"),
+        clan: pickIg("clan", "Clan"),
       },
+      homeInstagram: String(cfg.homeInstagram || "reparto"),
     };
   }
 
@@ -585,29 +613,67 @@ const ScoutStore = (() => {
     const base = defaultSocial();
     const saved = getSettings().social;
     if (!saved || typeof saved !== "object") return base;
+
+    const fb = normalizeSocialEntry(
+      saved.facebook ?? base.facebook,
+      base.facebook.url,
+      base.facebook.label
+    );
+    if (!fb.url && base.facebook.url) fb.url = base.facebook.url;
+
+    const mergeIg = (id) => {
+      const fromSaved = saved.instagram?.[id];
+      const fromBase = base.instagram[id];
+      const entry = normalizeSocialEntry(fromSaved ?? fromBase, fromBase.url, fromBase.label);
+      if (!entry.url && fromBase.url) entry.url = fromBase.url;
+      if (!entry.label) entry.label = fromBase.label;
+      return entry;
+    };
+
+    const homeInstagram = String(saved.homeInstagram || base.homeInstagram || "reparto");
     return {
-      facebook: String(saved.facebook ?? base.facebook).trim(),
+      facebook: fb,
       instagram: {
-        gruppo: String(saved.instagram?.gruppo ?? base.instagram.gruppo).trim(),
-        lupetti: String(saved.instagram?.lupetti ?? base.instagram.lupetti).trim(),
-        reparto: String(saved.instagram?.reparto ?? base.instagram.reparto).trim(),
-        noviziato: String(saved.instagram?.noviziato ?? base.instagram.noviziato).trim(),
-        clan: String(saved.instagram?.clan ?? base.instagram.clan).trim(),
+        gruppo: mergeIg("gruppo"),
+        lupetti: mergeIg("lupetti"),
+        reparto: mergeIg("reparto"),
+        noviziato: mergeIg("noviziato"),
+        clan: mergeIg("clan"),
       },
+      homeInstagram,
     };
   }
 
   function saveSocialLinks(social, user) {
     if (!isAdminUser(user)) throw new Error("Solo admin può aggiornare i social.");
     const next = {
-      facebook: String(social?.facebook || "").trim(),
-      instagram: {
-        gruppo: String(social?.instagram?.gruppo || "").trim(),
-        lupetti: String(social?.instagram?.lupetti || "").trim(),
-        reparto: String(social?.instagram?.reparto || "").trim(),
-        noviziato: String(social?.instagram?.noviziato || "").trim(),
-        clan: String(social?.instagram?.clan || "").trim(),
+      facebook: {
+        url: String(social?.facebook?.url ?? social?.facebook ?? "").trim(),
+        label: String(social?.facebook?.label || "Facebook").trim() || "Facebook",
       },
+      instagram: {
+        gruppo: {
+          url: String(social?.instagram?.gruppo?.url ?? social?.instagram?.gruppo ?? "").trim(),
+          label: String(social?.instagram?.gruppo?.label || "Firenze 1").trim() || "Firenze 1",
+        },
+        lupetti: {
+          url: String(social?.instagram?.lupetti?.url ?? social?.instagram?.lupetti ?? "").trim(),
+          label: String(social?.instagram?.lupetti?.label || "Lupetti").trim() || "Lupetti",
+        },
+        reparto: {
+          url: String(social?.instagram?.reparto?.url ?? social?.instagram?.reparto ?? "").trim(),
+          label: String(social?.instagram?.reparto?.label || "Reparto").trim() || "Reparto",
+        },
+        noviziato: {
+          url: String(social?.instagram?.noviziato?.url ?? social?.instagram?.noviziato ?? "").trim(),
+          label: String(social?.instagram?.noviziato?.label || "Noviziato").trim() || "Noviziato",
+        },
+        clan: {
+          url: String(social?.instagram?.clan?.url ?? social?.instagram?.clan ?? "").trim(),
+          label: String(social?.instagram?.clan?.label || "Clan").trim() || "Clan",
+        },
+      },
+      homeInstagram: String(social?.homeInstagram || "reparto"),
     };
     write(KEYS.settings, { ...getSettings(), social: next });
     return next;

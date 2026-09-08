@@ -90,6 +90,20 @@
         </div>
       </div>
     </section>
+
+    <section class="section" id="social" style="padding-top:0">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Seguici sui social</h2>
+            <p>Facebook del gruppo e Instagram delle branche.</p>
+          </div>
+        </div>
+        <div class="panel">
+          <div id="about-social" class="social-block"></div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -107,7 +121,8 @@
   <script src="js/ui.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      renderSocialLinks(document.getElementById("footer-social"), { compact: true });
+      renderSocialFull(document.getElementById("about-social"));
+      renderSocialFollow(document.getElementById("footer-social"));
     });
   </script>
 </body>

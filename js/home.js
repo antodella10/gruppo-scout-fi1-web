@@ -76,8 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function paintGroupExtras() {
     renderMeetingHoursList(document.getElementById("meeting-hours-list"));
-    renderSocialLinks(document.getElementById("contact-social"));
-    renderSocialLinks(document.getElementById("footer-social"), { compact: true });
+    renderSocialFollow(document.getElementById("contact-social"));
+    renderSocialFollow(document.getElementById("footer-social"));
   }
 
   function mergeEvents() {

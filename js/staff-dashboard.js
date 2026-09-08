@@ -1,12 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const user = StaffShell.boot({ active: "home" });
+  // staff.js già fa boot su home se data-staff-page=home; qui solo tile
+  const user = ScoutStore.getCurrentUser();
   if (!user) return;
 
   const dash = document.getElementById("staff-dash");
   if (!dash) return;
 
-  const isAdmin = StaffShell.isAdmin(user);
-  const events = ScoutStore.getManageableEvents(user);
+  const isAdmin = ScoutStore.isAdminUser(user);
   const hours = ScoutStore.getMeetingHours().filter((h) => ScoutStore.canEditMeetingSlot(user, h));
   const pendingStaff = isAdmin ? ScoutStore.listPending(user) : [];
   const pendingSongs =
@@ -18,16 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const tiles = [];
 
-  tiles.push({
-    href: "./attivita.html",
-    title: "Gestione attività",
-    hint: "Crea e modifica eventi del calendario.",
-    preview: events.length
-      ? `<strong>${events.length}</strong> attività gestibili`
-      : "Nessuna attività ancora",
-  });
-
-  if (StaffShell.canMeetings(user)) {
+  if (typeof StaffShell !== "undefined" && StaffShell.canMeetings(user)) {
     const preview = hours
       .slice(0, 3)
       .map((h) => `${escapeHtml(h.label)}: ${escapeHtml([h.day, h.time].filter(Boolean).join(" · ") || "—")}`)
@@ -40,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (StaffShell.canCanzoniere(user)) {
+  if (typeof StaffShell !== "undefined" && StaffShell.canCanzoniere(user)) {
     tiles.push({
       href: "./canzoniere.html",
       title: "Canzoniere reparto",
@@ -61,12 +52,12 @@ document.addEventListener("DOMContentLoaded", () => {
         : "Nessuna richiesta in attesa",
     });
 
-    const igCount = Object.values(social.instagram || {}).filter(Boolean).length;
+    const igCount = Object.values(social.instagram || {}).filter((x) => x?.url).length;
     tiles.push({
       href: "./social.html",
       title: "Gestione link social",
-      hint: "Facebook e Instagram del gruppo.",
-      preview: `${social.facebook ? "Facebook ok" : "Facebook mancante"} · ${igCount} Instagram`,
+      hint: "Nomi, URL e Instagram in home.",
+      preview: `${social.facebook?.url ? "Facebook ok" : "Facebook mancante"} · ${igCount} Instagram`,
     });
 
     tiles.push({

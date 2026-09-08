@@ -23,37 +23,68 @@
       <div class="staff-hero">
         <div>
           <h1>Gestione link social</h1>
-          <p id="staff-meta" data-static="1">Facebook e Instagram — visibili in home e contatti.</p>
+          <p id="staff-meta" data-static="1">Nomi e URL. In home compare “Seguici” con Facebook + Instagram scelto sotto.</p>
         </div>
         <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
       </div>
 
       <section class="panel">
         <form id="social-form" class="form-grid">
+          <h3 class="social-form-heading">Facebook</h3>
+          <div class="form-row-2">
+            <label>
+              Nome
+              <input type="text" name="fbLabel" placeholder="Facebook">
+            </label>
+            <label>
+              URL
+              <input type="url" name="fbUrl" placeholder="https://www.facebook.com/...">
+            </label>
+          </div>
+
+          <h3 class="social-form-heading">Instagram</h3>
+          <div class="social-ig-edit" data-ig="gruppo">
+            <div class="form-row-2">
+              <label>Nome <input type="text" name="igGruppoLabel"></label>
+              <label>URL <input type="url" name="igGruppoUrl" placeholder="https://www.instagram.com/..."></label>
+            </div>
+          </div>
+          <div class="social-ig-edit" data-ig="lupetti">
+            <div class="form-row-2">
+              <label>Nome <input type="text" name="igLupettiLabel"></label>
+              <label>URL <input type="url" name="igLupettiUrl" placeholder="https://www.instagram.com/..."></label>
+            </div>
+          </div>
+          <div class="social-ig-edit" data-ig="reparto">
+            <div class="form-row-2">
+              <label>Nome <input type="text" name="igRepartoLabel"></label>
+              <label>URL <input type="url" name="igRepartoUrl" placeholder="https://www.instagram.com/..."></label>
+            </div>
+          </div>
+          <div class="social-ig-edit" data-ig="noviziato">
+            <div class="form-row-2">
+              <label>Nome <input type="text" name="igNoviziatoLabel"></label>
+              <label>URL <input type="url" name="igNoviziatoUrl" placeholder="Opzionale"></label>
+            </div>
+          </div>
+          <div class="social-ig-edit" data-ig="clan">
+            <div class="form-row-2">
+              <label>Nome <input type="text" name="igClanLabel"></label>
+              <label>URL <input type="url" name="igClanUrl" placeholder="Opzionale"></label>
+            </div>
+          </div>
+
           <label>
-            Facebook
-            <input type="url" name="facebook" placeholder="https://www.facebook.com/...">
+            Instagram in home (“Seguici”)
+            <select name="homeInstagram" id="home-instagram">
+              <option value="gruppo">Gruppo / Firenze 1</option>
+              <option value="lupetti">Lupetti</option>
+              <option value="reparto" selected>Reparto</option>
+              <option value="noviziato">Noviziato</option>
+              <option value="clan">Clan</option>
+            </select>
           </label>
-          <label>
-            Instagram gruppo (Firenze 1)
-            <input type="url" name="igGruppo" placeholder="https://www.instagram.com/...">
-          </label>
-          <label>
-            Instagram lupetti
-            <input type="url" name="igLupetti" placeholder="https://www.instagram.com/...">
-          </label>
-          <label>
-            Instagram reparto
-            <input type="url" name="igReparto" placeholder="https://www.instagram.com/...">
-          </label>
-          <label>
-            Instagram noviziato
-            <input type="url" name="igNoviziato" placeholder="Opzionale">
-          </label>
-          <label>
-            Instagram clan
-            <input type="url" name="igClan" placeholder="Opzionale">
-          </label>
+
           <button class="btn btn-primary" type="submit">Salva social</button>
         </form>
         <div id="social-alert" class="alert alert-ok" hidden style="margin-top:.75rem"></div>

@@ -25,7 +25,6 @@ window.StaffShell = (() => {
     const admin = isAdmin(user);
     return [
       { id: "home", href: "./index.html", label: "Dashboard" },
-      { id: "attivita", href: "./attivita.html", label: "Gestione attività" },
       canMeetings(user) ? { id: "riunioni", href: "./riunioni.html", label: "Gestione riunioni" } : null,
       canCanzoniere(user) ? { id: "canzoniere", href: "./canzoniere.html", label: "Canzoniere reparto" } : null,
       admin ? { id: "richieste", href: "./richieste.html", label: "Richieste staff" } : null,

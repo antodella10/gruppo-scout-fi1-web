@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const user = StaffShell.boot({ active: "attivita" });
+  const active = document.body.dataset.staffPage || "attivita";
+  const user = StaffShell.boot({ active });
   if (!user) return;
 
   const isAdmin = StaffShell.isAdmin(user);

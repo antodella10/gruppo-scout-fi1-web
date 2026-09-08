@@ -20,16 +20,21 @@ window.SCOUT_CONFIG = {
       mapsUrl: "https://maps.app.goo.gl/vZ8S7TNm4LQBSBT26",
     },
   ],
-  /** Valori di default; in produzione si possono aggiornare dall’area admin. */
+  /** Valori di default; aggiornabili dall’area admin (anche i nomi). */
   social: {
-    facebook: "https://www.facebook.com/scoutfirenze1/?locale=it_IT",
-    instagram: {
-      gruppo: "https://www.instagram.com/scout_firenze1",
-      lupetti: "https://www.instagram.com/tigerandcavalloni",
-      reparto: "https://www.instagram.com/riparto.fi1",
-      noviziato: "",
-      clan: "",
+    facebook: {
+      url: "https://www.facebook.com/scoutfirenze1/?locale=it_IT",
+      label: "Facebook",
     },
+    instagram: {
+      gruppo: { url: "https://www.instagram.com/scout_firenze1", label: "Firenze 1" },
+      lupetti: { url: "https://www.instagram.com/tigerandcavalloni", label: "Lupetti" },
+      reparto: { url: "https://www.instagram.com/riparto.fi1", label: "Reparto" },
+      noviziato: { url: "", label: "Noviziato" },
+      clan: { url: "", label: "Clan" },
+    },
+    /** Quale Instagram usare sull’icona “Seguici” in home. */
+    homeInstagram: "reparto",
   },
 };
 

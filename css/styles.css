@@ -117,13 +117,6 @@ h3,
   align-items: center;
   gap: 0.75rem;
   margin-left: auto;
-  flex: 1;
-  justify-content: flex-end;
-  min-width: 0;
-}
-
-.nav-actions [data-nav-logout] {
-  margin-left: auto;
 }
 
 .btn {
@@ -1278,51 +1271,112 @@ body.staff-menu-open {
   color: var(--green-deep);
 }
 
-.social-row {
+.social-follow {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
-  align-items: flex-start;
+  align-items: center;
+  gap: 0.75rem 1rem;
 }
 
-.social-link {
-  font-weight: 700;
-  color: var(--green-deep);
-  text-decoration: none;
-  border-bottom: 2px solid var(--yellow);
-}
-
-.social-link:hover {
-  color: var(--green);
-}
-
-.social-ig {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.social-ig-label {
+.social-follow-label {
   font-weight: 800;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-}
-
-.social-ig-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 0.75rem;
-}
-
-.social-ig-item {
+  font-family: "Bricolage Grotesque", sans-serif;
   color: var(--green-deep);
-  font-weight: 650;
-  text-decoration: none;
+  font-size: 1.05rem;
 }
 
-.social-ig-item:hover {
-  text-decoration: underline;
+.social-icon-row {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.social-icon-btn {
+  width: 2.55rem;
+  height: 2.55rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.social-icon-btn svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.social-icon-fb {
+  background: #1877f2;
+}
+
+.social-icon-ig {
+  background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af);
+}
+
+.social-icon-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(20, 85, 40, 0.18);
+}
+
+.social-full-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.social-full-list a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 650;
+  background: #f7faf7;
+}
+
+.social-full-list a:hover {
+  border-color: rgba(31, 122, 58, 0.35);
+  color: var(--green-deep);
+}
+
+.social-full-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background: var(--green);
+  flex-shrink: 0;
+}
+
+.social-full-icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.social-form-heading {
+  margin: 0.5rem 0 0;
+  grid-column: 1 / -1;
+  color: var(--green-deep);
+  font-family: "Bricolage Grotesque", sans-serif;
+}
+
+.dash-grid-side {
+  grid-template-columns: 1fr;
+}
+
+.staff-dash-layout {
+  align-items: start;
 }
 
 .footer-inner {
