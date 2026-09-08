@@ -54,18 +54,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }));
     try {
       ScoutStore.saveMeetingHours(rows, user);
-      if (hoursAlert) {
-        hoursAlert.hidden = false;
-        hoursAlert.className = "alert alert-ok";
-        hoursAlert.textContent = "Orari salvati. Compariranno nella home di gruppo.";
-      }
+      flashAlert(hoursAlert, "Orari salvati. Compariranno nella home di gruppo.", true);
       renderHoursEditor();
     } catch (err) {
-      if (hoursAlert) {
-        hoursAlert.hidden = false;
-        hoursAlert.className = "alert alert-error";
-        hoursAlert.textContent = err.message || "Salvataggio non riuscito.";
-      }
+      flashAlert(hoursAlert, err.message || "Salvataggio non riuscito.", false);
     }
   });
 

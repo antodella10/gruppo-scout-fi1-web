@@ -19,7 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
     socialForm.igNoviziatoUrl.value = current.instagram.noviziato.url || "";
     socialForm.igClanLabel.value = current.instagram.clan.label || "Clan";
     socialForm.igClanUrl.value = current.instagram.clan.url || "";
-    socialForm.homeInstagram.value = current.homeInstagram || "reparto";
+    const home = current.homeInstagram || "reparto";
+    const radio = socialForm.querySelector(`input[name="homeInstagram"][value="${home}"]`);
+    if (radio) radio.checked = true;
   }
 
   socialForm?.addEventListener("submit", (e) => {
@@ -43,17 +45,9 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         user
       );
-      if (socialAlert) {
-        socialAlert.hidden = false;
-        socialAlert.className = "alert alert-ok";
-        socialAlert.textContent = "Link social aggiornati.";
-      }
+      flashAlert(socialAlert, "Link social aggiornati.", true);
     } catch (err) {
-      if (socialAlert) {
-        socialAlert.hidden = false;
-        socialAlert.className = "alert alert-error";
-        socialAlert.textContent = err.message || "Salvataggio non riuscito.";
-      }
+      flashAlert(socialAlert, err.message || "Salvataggio non riuscito.", false);
     }
   });
 });

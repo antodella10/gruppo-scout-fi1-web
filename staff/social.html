@@ -23,7 +23,7 @@
       <div class="staff-hero">
         <div>
           <h1>Gestione link social</h1>
-          <p id="staff-meta" data-static="1">Nomi e URL. In home compare “Seguici” con Facebook + Instagram scelto sotto.</p>
+          <p id="staff-meta" data-static="1">Nomi e URL. Spunta “In home” sull’Instagram da mostrare in Seguici.</p>
         </div>
         <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
       </div>
@@ -43,47 +43,58 @@
           </div>
 
           <h3 class="social-form-heading">Instagram</h3>
-          <div class="social-ig-edit" data-ig="gruppo">
+          <p class="hint" style="margin:0">Spunta la casella “In home” accanto al profilo da usare nell’icona Instagram della home.</p>
+
+          <div class="social-ig-row" data-ig="gruppo">
+            <label class="home-ig-check">
+              <input type="radio" name="homeInstagram" value="gruppo">
+              <span>In home</span>
+            </label>
             <div class="form-row-2">
               <label>Nome <input type="text" name="igGruppoLabel"></label>
               <label>URL <input type="url" name="igGruppoUrl" placeholder="https://www.instagram.com/..."></label>
             </div>
           </div>
-          <div class="social-ig-edit" data-ig="lupetti">
+          <div class="social-ig-row" data-ig="lupetti">
+            <label class="home-ig-check">
+              <input type="radio" name="homeInstagram" value="lupetti">
+              <span>In home</span>
+            </label>
             <div class="form-row-2">
               <label>Nome <input type="text" name="igLupettiLabel"></label>
               <label>URL <input type="url" name="igLupettiUrl" placeholder="https://www.instagram.com/..."></label>
             </div>
           </div>
-          <div class="social-ig-edit" data-ig="reparto">
+          <div class="social-ig-row" data-ig="reparto">
+            <label class="home-ig-check">
+              <input type="radio" name="homeInstagram" value="reparto" checked>
+              <span>In home</span>
+            </label>
             <div class="form-row-2">
               <label>Nome <input type="text" name="igRepartoLabel"></label>
               <label>URL <input type="url" name="igRepartoUrl" placeholder="https://www.instagram.com/..."></label>
             </div>
           </div>
-          <div class="social-ig-edit" data-ig="noviziato">
+          <div class="social-ig-row" data-ig="noviziato">
+            <label class="home-ig-check">
+              <input type="radio" name="homeInstagram" value="noviziato">
+              <span>In home</span>
+            </label>
             <div class="form-row-2">
               <label>Nome <input type="text" name="igNoviziatoLabel"></label>
               <label>URL <input type="url" name="igNoviziatoUrl" placeholder="Opzionale"></label>
             </div>
           </div>
-          <div class="social-ig-edit" data-ig="clan">
+          <div class="social-ig-row" data-ig="clan">
+            <label class="home-ig-check">
+              <input type="radio" name="homeInstagram" value="clan">
+              <span>In home</span>
+            </label>
             <div class="form-row-2">
               <label>Nome <input type="text" name="igClanLabel"></label>
               <label>URL <input type="url" name="igClanUrl" placeholder="Opzionale"></label>
             </div>
           </div>
-
-          <label>
-            Instagram in home (“Seguici”)
-            <select name="homeInstagram" id="home-instagram">
-              <option value="gruppo">Gruppo / Firenze 1</option>
-              <option value="lupetti">Lupetti</option>
-              <option value="reparto" selected>Reparto</option>
-              <option value="noviziato">Noviziato</option>
-              <option value="clan">Clan</option>
-            </select>
-          </label>
 
           <button class="btn btn-primary" type="submit">Salva social</button>
         </form>

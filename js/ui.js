@@ -182,7 +182,7 @@ function socialIconIg() {
   return `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4zm5 4.5A4.5 4.5 0 1 0 16.5 12 4.5 4.5 0 0 0 12 7.5zm5.2-.9a1.1 1.1 0 1 0 1.1 1.1 1.1 1.1 0 0 0-1.1-1.1zM12 9.5A2.5 2.5 0 1 1 9.5 12 2.5 2.5 0 0 1 12 9.5z"/></svg>`;
 }
 
-/** Home: “Seguici” con icone (aggiorna link esistenti o li crea). */
+/** Home: “Seguici” con icone (sempre ricostruisce il blocco). */
 function renderSocialFollow(container) {
   if (!container) return;
 
@@ -196,63 +196,44 @@ function renderSocialFollow(container) {
   }
   if (!social) social = window.SCOUT_CONFIG?.social || {};
 
+  const cfg = window.SCOUT_CONFIG?.social || {};
   const fbRaw = social.facebook;
-  const fbUrl =
-    (typeof fbRaw === "object" ? fbRaw?.url : fbRaw) ||
-    window.SCOUT_CONFIG?.social?.facebook?.url ||
-    "https://www.facebook.com/scoutfirenze1/?locale=it_IT";
+  let fbUrl = String((typeof fbRaw === "object" ? fbRaw?.url : fbRaw) || "").trim();
+  if (!fbUrl) {
+    fbUrl = String(cfg.facebook?.url || cfg.facebook || "https://www.facebook.com/scoutfirenze1/?locale=it_IT").trim();
+  }
   const fbLabel =
-    (typeof fbRaw === "object" && fbRaw?.label) || "Facebook";
+    (typeof fbRaw === "object" && fbRaw?.label) || cfg.facebook?.label || "Facebook";
 
-  const igKey = social.homeInstagram || window.SCOUT_CONFIG?.social?.homeInstagram || "reparto";
-  const igMap = social.instagram || window.SCOUT_CONFIG?.social?.instagram || {};
-  const igRaw = igMap[igKey] || igMap.reparto || {};
-  const igUrl =
-    (typeof igRaw === "object" ? igRaw?.url : igRaw) ||
-    window.SCOUT_CONFIG?.social?.instagram?.reparto?.url ||
-    "https://www.instagram.com/riparto.fi1";
+  const igKey = social.homeInstagram || cfg.homeInstagram || "reparto";
+  const igMap = social.instagram || cfg.instagram || {};
+  const igRaw = igMap[igKey] || igMap.reparto || cfg.instagram?.reparto || {};
+  let igUrl = String((typeof igRaw === "object" ? igRaw?.url : igRaw) || "").trim();
+  if (!igUrl) {
+    igUrl = String(cfg.instagram?.reparto?.url || "https://www.instagram.com/riparto.fi1").trim();
+  }
   const igLabel =
     (typeof igRaw === "object" && igRaw?.label) || "Instagram";
 
-  // Se le icone sono già in pagina, aggiorna solo gli href
-  const existingIg = container.querySelector('[data-social="ig"]');
-  const existingFb = container.querySelector('[data-social="fb"]');
-  if (existingIg || existingFb) {
-    if (existingIg) {
-      existingIg.href = igUrl;
-      existingIg.title = igLabel;
-      existingIg.setAttribute("aria-label", igLabel);
-      existingIg.hidden = !igUrl;
-    }
-    if (existingFb) {
-      existingFb.href = fbUrl;
-      existingFb.title = fbLabel;
-      existingFb.setAttribute("aria-label", fbLabel);
-      existingFb.hidden = !fbUrl;
-    }
-    return;
-  }
-
-  const parts = [];
-  if (igUrl) {
-    parts.push(
-      `<a class="social-icon-btn social-icon-ig" data-social="ig" href="${escapeHtml(igUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(igLabel)}" aria-label="${escapeHtml(igLabel)}">${socialIconIg()}</a>`
-    );
-  }
-  if (fbUrl) {
-    parts.push(
-      `<a class="social-icon-btn social-icon-fb" data-social="fb" href="${escapeHtml(fbUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(fbLabel)}" aria-label="${escapeHtml(fbLabel)}">${socialIconFb()}</a>`
-    );
-  }
-  if (!parts.length) {
-    container.innerHTML = `<p class="hint" style="margin:0">Social in arrivo.</p>`;
-    return;
-  }
   container.innerHTML = `
     <div class="social-follow">
       <span class="social-follow-label">Seguici:</span>
-      <div class="social-icon-row">${parts.join("")}</div>
+      <div class="social-icon-row">
+        <a class="social-icon-btn social-icon-ig" data-social="ig" href="${escapeHtml(igUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(igLabel)}" aria-label="${escapeHtml(igLabel)}">${socialIconIg()}</a>
+        <a class="social-icon-btn social-icon-fb" data-social="fb" href="${escapeHtml(fbUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(fbLabel)}" aria-label="${escapeHtml(fbLabel)}">${socialIconFb()}</a>
+      </div>
     </div>`;
+}
+
+function flashAlert(el, msg, ok = true) {
+  if (!el) return;
+  el.hidden = false;
+  el.className = ok ? "alert alert-ok" : "alert alert-error";
+  el.textContent = msg;
+  el.classList.remove("is-flashing");
+  // reflow per rieseguire l’animazione anche se il testo è uguale
+  void el.offsetWidth;
+  el.classList.add("is-flashing");
 }
 
 /** Elenco completo (Chi siamo): tutti i link con nome. */

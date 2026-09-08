@@ -14,10 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const alertBox = document.getElementById("cz-alert");
 
   function flash(msg, ok = true) {
-    if (!alertBox) return;
-    alertBox.hidden = false;
-    alertBox.className = ok ? "alert alert-ok" : "alert alert-error";
-    alertBox.textContent = msg;
+    flashAlert(alertBox, msg, ok);
   }
 
   function refreshBookMeta() {

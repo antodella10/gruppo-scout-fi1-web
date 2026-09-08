@@ -62,10 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
   scopeSelect?.addEventListener("change", syncBrancaVisibility);
 
   function showAlert(msg, ok = true) {
-    if (!eventAlert) return;
-    eventAlert.hidden = false;
-    eventAlert.className = ok ? "alert alert-ok" : "alert alert-error";
-    eventAlert.textContent = msg;
+    flashAlert(eventAlert, msg, ok);
   }
 
   function resetForm() {
