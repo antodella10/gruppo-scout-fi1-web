@@ -10,8 +10,9 @@ window.SCOUT_CONFIG = {
   /** Opzionale: chiave API Google Calendar (alternativa alla function Netlify). */
   googleCalendarApiKey: "",
   association: "FederScout — Associazione Mariano Silvani",
-  /** Form Google per le iscrizioni (sostituisci con il link reale). */
-  iscrizioniFormUrl: "https://docs.google.com/forms/d/e/1FAIpQLSf_PLACEHOLDER/viewform",
+  /** Form Google per le iscrizioni (modificabile anche dall’area admin). */
+  iscrizioniFormUrl:
+    "https://docs.google.com/forms/d/e/1FAIpQLSdfLeglaOITCcvyqEH5fgVqTV_WiSh9safZ8vXP9GfrBtXOQw/viewform",
   sedi: [
     {
       id: "girone",

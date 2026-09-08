@@ -444,6 +444,7 @@ const ScoutStore = (() => {
       googleCalendarEmbed: raw.googleCalendarEmbed || "",
       meetingHours: Array.isArray(raw.meetingHours) ? raw.meetingHours : [],
       social: raw.social && typeof raw.social === "object" ? raw.social : null,
+      iscrizioniFormUrl: String(raw.iscrizioniFormUrl || "").trim(),
     };
   }
 
@@ -722,6 +723,22 @@ const ScoutStore = (() => {
     return next;
   }
 
+  function getIscrizioniFormUrl() {
+    const saved = getSettings().iscrizioniFormUrl;
+    if (saved) return saved;
+    return String(window.SCOUT_CONFIG?.iscrizioniFormUrl || "").trim();
+  }
+
+  function saveIscrizioniFormUrl(url, user) {
+    if (!isAdminUser(user)) throw new Error("Solo l’admin può aggiornare il form iscrizioni.");
+    const clean = String(url || "").trim();
+    if (clean && !/^https?:\/\//i.test(clean)) {
+      throw new Error("Incolla un URL completo (https://…).");
+    }
+    write(KEYS.settings, { ...getSettings(), iscrizioniFormUrl: clean });
+    return clean;
+  }
+
   return {
     ADMIN_EMAIL,
     isAdminEmail,
@@ -756,5 +773,7 @@ const ScoutStore = (() => {
     canEditMeetingSlot,
     getSocialLinks,
     saveSocialLinks,
+    getIscrizioniFormUrl,
+    saveIscrizioniFormUrl,
   };
 })();

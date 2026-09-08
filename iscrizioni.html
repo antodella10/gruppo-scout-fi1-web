@@ -71,7 +71,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       const btn = document.getElementById("iscrizioni-form-btn");
       const hint = document.getElementById("iscrizioni-form-hint");
-      const url = (window.SCOUT_CONFIG?.iscrizioniFormUrl || "").trim();
+      const url = (ScoutStore.getIscrizioniFormUrl?.() || window.SCOUT_CONFIG?.iscrizioniFormUrl || "").trim();
       if (btn && url && !url.includes("PLACEHOLDER")) {
         btn.href = url;
       } else if (btn) {

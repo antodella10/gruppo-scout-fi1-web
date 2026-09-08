@@ -62,6 +62,15 @@ document.addEventListener("DOMContentLoaded", () => {
           : "Nessuna notizia",
       });
 
+      const formUrl = ScoutStore.getIscrizioniFormUrl?.() || "";
+      tiles.push({
+        id: "iscrizioni",
+        href: "./iscrizioni.html",
+        title: "Form iscrizioni",
+        hint: "Link del Google Form nella pagina pubblica.",
+        preview: formUrl ? "Form collegato" : "Nessun link impostato",
+      });
+
       tiles.push({
         id: "richieste",
         href: "./richieste.html",

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form iscrizioni · Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html" data-home-link data-home-base="../">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="staff-shell">
+    <div class="container">
+      <div class="staff-hero">
+        <div>
+          <h1>Form iscrizioni</h1>
+          <p id="staff-meta" data-static="1">Link del Google Form usato nella pagina pubblica Iscrizioni.</p>
+        </div>
+        <div class="inline-actions">
+          <a class="btn btn-ghost" href="../iscrizioni.html" target="_blank" rel="noopener">Vedi pagina pubblica</a>
+          <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
+        </div>
+      </div>
+
+      <div id="iscrizioni-alert" class="alert alert-ok" hidden></div>
+
+      <section class="panel" style="max-width:42rem">
+        <h2>Link form</h2>
+        <p class="hint">Incolla l’URL completo del Google Form. Se lo cambi, la pagina Iscrizioni userà subito il nuovo link.</p>
+        <form id="iscrizioni-form" class="form-grid">
+          <label>
+            URL Google Form
+            <input type="url" name="url" required placeholder="https://docs.google.com/forms/...">
+          </label>
+          <p class="hint" id="iscrizioni-current" style="margin:0;word-break:break-all"></p>
+          <div class="inline-actions">
+            <button class="btn btn-primary" type="submit">Salva link</button>
+            <a class="btn btn-ghost" id="iscrizioni-open" href="#" target="_blank" rel="noopener">Apri form</a>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/cloud-sync.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/canzoniere-store.js"></script>
+  <script src="../js/branch-view.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/staff-shell.js"></script>
+  <script src="../js/iscrizioni-staff.js"></script>
+</body>
+</html>
