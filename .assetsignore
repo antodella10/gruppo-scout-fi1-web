@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+netlify
+netlify.toml
+package.json
+package-lock.json
+wrangler.toml
+.gitignore
+README.md
+*.md
+.DS_Store
+.env
+.env.*
