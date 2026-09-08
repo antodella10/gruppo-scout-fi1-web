@@ -163,7 +163,12 @@ function updateNavAuth() {
     slot.innerHTML = `
       <span class="user-chip">${escapeHtml(full.nome)} ${escapeHtml(full.cognome)}${br ? " · " + escapeHtml(br) : ""}${badge}</span>
       <a class="btn btn-primary btn-small" href="${base}staff/">Area staff</a>
+      <button type="button" class="btn btn-ghost btn-small" data-nav-logout>Esci</button>
     `;
+    slot.querySelector("[data-nav-logout]")?.addEventListener("click", () => {
+      ScoutStore.logout();
+      location.href = `${base}index.html`;
+    });
   } else {
     slot.innerHTML = `<a class="btn btn-yellow btn-small" href="${base}staff/login.html">Login staff</a>`;
   }
@@ -171,12 +176,18 @@ function updateNavAuth() {
 
 function renderSocialLinks(container, { compact = false } = {}) {
   if (!container) return;
-  const social = window.SCOUT_CONFIG?.social || {};
+  const social =
+    typeof ScoutStore !== "undefined" && ScoutStore.getSocialLinks
+      ? ScoutStore.getSocialLinks()
+      : window.SCOUT_CONFIG?.social || {};
   const fb = (social.facebook || "").trim();
   const ig = social.instagram || {};
   const igEntries = [
-    ["gruppo", "Gruppo"],
-    ...Object.values(window.SCOUT_BRANCHES || {}).map((b) => [b.id, b.label]),
+    ["gruppo", "Firenze 1"],
+    ["lupetti", "Lupetti"],
+    ["reparto", "Reparto"],
+    ["noviziato", "Noviziato"],
+    ["clan", "Clan"],
   ]
     .map(([id, label]) => ({ id, label, url: String(ig[id] || "").trim() }))
     .filter((x) => x.url);
@@ -200,7 +211,7 @@ function renderSocialLinks(container, { compact = false } = {}) {
   }
 
   if (!parts.length) {
-    container.innerHTML = `<p class="hint" style="margin:0">Social in arrivo — i link si configurano in <code>js/config.js</code>.</p>`;
+    container.innerHTML = `<p class="hint" style="margin:0">Social non ancora configurati.</p>`;
     return;
   }
   container.innerHTML = `<div class="social-row">${parts.join("")}</div>`;
@@ -217,7 +228,7 @@ function renderMeetingHoursList(container) {
     <ul class="meeting-hours-list">
       ${hours
         .map((h) => {
-          const label = ScoutStore.branchLabel(h.branca);
+          const label = h.label || ScoutStore.branchLabel(h.branca);
           const when = [h.day, h.time].filter(Boolean).join(" · ") || "Da definire";
           const place = h.place ? `<span class="mh-place">${escapeHtml(h.place)}</span>` : "";
           return `<li>

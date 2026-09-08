@@ -29,35 +29,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const adminPanel = document.getElementById("admin-panel");
   const gcalPanel = document.getElementById("gcal-panel");
+  const socialPanel = document.getElementById("social-panel");
   if (adminPanel) adminPanel.hidden = !isAdmin;
   if (gcalPanel) gcalPanel.hidden = !isAdmin;
+  if (socialPanel) socialPanel.hidden = !isAdmin;
 
   // —— Orario riunioni ——
+  const hoursPanel = document.getElementById("meeting-hours-panel");
   const hoursEditor = document.getElementById("meeting-hours-editor");
   const hoursHint = document.getElementById("meeting-hours-hint");
   const hoursAlert = document.getElementById("meeting-hours-alert");
   const hoursSave = document.getElementById("meeting-hours-save");
   const DAYS = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
 
+  const editableHours = ScoutStore.getMeetingHours().filter((h) =>
+    ScoutStore.canEditMeetingSlot(user, h)
+  );
+  if (hoursPanel) hoursPanel.hidden = editableHours.length === 0;
+
   if (hoursHint) {
     hoursHint.textContent = isAdmin
-      ? "Come admin puoi modificare gli orari di tutte le branche."
-      : `Puoi modificare solo l’orario di ${ScoutStore.branchLabel(user.branca)}.`;
+      ? "Lupetti e Reparto (Girone / Quarate)."
+      : `Orari modificabili per ${ScoutStore.branchLabel(user.branca)}.`;
   }
 
   function renderHoursEditor() {
     if (!hoursEditor) return;
-    const hours = ScoutStore.getMeetingHours().filter((h) => isAdmin || h.branca === user.branca);
+    const hours = ScoutStore.getMeetingHours().filter((h) => ScoutStore.canEditMeetingSlot(user, h));
+    if (!hours.length) {
+      hoursEditor.innerHTML = `<div class="empty-state">Nessun orario da gestire per il tuo account.</div>`;
+      return;
+    }
     hoursEditor.innerHTML = hours
       .map((h) => {
-        const dayOpts = DAYS.map(
-          (d) => `<option value="${d}" ${h.day === d ? "selected" : ""}>${d}</option>`
-        ).join("");
+        const dayOpts = [
+          `<option value="" ${!h.day ? "selected" : ""}>—</option>`,
+          ...DAYS.map((d) => `<option value="${d}" ${h.day === d ? "selected" : ""}>${d}</option>`),
+        ].join("");
         return `
-        <div class="meeting-edit-row" data-branca="${h.branca}">
-          <strong class="mh-edit-label">${escapeHtml(ScoutStore.branchLabel(h.branca))}</strong>
+        <div class="meeting-edit-row" data-id="${escapeHtml(h.id)}">
+          <strong class="mh-edit-label">${escapeHtml(h.label)}</strong>
           <label>Giorno
-            <select name="day">${dayOpts}<option value="" ${!h.day ? "selected" : ""}>—</option></select>
+            <select name="day">${dayOpts}</select>
           </label>
           <label>Orario
             <input type="text" name="time" value="${escapeHtml(h.time)}" placeholder="es. 15:30–17:30">
@@ -73,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
   hoursSave?.addEventListener("click", () => {
     if (!hoursEditor) return;
     const rows = [...hoursEditor.querySelectorAll(".meeting-edit-row")].map((row) => ({
-      branca: row.dataset.branca,
+      id: row.dataset.id,
       day: row.querySelector('[name="day"]').value,
       time: row.querySelector('[name="time"]').value,
       place: row.querySelector('[name="place"]').value,
@@ -96,6 +109,51 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   renderHoursEditor();
+
+  // —— Admin: social links ——
+  if (isAdmin) {
+    const socialForm = document.getElementById("social-form");
+    const socialAlert = document.getElementById("social-alert");
+    const currentSocial = ScoutStore.getSocialLinks();
+    if (socialForm) {
+      socialForm.facebook.value = currentSocial.facebook || "";
+      socialForm.igGruppo.value = currentSocial.instagram.gruppo || "";
+      socialForm.igLupetti.value = currentSocial.instagram.lupetti || "";
+      socialForm.igReparto.value = currentSocial.instagram.reparto || "";
+      socialForm.igNoviziato.value = currentSocial.instagram.noviziato || "";
+      socialForm.igClan.value = currentSocial.instagram.clan || "";
+    }
+    socialForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const data = new FormData(socialForm);
+      try {
+        ScoutStore.saveSocialLinks(
+          {
+            facebook: data.get("facebook"),
+            instagram: {
+              gruppo: data.get("igGruppo"),
+              lupetti: data.get("igLupetti"),
+              reparto: data.get("igReparto"),
+              noviziato: data.get("igNoviziato"),
+              clan: data.get("igClan"),
+            },
+          },
+          user
+        );
+        if (socialAlert) {
+          socialAlert.hidden = false;
+          socialAlert.className = "alert alert-ok";
+          socialAlert.textContent = "Link social aggiornati.";
+        }
+      } catch (err) {
+        if (socialAlert) {
+          socialAlert.hidden = false;
+          socialAlert.className = "alert alert-error";
+          socialAlert.textContent = err.message || "Salvataggio non riuscito.";
+        }
+      }
+    });
+  }
 
   // —— Admin: Google Calendar + pending approvals ——
   if (isAdmin) {
@@ -222,6 +280,14 @@ document.addEventListener("DOMContentLoaded", () => {
           </ul>`;
       }
     }
+  }
+
+  const staffSide = document.querySelector(".staff-side");
+  const staffMain = document.querySelector(".staff-main");
+  if (staffSide) {
+    const hasVisible = [...staffSide.children].some((el) => !el.hidden);
+    staffSide.hidden = !hasVisible;
+    if (!hasVisible && staffMain) staffMain.classList.add("wide");
   }
 
   // —— Events ——

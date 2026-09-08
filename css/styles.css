@@ -662,11 +662,22 @@ select:focus {
 
 .staff-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.staff-side {
+  display: flex;
+  flex-direction: column;
   gap: 1.25rem;
 }
 
-.staff-grid .wide {
+.staff-grid .wide,
+.staff-grid #admin-panel,
+.staff-grid #social-panel,
+.staff-grid #gcal-panel,
+.staff-grid .staff-main.wide {
   grid-column: 1 / -1;
 }
 
@@ -1074,7 +1085,7 @@ select:focus {
 
 .meeting-hours-list li {
   display: grid;
-  grid-template-columns: 8rem 1fr auto;
+  grid-template-columns: minmax(9rem, 12rem) 1fr auto;
   gap: 0.75rem;
   align-items: baseline;
   padding: 0.75rem 0.85rem;

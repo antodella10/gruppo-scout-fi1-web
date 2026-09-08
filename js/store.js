@@ -400,6 +400,7 @@ const ScoutStore = (() => {
       googleCalendars: calendars,
       googleCalendarEmbed: raw.googleCalendarEmbed || "",
       meetingHours: Array.isArray(raw.meetingHours) ? raw.meetingHours : [],
+      social: raw.social && typeof raw.social === "object" ? raw.social : null,
     };
   }
 
@@ -460,6 +461,8 @@ const ScoutStore = (() => {
   function defaultMeetingHours() {
     const defaults = window.SCOUT_DEFAULT_MEETING_HOURS || [];
     return defaults.map((h) => ({
+      id: h.id,
+      label: h.label || h.id,
       branca: h.branca,
       day: h.day || "",
       time: h.time || "",
@@ -467,22 +470,68 @@ const ScoutStore = (() => {
     }));
   }
 
+  function migrateSavedMeetingHours(saved) {
+    if (!Array.isArray(saved) || !saved.length) return [];
+    return saved
+      .map((h) => {
+        if (!h) return null;
+        if (h.id) {
+          return {
+            id: h.id,
+            label: h.label || h.id,
+            branca: h.branca || "",
+            day: h.day || "",
+            time: h.time || "",
+            place: h.place || "",
+          };
+        }
+        // vecchio formato per sola branca
+        if (h.branca === "lupetti") {
+          return {
+            id: "lupetti",
+            label: "Lupetti",
+            branca: "lupetti",
+            day: h.day || "",
+            time: h.time || "",
+            place: h.place || "Girone",
+          };
+        }
+        if (h.branca === "reparto") {
+          return {
+            id: "reparto-girone",
+            label: "Reparto — Girone",
+            branca: "reparto",
+            day: h.day || "",
+            time: h.time || "",
+            place: h.place || "Girone",
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+  }
+
   function getMeetingHours() {
     const settings = getSettings();
-    const saved = Array.isArray(settings.meetingHours) ? settings.meetingHours : [];
-    const byBranca = Object.fromEntries(saved.filter((h) => h && h.branca).map((h) => [h.branca, h]));
-    const order = Object.keys(window.SCOUT_BRANCHES || {});
-    const defaults = defaultMeetingHours();
-    const defBy = Object.fromEntries(defaults.map((h) => [h.branca, h]));
-    return order.map((id) => {
-      const cur = byBranca[id] || defBy[id] || { branca: id, day: "", time: "", place: "" };
+    const saved = migrateSavedMeetingHours(settings.meetingHours);
+    const byId = Object.fromEntries(saved.map((h) => [h.id, h]));
+    return defaultMeetingHours().map((def) => {
+      const cur = byId[def.id] || {};
       return {
-        branca: id,
-        day: cur.day || "",
-        time: cur.time || "",
-        place: cur.place || "",
+        id: def.id,
+        label: def.label,
+        branca: def.branca,
+        day: cur.day ?? def.day,
+        time: cur.time ?? def.time,
+        place: cur.place ?? def.place,
       };
     });
+  }
+
+  function canEditMeetingSlot(user, slot) {
+    if (!user || !slot) return false;
+    if (isAdminUser(user)) return true;
+    return !!user.branca && user.branca === slot.branca;
   }
 
   function saveMeetingHours(list, user) {
@@ -491,57 +540,73 @@ const ScoutStore = (() => {
     const current = getMeetingHours();
     const incoming = Array.isArray(list) ? list : [];
     const next = current.map((row) => {
-      const patch = incoming.find((h) => h.branca === row.branca);
+      const patch = incoming.find((h) => h.id === row.id);
       if (!patch) return row;
-      if (!admin && user.branca !== row.branca) return row;
+      if (!canEditMeetingSlot(user, row)) return row;
       return {
+        id: row.id,
+        label: row.label,
         branca: row.branca,
         day: String(patch.day || "").trim(),
         time: String(patch.time || "").trim(),
         place: String(patch.place || "").trim(),
       };
     });
-    // staff non admin: può aggiornare solo la propria riga
     if (!admin) {
-      if (!user.branca) throw new Error("Branca non impostata.");
-      const only = incoming.find((h) => h.branca === user.branca);
-      if (!only) throw new Error("Nessun orario da salvare.");
-      const merged = current.map((row) =>
-        row.branca === user.branca
-          ? {
-              branca: row.branca,
-              day: String(only.day || "").trim(),
-              time: String(only.time || "").trim(),
-              place: String(only.place || "").trim(),
-            }
-          : row
-      );
-      write(KEYS.settings, { ...getSettings(), meetingHours: merged });
-      return merged;
+      const editable = incoming.filter((h) => {
+        const row = current.find((r) => r.id === h.id);
+        return row && canEditMeetingSlot(user, row);
+      });
+      if (!editable.length) throw new Error("Nessun orario da salvare.");
     }
     write(KEYS.settings, { ...getSettings(), meetingHours: next });
     return next;
   }
 
-  function updateMeetingHour(branca, patch, user) {
-    if (!user) throw new Error("Devi essere autenticato.");
-    const admin = isAdminUser(user);
-    if (!admin && user.branca !== branca) {
-      throw new Error("Puoi modificare solo l’orario della tua branca.");
-    }
-    if (!window.SCOUT_BRANCHES?.[branca]) throw new Error("Branca non valida.");
-    const list = getMeetingHours().map((row) =>
-      row.branca === branca
-        ? {
-            branca,
-            day: String(patch.day ?? row.day ?? "").trim(),
-            time: String(patch.time ?? row.time ?? "").trim(),
-            place: String(patch.place ?? row.place ?? "").trim(),
-          }
-        : row
-    );
-    write(KEYS.settings, { ...getSettings(), meetingHours: list });
-    return list;
+  function defaultSocial() {
+    const cfg = window.SCOUT_CONFIG?.social || {};
+    return {
+      facebook: String(cfg.facebook || "").trim(),
+      instagram: {
+        gruppo: String(cfg.instagram?.gruppo || "").trim(),
+        lupetti: String(cfg.instagram?.lupetti || "").trim(),
+        reparto: String(cfg.instagram?.reparto || "").trim(),
+        noviziato: String(cfg.instagram?.noviziato || "").trim(),
+        clan: String(cfg.instagram?.clan || "").trim(),
+      },
+    };
+  }
+
+  function getSocialLinks() {
+    const base = defaultSocial();
+    const saved = getSettings().social;
+    if (!saved || typeof saved !== "object") return base;
+    return {
+      facebook: String(saved.facebook ?? base.facebook).trim(),
+      instagram: {
+        gruppo: String(saved.instagram?.gruppo ?? base.instagram.gruppo).trim(),
+        lupetti: String(saved.instagram?.lupetti ?? base.instagram.lupetti).trim(),
+        reparto: String(saved.instagram?.reparto ?? base.instagram.reparto).trim(),
+        noviziato: String(saved.instagram?.noviziato ?? base.instagram.noviziato).trim(),
+        clan: String(saved.instagram?.clan ?? base.instagram.clan).trim(),
+      },
+    };
+  }
+
+  function saveSocialLinks(social, user) {
+    if (!isAdminUser(user)) throw new Error("Solo admin può aggiornare i social.");
+    const next = {
+      facebook: String(social?.facebook || "").trim(),
+      instagram: {
+        gruppo: String(social?.instagram?.gruppo || "").trim(),
+        lupetti: String(social?.instagram?.lupetti || "").trim(),
+        reparto: String(social?.instagram?.reparto || "").trim(),
+        noviziato: String(social?.instagram?.noviziato || "").trim(),
+        clan: String(social?.instagram?.clan || "").trim(),
+      },
+    };
+    write(KEYS.settings, { ...getSettings(), social: next });
+    return next;
   }
 
   return {
@@ -573,6 +638,8 @@ const ScoutStore = (() => {
     getGoogleCalendarsForView,
     getMeetingHours,
     saveMeetingHours,
-    updateMeetingHour,
+    canEditMeetingSlot,
+    getSocialLinks,
+    saveSocialLinks,
   };
 })();

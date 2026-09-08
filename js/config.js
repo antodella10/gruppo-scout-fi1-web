@@ -20,12 +20,13 @@ window.SCOUT_CONFIG = {
       mapsUrl: "https://maps.app.goo.gl/vZ8S7TNm4LQBSBT26",
     },
   ],
+  /** Valori di default; in produzione si possono aggiornare dall’area admin. */
   social: {
-    facebook: "", // es. https://www.facebook.com/tuapagina
+    facebook: "https://www.facebook.com/scoutfirenze1/?locale=it_IT",
     instagram: {
-      gruppo: "",
-      lupetti: "",
-      reparto: "",
+      gruppo: "https://www.instagram.com/scout_firenze1",
+      lupetti: "https://www.instagram.com/tigerandcavalloni",
+      reparto: "https://www.instagram.com/riparto.fi1",
       noviziato: "",
       clan: "",
     },
@@ -46,9 +47,30 @@ window.SCOUT_SCOPES = {
   coca: { id: "coca", label: "Co.Ca." },
 };
 
+/** Solo lupetti + reparto (Girone / Quarate). */
 window.SCOUT_DEFAULT_MEETING_HOURS = [
-  { branca: "lupetti", day: "Sabato", time: "15:30–17:00", place: "Girone" },
-  { branca: "reparto", day: "Sabato", time: "15:00–17:30", place: "Girone" },
-  { branca: "noviziato", day: "Sabato", time: "15:30–17:30", place: "Quarate" },
-  { branca: "clan", day: "Sabato", time: "21:00–23:00", place: "Quarate" },
+  {
+    id: "lupetti",
+    label: "Lupetti",
+    branca: "lupetti",
+    day: "Sabato",
+    time: "15:30–17:00",
+    place: "Girone",
+  },
+  {
+    id: "reparto-girone",
+    label: "Reparto — Girone",
+    branca: "reparto",
+    day: "Sabato",
+    time: "15:00–17:30",
+    place: "Girone",
+  },
+  {
+    id: "reparto-quarate",
+    label: "Reparto — Quarate",
+    branca: "reparto",
+    day: "Sabato",
+    time: "15:00–17:30",
+    place: "Quarate",
+  },
 ];

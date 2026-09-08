@@ -25,11 +25,10 @@
           <h1>Ciao, <span id="staff-name">staff</span></h1>
           <p id="staff-meta">Area personale</p>
         </div>
-        <button type="button" class="btn btn-ghost" id="logout-btn">Esci</button>
       </div>
 
       <div class="staff-grid">
-        <section class="panel">
+        <section class="panel staff-main">
           <h2>Gestione attività</h2>
           <p class="hint" id="event-hint">
             Eventi Gruppo, della tua branca, staff di branca e Co.Ca.
@@ -80,15 +79,27 @@
           <div id="staff-event-list"></div>
         </section>
 
-        <section class="panel" id="meeting-hours-panel">
-          <h2>Orario riunioni</h2>
-          <p class="hint" id="meeting-hours-hint">Imposta giorno, orario e sede della riunione.</p>
-          <div id="meeting-hours-editor"></div>
-          <div class="inline-actions" style="margin-top:1rem">
-            <button type="button" class="btn btn-primary" id="meeting-hours-save">Salva orari</button>
-          </div>
-          <div id="meeting-hours-alert" class="alert alert-ok" hidden style="margin-top:.75rem"></div>
-        </section>
+        <div class="staff-side">
+          <section class="panel" id="reparto-canzoniere-panel" hidden>
+            <h2>Canzoniere reparto</h2>
+            <p class="hint">Gestisci PDF canzoniere, canzoni sfuse e proposte dei ragazzi.</p>
+            <div id="reparto-proposals-preview"></div>
+            <div class="inline-actions" style="margin-top:1rem">
+              <a class="btn btn-primary" href="./canzoniere.html">Apri gestione canzoniere</a>
+              <a class="btn btn-ghost" href="../canzoniere/">Pagina pubblica</a>
+            </div>
+          </section>
+
+          <section class="panel" id="meeting-hours-panel" hidden>
+            <h2>Orario riunioni</h2>
+            <p class="hint" id="meeting-hours-hint">Imposta giorno e orario.</p>
+            <div id="meeting-hours-editor"></div>
+            <div class="inline-actions" style="margin-top:1rem">
+              <button type="button" class="btn btn-primary" id="meeting-hours-save">Salva orari</button>
+            </div>
+            <div id="meeting-hours-alert" class="alert alert-ok" hidden style="margin-top:.75rem"></div>
+          </section>
+        </div>
 
         <section class="panel" id="admin-panel" hidden>
           <h2>Richieste staff</h2>
@@ -96,14 +107,37 @@
           <div id="pending-list"></div>
         </section>
 
-        <section class="panel" id="reparto-canzoniere-panel" hidden>
-          <h2>Canzoniere reparto</h2>
-          <p class="hint">Gestisci PDF canzoniere, canzoni sfuse e proposte dei ragazzi.</p>
-          <div id="reparto-proposals-preview"></div>
-          <div class="inline-actions" style="margin-top:1rem">
-            <a class="btn btn-primary" href="./canzoniere.html">Apri gestione canzoniere</a>
-            <a class="btn btn-ghost" href="../canzoniere/">Pagina pubblica</a>
-          </div>
+        <section class="panel" id="social-panel" hidden>
+          <h2>Link social</h2>
+          <p class="hint">Solo admin — aggiorna Facebook e Instagram. Compariranno in home e contatti.</p>
+          <form id="social-form" class="form-grid">
+            <label>
+              Facebook
+              <input type="url" name="facebook" id="social-facebook" placeholder="https://www.facebook.com/...">
+            </label>
+            <label>
+              Instagram gruppo
+              <input type="url" name="igGruppo" id="social-ig-gruppo" placeholder="https://www.instagram.com/...">
+            </label>
+            <label>
+              Instagram lupetti
+              <input type="url" name="igLupetti" id="social-ig-lupetti" placeholder="https://www.instagram.com/...">
+            </label>
+            <label>
+              Instagram reparto
+              <input type="url" name="igReparto" id="social-ig-reparto" placeholder="https://www.instagram.com/...">
+            </label>
+            <label>
+              Instagram noviziato
+              <input type="url" name="igNoviziato" id="social-ig-noviziato" placeholder="Opzionale">
+            </label>
+            <label>
+              Instagram clan
+              <input type="url" name="igClan" id="social-ig-clan" placeholder="Opzionale">
+            </label>
+            <button class="btn btn-primary" type="submit">Salva social</button>
+          </form>
+          <div id="social-alert" class="alert alert-ok" hidden style="margin-top:.75rem"></div>
         </section>
 
         <section class="panel" id="gcal-panel" hidden>
