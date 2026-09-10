@@ -1,4 +1,4 @@
-node_modules/
+﻿node_modules/
 .DS_Store
 *.log
 .env
@@ -6,6 +6,7 @@ node_modules/
 
 # Archivio foto locali (galleria usa R2)
 photos/clan/
+photos/lupetti/
 photos/branco/
 photos/riparto/
 photos/noviziato/
