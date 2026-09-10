@@ -180,4 +180,10 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshSongs();
     refreshProposals();
   })();
+
+  document.addEventListener("staff-notifs-updated", () => {
+    refreshProposals();
+    refreshBookMeta();
+    refreshSongs();
+  });
 });

@@ -102,9 +102,66 @@ const CanzoniereStore = (() => {
     });
   }
 
+  function statusRank(status) {
+    if (status === "done" || status === "rejected") return 2;
+    if (status === "pending") return 1;
+    return 0;
+  }
+
+  function stamp(item) {
+    return item?.resolvedAt || item?.updatedAt || item?.createdAt || "";
+  }
+
+  /** Unisce liste per id: preferisce stato risolto, altrimenti il più recente. */
+  function mergeById(localList, remoteList) {
+    const map = new Map();
+    for (const item of [...(remoteList || []), ...(localList || [])]) {
+      if (!item?.id) continue;
+      const prev = map.get(item.id);
+      if (!prev) {
+        map.set(item.id, item);
+        continue;
+      }
+      const prevR = statusRank(prev.status);
+      const nextR = statusRank(item.status);
+      if (nextR > prevR) map.set(item.id, item);
+      else if (nextR === prevR && stamp(item) >= stamp(prev)) map.set(item.id, item);
+    }
+    return [...map.values()];
+  }
+
+  function pickBook(localBook, remoteBook) {
+    if (!localBook) return remoteBook || null;
+    if (!remoteBook) return localBook;
+    return stamp(remoteBook) >= stamp(localBook) ? remoteBook : localBook;
+  }
+
+  function mergeMeta(local, remote) {
+    return {
+      book: pickBook(local?.book, remote?.book),
+      songs: mergeById(local?.songs, remote?.songs),
+      proposals: mergeById(local?.proposals, remote?.proposals),
+    };
+  }
+
   async function pushMeta() {
-    if (typeof CloudSync === "undefined") return;
-    await CloudSync.putCanzoniereMeta(readMeta());
+    if (typeof CloudSync === "undefined") return null;
+    if (!CloudSync.available()) return null;
+    const result = await CloudSync.putCanzoniereMeta(readMeta());
+    if (!result?.ok) throw new Error("Sync cloud delle proposte non riuscita. Riprova.");
+    return result;
+  }
+
+  /** Prima di scrivere: riallinea dal cloud e fa merge, così non si perdono proposte. */
+  async function syncMergeFromRemote() {
+    if (typeof CloudSync === "undefined" || !CloudSync.available()) return readMeta();
+    const remote = await CloudSync.getCanzoniereMeta();
+    if (!remote) {
+      throw new Error("Impossibile sincronizzare col cloud. Controlla la connessione e riprova.");
+    }
+    const merged = mergeMeta(readMeta(), remote);
+    writeMeta(merged);
+    return merged;
   }
 
   async function syncPdfToCloud(fileId, file) {
@@ -159,15 +216,12 @@ const CanzoniereStore = (() => {
       (local.songs || []).length ||
       (local.proposals || []).length;
 
-    if (hasRemote) {
-      writeMeta({
-        book: remote.book || null,
-        songs: Array.isArray(remote.songs) ? remote.songs : [],
-        proposals: Array.isArray(remote.proposals) ? remote.proposals : [],
-      });
-      return true;
+    if (hasRemote || hasLocal) {
+      // Sempre merge: evita che un device cancelli le proposte dell’altro
+      writeMeta(mergeMeta(local, remote));
+      if (hasRemote) return true;
     }
-    if (hasLocal) {
+    if (hasLocal && !hasRemote) {
       await pushLocalFilesToCloud();
     }
     return false;
@@ -228,7 +282,7 @@ const CanzoniereStore = (() => {
 
   async function setBook(file, user) {
     if (!canManage(user)) throw new Error("Solo staff reparto (o admin) può aggiornare il canzoniere.");
-    const meta = readMeta();
+    const meta = await syncMergeFromRemote();
     const oldId = meta.book?.fileId;
     const fileId = uid("book");
     await putFile(fileId, file);
@@ -252,9 +306,9 @@ const CanzoniereStore = (() => {
     if (!canManage(user)) throw new Error("Solo staff reparto (o admin) può aggiungere canzoni.");
     const clean = String(title || "").trim();
     if (!clean) throw new Error("Inserisci il titolo della canzone.");
+    const meta = await syncMergeFromRemote();
     const fileId = uid("song");
     await putFile(fileId, file);
-    const meta = readMeta();
     const song = {
       id: uid("songmeta"),
       title: clean,
@@ -273,7 +327,7 @@ const CanzoniereStore = (() => {
 
   async function deleteSong(songId, user) {
     if (!canManage(user)) throw new Error("Non autorizzato.");
-    const meta = readMeta();
+    const meta = await syncMergeFromRemote();
     const song = (meta.songs || []).find((s) => s.id === songId);
     if (!song) return;
     meta.songs = meta.songs.filter((s) => s.id !== songId);
@@ -284,10 +338,9 @@ const CanzoniereStore = (() => {
   }
 
   async function proposeSong({ title, notes, fromName }) {
-    await pullRemote().catch(() => {});
     const clean = String(title || "").trim();
     if (!clean) throw new Error("Inserisci il titolo della canzone.");
-    const meta = readMeta();
+    const meta = await syncMergeFromRemote();
     const proposal = {
       id: uid("prop"),
       title: clean,
@@ -308,7 +361,7 @@ const CanzoniereStore = (() => {
     if (!["pending", "done", "rejected"].includes(status)) {
       throw new Error("Stato non valido.");
     }
-    const meta = readMeta();
+    const meta = await syncMergeFromRemote();
     const item = (meta.proposals || []).find((p) => p.id === id);
     if (!item) throw new Error("Proposta non trovata.");
     item.status = status;

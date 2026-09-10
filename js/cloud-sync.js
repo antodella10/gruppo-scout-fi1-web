@@ -37,7 +37,8 @@ window.CloudSync = (() => {
     if (!available()) return null;
     const base = await pickBase();
     const qs = new URLSearchParams({ resource, ...extra });
-    const res = await fetch(`${base}?${qs}`, { credentials: "omit" });
+    // cache: no-store evita risposte sync vecchie (soprattutto Safari/mobile)
+    const res = await fetch(`${base}?${qs}`, { credentials: "omit", cache: "no-store" });
     if (res.status === 503) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.error || "Sync cloud non configurata (KV).");
@@ -60,6 +61,7 @@ window.CloudSync = (() => {
       },
       body: JSON.stringify({ ...payload, writeKey: writeKey() }),
       credentials: "omit",
+      cache: "no-store",
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

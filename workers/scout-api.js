@@ -16,7 +16,11 @@ function corsHeaders(extra = {}) {
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: corsHeaders({ "Content-Type": "application/json", ...extraHeaders }),
+    headers: corsHeaders({
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+      ...extraHeaders,
+    }),
   });
 }
 

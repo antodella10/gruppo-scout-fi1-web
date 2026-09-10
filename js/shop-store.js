@@ -29,9 +29,57 @@ const ShopStore = (() => {
     localStorage.setItem(META_KEY, JSON.stringify(meta));
   }
 
+  function statusRank(status) {
+    if (status === "done" || status === "rejected") return 2;
+    if (status === "pending") return 1;
+    return 0;
+  }
+
+  function stamp(item) {
+    return item?.resolvedAt || item?.updatedAt || item?.createdAt || "";
+  }
+
+  function mergeById(localList, remoteList) {
+    const map = new Map();
+    for (const item of [...(remoteList || []), ...(localList || [])]) {
+      if (!item?.id) continue;
+      const prev = map.get(item.id);
+      if (!prev) {
+        map.set(item.id, item);
+        continue;
+      }
+      const prevR = statusRank(prev.status);
+      const nextR = statusRank(item.status);
+      if (nextR > prevR) map.set(item.id, item);
+      else if (nextR === prevR && stamp(item) >= stamp(prev)) map.set(item.id, item);
+    }
+    return [...map.values()];
+  }
+
+  function mergeMeta(local, remote) {
+    return {
+      items: mergeById(local?.items, remote?.items),
+      orders: mergeById(local?.orders, remote?.orders),
+    };
+  }
+
   async function pushMeta() {
-    if (typeof CloudSync === "undefined") return;
-    await CloudSync.putShopMeta(readMeta());
+    if (typeof CloudSync === "undefined") return null;
+    if (!CloudSync.available()) return null;
+    const result = await CloudSync.putShopMeta(readMeta());
+    if (!result?.ok) throw new Error("Sync cloud negozio non riuscita. Riprova.");
+    return result;
+  }
+
+  async function syncMergeFromRemote() {
+    if (typeof CloudSync === "undefined" || !CloudSync.available()) return readMeta();
+    const remote = await CloudSync.getShopMeta();
+    if (!remote) {
+      throw new Error("Impossibile sincronizzare col cloud. Controlla la connessione e riprova.");
+    }
+    const merged = mergeMeta(readMeta(), remote);
+    writeMeta(merged);
+    return merged;
   }
 
   async function pullRemote() {
@@ -44,14 +92,11 @@ const ShopStore = (() => {
     const local = readMeta();
     const hasLocal =
       (local.items || []).length || (local.orders || []).length;
-    if (hasRemote) {
-      writeMeta({
-        items: Array.isArray(remote.items) ? remote.items : [],
-        orders: Array.isArray(remote.orders) ? remote.orders : [],
-      });
-      return true;
+    if (hasRemote || hasLocal) {
+      writeMeta(mergeMeta(local, remote));
+      if (hasRemote) return true;
     }
-    if (hasLocal) await pushMeta();
+    if (hasLocal && !hasRemote) await pushMeta();
     return false;
   }
 
@@ -200,7 +245,7 @@ const ShopStore = (() => {
     const price = Number(payload.price);
     if (!Number.isFinite(price) || price < 0) throw new Error("Prezzo non valido.");
 
-    const meta = readMeta();
+    const meta = await syncMergeFromRemote();
     meta.items = meta.items || [];
     let item = payload.id ? meta.items.find((x) => x.id === payload.id) : null;
     if (!item) {
@@ -237,7 +282,7 @@ const ShopStore = (() => {
 
   async function deleteItem(id, user) {
     if (!canManage(user)) throw new Error("Solo l’admin può gestire il negozio.");
-    const meta = readMeta();
+    const meta = await syncMergeFromRemote();
     const item = (meta.items || []).find((x) => x.id === id);
     if (!item) return;
     meta.items = meta.items.filter((x) => x.id !== id);
@@ -262,13 +307,12 @@ const ShopStore = (() => {
   }
 
   async function placeOrder({ itemId, fromName, phone, sede, notes }) {
-    await pullRemote().catch(() => {});
-    const item = getItem(itemId);
+    const meta = await syncMergeFromRemote();
+    const item = (meta.items || []).map(normalizeItem).find((x) => x.id === itemId) || getItem(itemId);
     if (!item) throw new Error("Oggetto non trovato.");
     if (!item.available) throw new Error("Questo oggetto non è disponibile.");
     const name = String(fromName || "").trim();
     if (!name) throw new Error("Inserisci nome e cognome.");
-    const meta = readMeta();
     meta.orders = meta.orders || [];
     const order = {
       id: uid("ord"),
@@ -294,7 +338,7 @@ const ShopStore = (() => {
     if (!["pending", "done", "rejected"].includes(status)) {
       throw new Error("Stato non valido.");
     }
-    const meta = readMeta();
+    const meta = await syncMergeFromRemote();
     const order = (meta.orders || []).find((o) => o.id === orderId);
     if (!order) throw new Error("Richiesta non trovata.");
     order.status = status;
