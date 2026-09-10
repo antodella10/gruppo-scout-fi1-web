@@ -46,6 +46,25 @@ const NewsStore = (() => {
     localStorage.setItem(KEY, JSON.stringify(list));
   }
 
+  async function pushRemote() {
+    if (typeof CloudSync === "undefined") return;
+    await CloudSync.putNews(readAll());
+  }
+
+  async function pullRemote() {
+    if (typeof CloudSync === "undefined") return false;
+    const remote = await CloudSync.getNews();
+    if (!remote) return false;
+    if (Array.isArray(remote.items) && remote.items.length) {
+      writeAll(remote.items);
+      return true;
+    }
+    // remote empty / null items: seed local to cloud if we have content
+    const local = readAll();
+    if (local.length) await CloudSync.putNews(local);
+    return false;
+  }
+
   function normalize(item) {
     return {
       id: item.id,
@@ -95,12 +114,14 @@ const NewsStore = (() => {
     item.date = date;
     item.updatedAt = new Date().toISOString();
     writeAll(list);
+    pushRemote().catch(() => {});
     return normalize(item);
   }
 
   function remove(id, user) {
     if (!canManage(user)) throw new Error("Solo l’admin può gestire le notizie.");
     writeAll(readAll().filter((x) => x.id !== id));
+    pushRemote().catch(() => {});
   }
 
   function formatDate(isoDate) {
@@ -150,5 +171,7 @@ const NewsStore = (() => {
     formatDate,
     getDashTilePrefs,
     setDashTilePrefs,
+    pullRemote,
+    pushRemote,
   };
 })();

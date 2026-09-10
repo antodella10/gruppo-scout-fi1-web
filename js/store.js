@@ -453,6 +453,50 @@ const ScoutStore = (() => {
       throw new Error("Solo l’account mail di gruppo può modificare queste impostazioni.");
     }
     write(KEYS.settings, { ...getSettings(), ...settings });
+    pushRemoteSettings().catch(() => {});
+  }
+
+  async function pushRemoteSettings() {
+    if (typeof CloudSync === "undefined") return;
+    const s = getSettings();
+    await CloudSync.putSettings({
+      iscrizioniFormUrl: getIscrizioniFormUrl(),
+      social: s.social,
+      meetingHours: getMeetingHours(),
+      googleCalendars: listGoogleCalendars(),
+    });
+  }
+
+  async function pullRemoteSettings() {
+    if (typeof CloudSync === "undefined") return false;
+    const remote = await CloudSync.getSettings();
+    if (!remote) return false;
+    const has =
+      remote.iscrizioniFormUrl ||
+      remote.social ||
+      (Array.isArray(remote.meetingHours) && remote.meetingHours.length) ||
+      (Array.isArray(remote.googleCalendars) && remote.googleCalendars.length);
+    if (!has) {
+      const local = getSettings();
+      if (
+        getIscrizioniFormUrl() ||
+        local.social ||
+        (local.meetingHours || []).length ||
+        (local.googleCalendars || []).length
+      ) {
+        await pushRemoteSettings();
+      }
+      return false;
+    }
+    const next = { ...getSettings() };
+    if (remote.iscrizioniFormUrl) next.iscrizioniFormUrl = remote.iscrizioniFormUrl;
+    if (remote.social) next.social = remote.social;
+    if (Array.isArray(remote.meetingHours) && remote.meetingHours.length) {
+      next.meetingHours = remote.meetingHours;
+    }
+    if (Array.isArray(remote.googleCalendars)) next.googleCalendars = remote.googleCalendars;
+    write(KEYS.settings, next);
+    return true;
   }
 
   function listGoogleCalendars() {
@@ -608,6 +652,7 @@ const ScoutStore = (() => {
       if (!editable.length) throw new Error("Nessun orario da salvare.");
     }
     write(KEYS.settings, { ...getSettings(), meetingHours: next });
+    pushRemoteSettings().catch(() => {});
     return next;
   }
 
@@ -720,6 +765,7 @@ const ScoutStore = (() => {
       homeInstagram: String(social?.homeInstagram || "reparto"),
     };
     write(KEYS.settings, { ...getSettings(), social: next });
+    pushRemoteSettings().catch(() => {});
     return next;
   }
 
@@ -736,6 +782,7 @@ const ScoutStore = (() => {
       throw new Error("Incolla un URL completo (https://…).");
     }
     write(KEYS.settings, { ...getSettings(), iscrizioniFormUrl: clean });
+    pushRemoteSettings().catch(() => {});
     return clean;
   }
 
@@ -753,6 +800,8 @@ const ScoutStore = (() => {
     logout,
     pullRemoteAccounts,
     pushRemoteAccounts,
+    pullRemoteSettings,
+    pushRemoteSettings,
     getCurrentUser,
     getSession,
     getEvents,

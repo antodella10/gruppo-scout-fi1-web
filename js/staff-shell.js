@@ -132,6 +132,7 @@ window.StaffShell = (() => {
     fillHero(user);
     mountMenu(user, { active });
     ScoutStore.pullRemoteAccounts?.().catch(() => {});
+    ScoutStore.pullRemoteSettings?.().catch(() => {});
     return user;
   }
 

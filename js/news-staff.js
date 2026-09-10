@@ -103,5 +103,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   resetForm();
-  refresh();
+  (async () => {
+    await NewsStore.pullRemote?.().catch(() => {});
+    refresh();
+  })();
 });

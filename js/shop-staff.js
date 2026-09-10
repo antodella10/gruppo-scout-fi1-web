@@ -193,6 +193,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   fillTypes("Divisa");
-  refreshOrders();
-  refreshList();
+  (async () => {
+    await ShopStore.pullRemote?.().catch(() => {});
+    refreshOrders();
+    await refreshList();
+  })();
 });

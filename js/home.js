@@ -78,6 +78,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  async function syncCloudThenPaint() {
+    await ScoutStore.pullRemoteSettings?.().catch(() => {});
+    await NewsStore.pullRemote?.().catch(() => {});
+    paintGroupExtras();
+  }
+
   function mergeEvents() {
     const local = ScoutStore.getVisibleEvents(selectedBranca, user);
     const all = [...local, ...googleEvents];
@@ -214,13 +220,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         refreshCalendar();
-        paintGroupExtras();
+        syncCloudThenPaint();
         viewRoot.classList.remove("is-switching");
         scrollToHashSoon();
       }, 180);
     } else {
       refreshCalendar();
-      paintGroupExtras();
+      syncCloudThenPaint();
       scrollToHashSoon();
     }
 

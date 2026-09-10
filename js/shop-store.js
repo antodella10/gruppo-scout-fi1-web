@@ -29,6 +29,32 @@ const ShopStore = (() => {
     localStorage.setItem(META_KEY, JSON.stringify(meta));
   }
 
+  async function pushMeta() {
+    if (typeof CloudSync === "undefined") return;
+    await CloudSync.putShopMeta(readMeta());
+  }
+
+  async function pullRemote() {
+    if (typeof CloudSync === "undefined") return false;
+    const remote = await CloudSync.getShopMeta();
+    if (!remote) return false;
+    const hasRemote =
+      (Array.isArray(remote.items) && remote.items.length) ||
+      (Array.isArray(remote.orders) && remote.orders.length);
+    const local = readMeta();
+    const hasLocal =
+      (local.items || []).length || (local.orders || []).length;
+    if (hasRemote) {
+      writeMeta({
+        items: Array.isArray(remote.items) ? remote.items : [],
+        orders: Array.isArray(remote.orders) ? remote.orders : [],
+      });
+      return true;
+    }
+    if (hasLocal) await pushMeta();
+    return false;
+  }
+
   function uid(prefix = "shop") {
     return `${prefix}_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`;
   }
@@ -151,8 +177,20 @@ const ShopStore = (() => {
 
   async function getImageUrl(imageId) {
     const rec = await getImage(imageId);
-    if (!rec?.blob) return null;
-    return URL.createObjectURL(rec.blob);
+    if (rec?.blob) return URL.createObjectURL(rec.blob);
+    if (typeof CloudSync !== "undefined" && CloudSync.available()) {
+      try {
+        const url = await CloudSync.fileUrl("file", imageId);
+        const res = await fetch(url, { credentials: "omit" });
+        if (!res.ok) return null;
+        const blob = await res.blob();
+        await putImage(imageId, blob).catch(() => {});
+        return URL.createObjectURL(blob);
+      } catch {
+        return null;
+      }
+    }
+    return null;
   }
 
   async function upsertItem(payload, user, imageFile) {
@@ -165,8 +203,7 @@ const ShopStore = (() => {
     const meta = readMeta();
     meta.items = meta.items || [];
     let item = payload.id ? meta.items.find((x) => x.id === payload.id) : null;
-    const isNew = !item;
-    if (isNew) {
+    if (!item) {
       item = { id: uid("item"), imageId: null };
       meta.items.push(item);
     }
@@ -185,10 +222,16 @@ const ShopStore = (() => {
       const imageId = uid("img");
       await putImage(imageId, blob);
       item.imageId = imageId;
+      if (typeof CloudSync !== "undefined") {
+        const file = new File([blob], `${imageId}.jpg`, { type: "image/jpeg" });
+        await CloudSync.uploadFile(imageId, file).catch((err) => console.warn(err));
+        if (oldId) await CloudSync.deleteFile(oldId);
+      }
       if (oldId) await deleteImage(oldId).catch(() => {});
     }
 
     writeMeta(meta);
+    await pushMeta();
     return normalizeItem(item);
   }
 
@@ -199,7 +242,11 @@ const ShopStore = (() => {
     if (!item) return;
     meta.items = meta.items.filter((x) => x.id !== id);
     writeMeta(meta);
-    if (item.imageId) await deleteImage(item.imageId).catch(() => {});
+    if (item.imageId) {
+      await deleteImage(item.imageId).catch(() => {});
+      if (typeof CloudSync !== "undefined") await CloudSync.deleteFile(item.imageId);
+    }
+    await pushMeta();
   }
 
   function getOrders({ status } = {}) {
@@ -214,7 +261,8 @@ const ShopStore = (() => {
     return getOrders({ status: "pending" }).length;
   }
 
-  function placeOrder({ itemId, fromName, phone, sede, notes }) {
+  async function placeOrder({ itemId, fromName, phone, sede, notes }) {
+    await pullRemote().catch(() => {});
     const item = getItem(itemId);
     if (!item) throw new Error("Oggetto non trovato.");
     if (!item.available) throw new Error("Questo oggetto non è disponibile.");
@@ -237,10 +285,11 @@ const ShopStore = (() => {
     };
     meta.orders.unshift(order);
     writeMeta(meta);
+    await pushMeta();
     return order;
   }
 
-  function setOrderStatus(orderId, status, user) {
+  async function setOrderStatus(orderId, status, user) {
     if (!canManage(user)) throw new Error("Solo l’admin può gestire le richieste.");
     if (!["pending", "done", "rejected"].includes(status)) {
       throw new Error("Stato non valido.");
@@ -252,6 +301,7 @@ const ShopStore = (() => {
     order.resolvedAt = new Date().toISOString();
     order.resolvedBy = user.id;
     writeMeta(meta);
+    await pushMeta();
     return order;
   }
 
@@ -284,5 +334,7 @@ const ShopStore = (() => {
     setOrderStatus,
     formatPrice,
     availabilityLabel,
+    pullRemote,
+    pushMeta,
   };
 })();

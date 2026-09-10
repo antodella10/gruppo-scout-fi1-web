@@ -128,7 +128,10 @@ document.addEventListener("DOMContentLoaded", () => {
     render().catch((err) => alert(err.message));
   });
 
-  render().catch((err) => {
-    if (listEl) listEl.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
-  });
+  (async () => {
+    await ShopStore.pullRemote?.().catch(() => {});
+    await render().catch((err) => {
+      if (listEl) listEl.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
+    });
+  })();
 });

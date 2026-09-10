@@ -52,8 +52,9 @@
   <script src="js/branch-view.js"></script>
   <script src="js/ui.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
       renderSocialFollow(document.getElementById("footer-social"));
+      await NewsStore.pullRemote?.().catch(() => {});
       const listEl = document.getElementById("news-list");
       const items = NewsStore.getNews();
       if (!listEl) return;

@@ -24,6 +24,43 @@ const SentieroStore = (() => {
     localStorage.setItem(META_KEY, JSON.stringify(meta));
   }
 
+  async function pushMeta() {
+    if (typeof CloudSync === "undefined") return;
+    const meta = readMeta();
+    if (!meta) return;
+    await CloudSync.putSentieroMeta(meta);
+  }
+
+  async function pullRemoteMeta() {
+    if (typeof CloudSync === "undefined") return false;
+    const remote = await CloudSync.getSentieroMeta();
+    if (!remote) return false;
+    const has =
+      remote.libretto ||
+      (Array.isArray(remote.specialita) && remote.specialita.some((s) => s.source === "upload" || s.fileId));
+    // Prefer cloud overrides when present; otherwise keep seed/local
+    if (remote.libretto || (Array.isArray(remote.specialita) && remote.specialita.length && remote.updatedAt)) {
+      // Only overwrite if remote looks like a managed catalog (has updatedAt from our API)
+      if (remote.updatedAt) {
+        writeMeta({
+          libretto: remote.libretto || null,
+          specialita: Array.isArray(remote.specialita) ? remote.specialita : [],
+          updatedAt: remote.updatedAt,
+        });
+        return true;
+      }
+    }
+    if (has) {
+      writeMeta({
+        libretto: remote.libretto || null,
+        specialita: Array.isArray(remote.specialita) ? remote.specialita : [],
+        updatedAt: remote.updatedAt || new Date().toISOString(),
+      });
+      return true;
+    }
+    return false;
+  }
+
   async function loadSeed() {
     if (seedCache) return seedCache;
     const candidates = [];
@@ -127,6 +164,7 @@ const SentieroStore = (() => {
   }
 
   async function ensureMeta() {
+    await pullRemoteMeta().catch(() => {});
     let meta = readMeta();
     if (meta?.specialita?.length) return meta;
     const seed = await loadSeed();
@@ -171,8 +209,11 @@ const SentieroStore = (() => {
     if (!item) throw new Error("Elemento non trovato.");
     if (item.fileId) {
       const rec = await getFile(item.fileId);
-      if (!rec?.blob) throw new Error("PDF non trovato.");
-      return URL.createObjectURL(rec.blob);
+      if (rec?.blob) return URL.createObjectURL(rec.blob);
+      if (typeof CloudSync !== "undefined" && CloudSync.available()) {
+        return CloudSync.fileUrl("pdf", item.fileId);
+      }
+      throw new Error("PDF non trovato.");
     }
     if (item.pdfPath) return assetUrl(item.pdfPath);
     throw new Error("PDF non disponibile.");
@@ -183,6 +224,19 @@ const SentieroStore = (() => {
     if (item.imageId) {
       const rec = await getFile(item.imageId);
       if (rec?.blob) return URL.createObjectURL(rec.blob);
+      if (typeof CloudSync !== "undefined" && CloudSync.available()) {
+        try {
+          const url = await CloudSync.fileUrl("file", item.imageId);
+          const res = await fetch(url, { credentials: "omit" });
+          if (res.ok) {
+            const blob = await res.blob();
+            await putImageBlob(item.imageId, blob).catch(() => {});
+            return URL.createObjectURL(blob);
+          }
+        } catch {
+          /* fall through */
+        }
+      }
     }
     if (item.imagePath) return assetUrl(item.imagePath);
     return "";
@@ -217,6 +271,11 @@ const SentieroStore = (() => {
       updatedBy: user.id,
     };
     writeMeta(meta);
+    if (typeof CloudSync !== "undefined") {
+      await CloudSync.uploadPdf(fileId, file).catch((err) => console.warn(err));
+      if (oldId) await CloudSync.deletePdf(oldId);
+    }
+    await pushMeta();
     if (oldId) await deleteFile(oldId).catch(() => {});
     return meta.libretto;
   }
@@ -224,9 +283,13 @@ const SentieroStore = (() => {
   async function clearLibretto(user) {
     if (!canManage(user)) throw new Error("Non autorizzato.");
     const meta = await ensureMeta();
-    if (meta.libretto?.fileId) await deleteFile(meta.libretto.fileId).catch(() => {});
+    if (meta.libretto?.fileId) {
+      await deleteFile(meta.libretto.fileId).catch(() => {});
+      if (typeof CloudSync !== "undefined") await CloudSync.deletePdf(meta.libretto.fileId);
+    }
     meta.libretto = null;
     writeMeta(meta);
+    await pushMeta();
   }
 
   async function upsertSpecialita(payload, user, { pdfFile, imageFile } = {}) {
@@ -257,6 +320,10 @@ const SentieroStore = (() => {
       await putFile(item.fileId, pdfFile);
       item.source = "upload";
       item.pdfPath = null;
+      if (typeof CloudSync !== "undefined") {
+        await CloudSync.uploadPdf(item.fileId, pdfFile).catch((err) => console.warn(err));
+        if (old) await CloudSync.deletePdf(old);
+      }
       if (old) await deleteFile(old).catch(() => {});
     }
     if (imageFile) {
@@ -265,12 +332,17 @@ const SentieroStore = (() => {
       item.imageId = uid("simg");
       await putImageBlob(item.imageId, imageFile);
       item.imagePath = null;
+      if (typeof CloudSync !== "undefined") {
+        await CloudSync.uploadFile(item.imageId, imageFile).catch((err) => console.warn(err));
+        if (old) await CloudSync.deleteFile(old);
+      }
       if (old) await deleteFile(old).catch(() => {});
     }
     if (!item.fileId && !item.pdfPath) {
       throw new Error("Serve un PDF per la specialità.");
     }
     writeMeta(meta);
+    await pushMeta();
     return item;
   }
 
@@ -281,15 +353,24 @@ const SentieroStore = (() => {
     if (!item) return;
     meta.specialita = meta.specialita.filter((x) => x.id !== id);
     writeMeta(meta);
-    if (item.fileId) await deleteFile(item.fileId).catch(() => {});
-    if (item.imageId) await deleteFile(item.imageId).catch(() => {});
+    if (item.fileId) {
+      await deleteFile(item.fileId).catch(() => {});
+      if (typeof CloudSync !== "undefined") await CloudSync.deletePdf(item.fileId);
+    }
+    if (item.imageId) {
+      await deleteFile(item.imageId).catch(() => {});
+      if (typeof CloudSync !== "undefined") await CloudSync.deleteFile(item.imageId);
+    }
+    await pushMeta();
   }
 
   async function resetToSeed(user) {
     if (!canManage(user)) throw new Error("Non autorizzato.");
     localStorage.removeItem(META_KEY);
     seedCache = null;
-    return ensureMeta();
+    const meta = await ensureMeta();
+    await pushMeta();
+    return meta;
   }
 
   return {
