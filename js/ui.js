@@ -154,7 +154,10 @@ function updateNavAuth() {
         ? ScoutStore.branchLabel(full.branca)
         : "";
     let badge = "";
-    if (typeof CanzoniereStore !== "undefined" && CanzoniereStore.canManage(full)) {
+    if (typeof StaffNotifs !== "undefined") {
+      const c = StaffNotifs.counts(full);
+      if (c.total > 0) badge = StaffNotifs.badgeHtml(c.total, StaffNotifs.titleFor(c));
+    } else if (typeof CanzoniereStore !== "undefined" && CanzoniereStore.canManage(full)) {
       const n = CanzoniereStore.pendingProposalsCount();
       if (n > 0) {
         badge = `<span class="notif-badge" title="Proposte canzoni">${n > 9 ? "9+" : n}</span>`;
@@ -327,6 +330,9 @@ function renderMeetingHoursList(container, { compact = false } = {}) {
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof BranchView !== "undefined") BranchView.wireHomeLinks();
   updateNavAuth();
+  if (typeof StaffNotifs !== "undefined" && ScoutStore.getSession?.()) {
+    StaffNotifs.pullAll().then(() => updateNavAuth());
+  }
   // Social anche senza home.js (pagine statiche / fallback)
   renderSocialFollow(document.getElementById("contact-social"));
   renderSocialFollow(document.getElementById("footer-social"));

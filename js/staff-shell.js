@@ -27,17 +27,24 @@ window.StaffShell = (() => {
 
   function menuItems(user) {
     const admin = isAdmin(user);
+    const c = typeof StaffNotifs !== "undefined" ? StaffNotifs.counts(user) : { songs: 0, shop: 0, staff: 0 };
     return [
       { id: "home", href: "./index.html", label: "Dashboard" },
       canMeetings(user) ? { id: "riunioni", href: "./riunioni.html", label: "Gestione riunioni" } : null,
-      canCanzoniere(user) ? { id: "canzoniere", href: "./canzoniere.html", label: "Canzoniere reparto" } : null,
+      canCanzoniere(user)
+        ? { id: "canzoniere", href: "./canzoniere.html", label: "Canzoniere reparto", badge: c.songs }
+        : null,
       canSentiero(user) ? { id: "sentiero", href: "./sentiero.html", label: "Sentiero / specialità" } : null,
       admin ? { id: "notizie", href: "./notizie.html", label: "Gestione notizie" } : null,
       admin ? { id: "iscrizioni", href: "./iscrizioni.html", label: "Form iscrizioni" } : null,
-      admin ? { id: "richieste", href: "./richieste.html", label: "Richieste staff" } : null,
+      admin
+        ? { id: "richieste", href: "./richieste.html", label: "Richieste staff", badge: c.staff }
+        : null,
       admin ? { id: "social", href: "./social.html", label: "Link social" } : null,
       admin ? { id: "calendari", href: "./calendari.html", label: "Calendari Google" } : null,
-      admin ? { id: "negozio", href: "./negozio.html", label: "Negozio / Kala Nag" } : null,
+      admin
+        ? { id: "negozio", href: "./negozio.html", label: "Negozio / Kala Nag", badge: c.shop }
+        : null,
       { id: "documenti", href: "./documenti.html", label: "File e documenti" },
     ].filter(Boolean);
   }
@@ -51,6 +58,37 @@ window.StaffShell = (() => {
         ? "Admin generale · tutte le branche"
         : `Staff ${ScoutStore.branchLabel(user.branca)}`;
     }
+  }
+
+  function applyMenuBadges(user) {
+    const c = typeof StaffNotifs !== "undefined" ? StaffNotifs.counts(user) : { total: 0, songs: 0, shop: 0, staff: 0 };
+    const btn = document.querySelector(".staff-menu-btn");
+    if (btn) {
+      const existing = btn.querySelector(".notif-badge");
+      if (existing) existing.remove();
+      if (c.total > 0 && typeof StaffNotifs !== "undefined") {
+        btn.insertAdjacentHTML(
+          "beforeend",
+          StaffNotifs.badgeHtml(c.total, StaffNotifs.titleFor(c))
+        );
+      }
+    }
+
+    const drawer = document.getElementById("staff-menu-drawer");
+    if (!drawer || typeof StaffNotifs === "undefined") return;
+    const byId = {
+      canzoniere: c.songs,
+      negozio: c.shop,
+      richieste: c.staff,
+    };
+    drawer.querySelectorAll(".staff-menu-link").forEach((link) => {
+      link.querySelector(".notif-badge")?.remove();
+      const href = link.getAttribute("href") || "";
+      const id = Object.keys(byId).find((key) => href.includes(`${key}.html`));
+      if (id && byId[id] > 0) {
+        link.insertAdjacentHTML("beforeend", StaffNotifs.badgeHtml(byId[id]));
+      }
+    });
   }
 
   function mountMenu(user, { active = "home" } = {}) {
@@ -91,7 +129,8 @@ window.StaffShell = (() => {
               (item) => `
             <li>
               <a class="staff-menu-link ${item.id === active ? "is-active" : ""}" href="${item.href}">
-                ${escapeHtml(item.label)}
+                <span>${escapeHtml(item.label)}</span>
+                ${item.badge && typeof StaffNotifs !== "undefined" ? StaffNotifs.badgeHtml(item.badge) : ""}
               </a>
             </li>`
             )
@@ -120,6 +159,8 @@ window.StaffShell = (() => {
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") close();
     });
+
+    applyMenuBadges(user);
   }
 
   function boot({ active = "home", requireAdmin = false } = {}) {
@@ -133,8 +174,27 @@ window.StaffShell = (() => {
     mountMenu(user, { active });
     ScoutStore.pullRemoteAccounts?.().catch(() => {});
     ScoutStore.pullRemoteSettings?.().catch(() => {});
+
+    if (typeof StaffNotifs !== "undefined") {
+      StaffNotifs.pullAll().then(() => {
+        applyMenuBadges(user);
+        if (typeof updateNavAuth === "function") updateNavAuth();
+        document.dispatchEvent(new CustomEvent("staff-notifs-updated"));
+      });
+    }
     return user;
   }
 
-  return { requireUser, isAdmin, menuItems, canMeetings, canCanzoniere, canSentiero, fillHero, mountMenu, boot };
+  return {
+    requireUser,
+    isAdmin,
+    menuItems,
+    canMeetings,
+    canCanzoniere,
+    canSentiero,
+    fillHero,
+    mountMenu,
+    applyMenuBadges,
+    boot,
+  };
 })();

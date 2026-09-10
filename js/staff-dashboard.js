@@ -12,17 +12,39 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!dash) return;
 
   const isAdmin = ScoutStore.isAdminUser(user);
-  const hours = ScoutStore.getMeetingHours().filter((h) => ScoutStore.canEditMeetingSlot(user, h));
-  const pendingStaff = isAdmin ? ScoutStore.listPending(user) : [];
-  const pendingSongs =
-    typeof CanzoniereStore !== "undefined" && CanzoniereStore.canManage(user)
-      ? CanzoniereStore.getProposals().filter((p) => p.status === "pending")
-      : [];
-  const calendars = isAdmin ? ScoutStore.listGoogleCalendars() : [];
-  const social = isAdmin ? ScoutStore.getSocialLinks() : null;
-  const newsCount = typeof NewsStore !== "undefined" ? NewsStore.getNews().length : 0;
+
+  function pendingSongsCount() {
+    return typeof StaffNotifs !== "undefined"
+      ? StaffNotifs.counts(user).songs
+      : typeof CanzoniereStore !== "undefined" && CanzoniereStore.canManage(user)
+        ? CanzoniereStore.pendingProposalsCount()
+        : 0;
+  }
+
+  function pendingStaffCount() {
+    return typeof StaffNotifs !== "undefined"
+      ? StaffNotifs.counts(user).staff
+      : isAdmin
+        ? ScoutStore.listPending(user).length
+        : 0;
+  }
+
+  function pendingShopCount() {
+    return typeof StaffNotifs !== "undefined"
+      ? StaffNotifs.counts(user).shop
+      : typeof ShopStore !== "undefined" && isAdmin
+        ? ShopStore.pendingOrdersCount()
+        : 0;
+  }
 
   function buildTiles() {
+    const hours = ScoutStore.getMeetingHours().filter((h) => ScoutStore.canEditMeetingSlot(user, h));
+    const pendingStaff = pendingStaffCount();
+    const pendingSongs = pendingSongsCount();
+    const shopPending = pendingShopCount();
+    const calendars = isAdmin ? ScoutStore.listGoogleCalendars() : [];
+    const social = isAdmin ? ScoutStore.getSocialLinks() : null;
+    const newsCount = typeof NewsStore !== "undefined" ? NewsStore.getNews().length : 0;
     const tiles = [];
 
     if (typeof StaffShell !== "undefined" && StaffShell.canMeetings(user)) {
@@ -45,8 +67,11 @@ document.addEventListener("DOMContentLoaded", () => {
         href: "./canzoniere.html",
         title: "Canzoniere reparto",
         hint: "PDF, canzoni sfuse e proposte.",
-        preview: pendingSongs.length
-          ? `<strong>${pendingSongs.length}</strong> proposte in attesa`
+        badge: pendingSongs,
+        preview: pendingSongs
+          ? (typeof StaffNotifs !== "undefined"
+              ? StaffNotifs.alertText(pendingSongs, "proposta in attesa", "proposte in attesa")
+              : `<strong>${pendingSongs}</strong> proposte in attesa`)
           : "Nessuna proposta in attesa",
       });
     }
@@ -86,8 +111,11 @@ document.addEventListener("DOMContentLoaded", () => {
         href: "./richieste.html",
         title: "Richieste staff",
         hint: "Approva o rifiuta le registrazioni.",
-        preview: pendingStaff.length
-          ? `<strong>${pendingStaff.length}</strong> in attesa`
+        badge: pendingStaff,
+        preview: pendingStaff
+          ? (typeof StaffNotifs !== "undefined"
+              ? StaffNotifs.alertText(pendingStaff, "richiesta in attesa", "richieste in attesa")
+              : `<strong>${pendingStaff}</strong> in attesa`)
           : "Nessuna richiesta in attesa",
       });
 
@@ -110,8 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
           : "Nessun calendario collegato",
       });
 
-      const shopPending =
-        typeof ShopStore !== "undefined" ? ShopStore.pendingOrdersCount() : 0;
       const shopCount =
         typeof ShopStore !== "undefined" ? ShopStore.getItems().length : 0;
       tiles.push({
@@ -119,8 +145,11 @@ document.addEventListener("DOMContentLoaded", () => {
         href: "./negozio.html",
         title: "Negozio · Kala Nag",
         hint: "Catalogo e richieste di ritiro in sede.",
+        badge: shopPending,
         preview: shopPending
-          ? `<strong>${shopPending}</strong> richiest${shopPending === 1 ? "a" : "e"} in attesa`
+          ? (typeof StaffNotifs !== "undefined"
+              ? StaffNotifs.alertText(shopPending, "richiesta in attesa", "richieste in attesa")
+              : `<strong>${shopPending}</strong> richieste in attesa`)
           : shopCount
             ? `<strong>${shopCount}</strong> oggett${shopCount === 1 ? "o" : "i"} · nessuna richiesta`
             : "Catalogo vuoto",
@@ -154,6 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .map(
         (t) => `
     <a class="dash-tile" href="${t.href}">
+      ${t.badge && typeof StaffNotifs !== "undefined" ? StaffNotifs.badgeHtml(t.badge) : ""}
       <span class="dash-tile-kicker">Apri</span>
       <h2>${escapeHtml(t.title)}</h2>
       <p class="hint">${escapeHtml(t.hint)}</p>
@@ -210,6 +240,8 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCustomize();
     renderDash();
   });
+
+  document.addEventListener("staff-notifs-updated", renderDash);
 
   renderDash();
 });

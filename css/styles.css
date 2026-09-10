@@ -738,6 +738,7 @@ select:focus {
 }
 
 .staff-menu-btn {
+  position: relative;
   width: 2.6rem;
   height: 2.6rem;
   border-radius: 12px;
@@ -807,12 +808,21 @@ select:focus {
 }
 
 .staff-menu-link {
-  display: block;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   padding: 0.75rem 0.85rem;
   border-radius: 12px;
   color: var(--ink);
   text-decoration: none;
   font-weight: 650;
+}
+
+.staff-menu-link .notif-badge {
+  position: static;
+  flex-shrink: 0;
 }
 
 .staff-menu-link:hover,
@@ -828,6 +838,7 @@ select:focus {
 }
 
 .dash-tile {
+  position: relative;
   display: block;
   text-decoration: none;
   color: inherit;
@@ -838,6 +849,16 @@ select:focus {
   box-shadow: 0 10px 30px rgba(20, 85, 40, 0.06);
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   min-height: 11rem;
+}
+
+.dash-tile .notif-badge {
+  top: 0.75rem;
+  right: 0.75rem;
+}
+
+.dash-tile-alert {
+  color: #c44536;
+  font-weight: 750;
 }
 
 .dash-tile:hover {
@@ -2080,6 +2101,44 @@ a.home-tile:hover {
   min-height: 82vh;
 }
 
+.pdf-viewer {
+  display: none;
+  width: 100%;
+  height: 82vh;
+  min-height: 420px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #ecefe9;
+  padding: 0.5rem 0.35rem 1rem;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.pdf-viewer.is-visible,
+.pdf-viewer:not([hidden]) {
+  display: block;
+}
+
+.pdf-viewer[hidden] {
+  display: none !important;
+}
+
+.pdf-viewer-status {
+  margin: 2rem 1rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.pdf-page-canvas {
+  display: block;
+  margin: 0 auto 0.65rem;
+  max-width: 100%;
+  height: auto;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
 .pdf-frame {
   width: 100%;
   height: 82vh;
@@ -2126,7 +2185,8 @@ a.home-tile:hover {
   flex-direction: column;
 }
 
-.pdf-stage.is-pseudo-fs .pdf-frame {
+.pdf-stage.is-pseudo-fs .pdf-frame,
+.pdf-stage.is-pseudo-fs .pdf-viewer {
   display: block !important;
   flex: 1;
   width: 100%;
@@ -2174,6 +2234,7 @@ body.pdf-pseudo-fs-open {
 }
 
 .pdf-stage:fullscreen .pdf-frame,
+.pdf-stage:fullscreen .pdf-viewer,
 .pdf-frame:fullscreen {
   display: block !important;
   width: 100%;
@@ -2266,18 +2327,21 @@ body.pdf-pseudo-fs-open {
   }
 
   .pdf-frame,
+  .pdf-viewer,
   .pdf-stage {
     height: auto;
     min-height: 70vh;
   }
 
-  .pdf-frame {
+  .pdf-frame,
+  .pdf-viewer {
     height: 70vh;
     min-height: 420px;
   }
 
   .pdf-stage.is-pseudo-fs,
-  .pdf-stage.is-pseudo-fs .pdf-frame {
+  .pdf-stage.is-pseudo-fs .pdf-frame,
+  .pdf-stage.is-pseudo-fs .pdf-viewer {
     height: 100%;
     min-height: 100%;
   }

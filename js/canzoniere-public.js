@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const bookStatus = document.getElementById("book-status");
   const bookEmpty = document.getElementById("book-empty");
   const bookFrame = document.getElementById("book-frame");
+  const bookViewer = document.getElementById("book-viewer");
   const bookMeta = document.getElementById("book-meta-line");
   const downloadBtn = document.getElementById("pdf-download");
   const openBtn = document.getElementById("pdf-open");
@@ -16,6 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentBookUrl = null;
   let currentBookName = "canzoniere.pdf";
+  let pdfJsPromise = null;
+  let renderToken = 0;
 
   function isMobileUi() {
     const ua = navigator.userAgent || "";
@@ -56,17 +59,92 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.remove("pdf-pseudo-fs-open");
   }
 
+  function loadPdfJs() {
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    if (pdfJsPromise) return pdfJsPromise;
+    pdfJsPromise = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+      s.async = true;
+      s.onload = () => {
+        try {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+          resolve(window.pdfjsLib);
+        } catch (err) {
+          reject(err);
+        }
+      };
+      s.onerror = () => reject(new Error("Impossibile caricare il visualizzatore PDF."));
+      document.head.appendChild(s);
+    });
+    return pdfJsPromise;
+  }
+
+  async function renderPdfJs(url) {
+    if (!bookViewer) return;
+    const token = ++renderToken;
+    bookViewer.hidden = false;
+    bookViewer.classList.add("is-visible");
+    bookViewer.innerHTML = `<p class="pdf-viewer-status">Caricamento anteprima…</p>`;
+
+    try {
+      const pdfjsLib = await loadPdfJs();
+      if (token !== renderToken) return;
+
+      const pdf = await pdfjsLib.getDocument({ url, withCredentials: false }).promise;
+      if (token !== renderToken) return;
+
+      bookViewer.innerHTML = "";
+      const width = Math.max(bookViewer.clientWidth || pdfStage?.clientWidth || window.innerWidth - 32, 280);
+
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        if (token !== renderToken) return;
+        const page = await pdf.getPage(pageNum);
+        const unscaled = page.getViewport({ scale: 1 });
+        const scale = Math.min(2.2, (width - 8) / unscaled.width);
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d", { alpha: false });
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(viewport.width * dpr);
+        canvas.height = Math.floor(viewport.height * dpr);
+        canvas.style.width = `${Math.floor(viewport.width)}px`;
+        canvas.style.height = `${Math.floor(viewport.height)}px`;
+        canvas.className = "pdf-page-canvas";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        if (token !== renderToken) return;
+        bookViewer.appendChild(canvas);
+      }
+    } catch (err) {
+      if (token !== renderToken) return;
+      bookViewer.innerHTML = `<p class="pdf-viewer-status">Anteprima non disponibile su questo telefono. Usa <strong>Apri PDF</strong>.</p>`;
+      console.warn("[canzoniere] pdf.js", err);
+    }
+  }
+
+  function clearViewer() {
+    renderToken += 1;
+    if (bookViewer) {
+      bookViewer.innerHTML = "";
+      bookViewer.hidden = true;
+      bookViewer.classList.remove("is-visible");
+    }
+  }
+
   function showEmpty(message) {
     if (bookEmpty) {
       bookEmpty.hidden = false;
       bookEmpty.classList.add("is-visible");
     }
-    if (bookStatus) bookStatus.textContent = message;
     if (bookFrame) {
       bookFrame.hidden = true;
       bookFrame.removeAttribute("src");
       bookFrame.classList.remove("is-visible");
     }
+    clearViewer();
+    if (bookStatus) bookStatus.textContent = message;
     if (fsBtn) fsBtn.hidden = true;
     if (downloadBtn) downloadBtn.hidden = true;
     if (openBtn) openBtn.hidden = true;
@@ -79,12 +157,25 @@ document.addEventListener("DOMContentLoaded", () => {
       bookEmpty.hidden = true;
       bookEmpty.classList.remove("is-visible");
     }
-    if (bookFrame) {
-      const next = pdfSrc(url, { toolbar: true, zoom: isMobileUi() ? 85 : 100 });
-      if (bookFrame.getAttribute("src") !== next) bookFrame.src = next;
-      bookFrame.hidden = false;
-      bookFrame.classList.add("is-visible");
+
+    const mobile = isMobileUi();
+    if (mobile && bookViewer) {
+      if (bookFrame) {
+        bookFrame.hidden = true;
+        bookFrame.removeAttribute("src");
+        bookFrame.classList.remove("is-visible");
+      }
+      renderPdfJs(url);
+    } else {
+      clearViewer();
+      if (bookFrame) {
+        const next = pdfSrc(url, { toolbar: true, zoom: 100 });
+        if (bookFrame.getAttribute("src") !== next) bookFrame.src = next;
+        bookFrame.hidden = false;
+        bookFrame.classList.add("is-visible");
+      }
     }
+
     if (fsBtn) fsBtn.hidden = false;
     if (downloadBtn) downloadBtn.hidden = false;
     if (openBtn) openBtn.hidden = false;
@@ -93,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function refreshBook() {
     const book = CanzoniereStore.getBook();
-    if (!bookFrame && !bookEmpty) return;
+    if (!bookFrame && !bookEmpty && !bookViewer) return;
 
     if (!book) {
       showEmpty("Il canzoniere non è ancora stato caricato dallo staff.");
@@ -151,7 +242,6 @@ document.addEventListener("DOMContentLoaded", () => {
       else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
       else enablePseudoFs();
     } catch {
-      // iOS / browser senza Fullscreen API
       enablePseudoFs();
     }
   }
@@ -209,6 +299,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Escape" && pdfStage?.classList.contains("is-pseudo-fs")) {
       exitFullscreen();
     }
+  });
+
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    if (!isMobileUi() || !currentBookUrl || !bookViewer || bookViewer.hidden) return;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => renderPdfJs(currentBookUrl), 350);
   });
 
   setExitFsVisible(false);

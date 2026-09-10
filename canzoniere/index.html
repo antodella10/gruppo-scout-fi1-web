@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -48,6 +48,7 @@
       <div class="pdf-empty" id="book-empty" hidden>
         <p id="book-status">Il canzoniere non è ancora stato caricato dallo staff.</p>
       </div>
+      <div id="book-viewer" class="pdf-viewer" hidden aria-label="Anteprima canzoniere"></div>
       <iframe id="book-frame" class="pdf-frame" title="Canzoniere PDF" allowfullscreen allow="fullscreen" hidden></iframe>
       <button type="button" class="pdf-exit-fs btn btn-ghost btn-small" id="pdf-exit-fs" hidden>Esci schermo intero</button>
     </div>
@@ -77,6 +78,8 @@
   <script src="../js/cloud-sync.js"></script>
   <script src="../js/store.js"></script>
   <script src="../js/canzoniere-store.js"></script>
+  <script src="../js/shop-store.js"></script>
+  <script src="../js/staff-notifs.js"></script>
   <script src="../js/branch-view.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/canzoniere-public.js"></script>
