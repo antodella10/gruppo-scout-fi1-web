@@ -11,3 +11,8 @@ run_worker_first = ["/api/*"]
 [[kv_namespaces]]
 binding = "SCOUT_KV"
 id = "2334c813ef4c4d9b96463a7688f8d656"
+
+# Bucket R2 per la galleria foto (crealo in Dashboard se non esiste).
+[[r2_buckets]]
+binding = "SCOUT_R2"
+bucket_name = "firenze1-gallery"

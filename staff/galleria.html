@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galleria · Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html" data-home-link data-home-base="../">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="staff-shell">
+    <div class="container">
+      <div class="staff-hero">
+        <div>
+          <h1>Galleria foto</h1>
+          <p id="staff-meta" data-static="1">Carica immagini sul cloud (R2). Compariranno nella pagina pubblica Galleria.</p>
+        </div>
+        <div class="inline-actions">
+          <a class="btn btn-ghost" href="../galleria.html" target="_blank" rel="noopener">Vedi pagina pubblica</a>
+          <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
+        </div>
+      </div>
+
+      <div id="gallery-alert" class="alert alert-ok" hidden></div>
+
+      <div class="staff-grid">
+        <section class="panel">
+          <h2>Carica foto</h2>
+          <p class="hint">JPG/PNG/WebP. Verrà compressa automaticamente (max circa 1600px).</p>
+          <form id="gallery-form" class="form-grid">
+            <label>
+              Foto
+              <input type="file" name="photo" accept="image/*" required>
+            </label>
+            <label>
+              Titolo
+              <input type="text" name="title" placeholder="Es. Campo estivo 2026" maxlength="120">
+            </label>
+            <label>
+              Didascalia
+              <textarea name="caption" rows="3" placeholder="Opzionale" maxlength="400"></textarea>
+            </label>
+            <button class="btn btn-primary" type="submit">Pubblica in galleria</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Foto pubblicate</h2>
+          <div id="gallery-admin-list"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/cloud-sync.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/canzoniere-store.js"></script>
+  <script src="../js/shop-store.js"></script>
+  <script src="../js/staff-notifs.js"></script>
+  <script src="../js/gallery-store.js"></script>
+  <script src="../js/branch-view.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/staff-shell.js"></script>
+  <script src="../js/gallery-staff.js"></script>
+</body>
+</html>

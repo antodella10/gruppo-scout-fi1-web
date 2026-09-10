@@ -246,6 +246,43 @@ window.CloudSync = (() => {
     }
   }
 
+  async function galleryGet() {
+    if (!available()) return null;
+    const res = await fetch("/api/gallery", { credentials: "omit", cache: "no-store" });
+    if (res.status === 503) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Galleria non configurata (R2).");
+    }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Galleria GET fallita (${res.status})`);
+    }
+    return res.json();
+  }
+
+  function galleryImageUrl(id) {
+    return `/api/gallery/file?id=${encodeURIComponent(id)}`;
+  }
+
+  async function galleryPost(payload) {
+    if (!available()) return null;
+    const res = await fetch("/api/gallery", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Write-Key": writeKey(),
+      },
+      body: JSON.stringify({ ...payload, writeKey: writeKey() }),
+      credentials: "omit",
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Galleria POST fallita (${res.status})`);
+    }
+    return res.json();
+  }
+
   return {
     available,
     getAccounts,
@@ -266,5 +303,8 @@ window.CloudSync = (() => {
     deleteFile,
     pdfUrl,
     fileUrl,
+    galleryGet,
+    galleryImageUrl,
+    galleryPost,
   };
 })();

@@ -138,6 +138,14 @@ document.addEventListener("DOMContentLoaded", () => {
           : "Nessun calendario collegato",
       });
 
+      tiles.push({
+        id: "galleria",
+        href: "./galleria.html",
+        title: "Galleria foto",
+        hint: "Album pubblico sul cloud R2.",
+        preview: "Carica e gestisci le foto",
+      });
+
       const shopCount =
         typeof ShopStore !== "undefined" ? ShopStore.getItems().length : 0;
       tiles.push({

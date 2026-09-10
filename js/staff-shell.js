@@ -42,6 +42,7 @@ window.StaffShell = (() => {
         : null,
       admin ? { id: "social", href: "./social.html", label: "Link social" } : null,
       admin ? { id: "calendari", href: "./calendari.html", label: "Calendari Google" } : null,
+      admin ? { id: "galleria", href: "./galleria.html", label: "Galleria foto" } : null,
       admin
         ? { id: "negozio", href: "./negozio.html", label: "Negozio / Kala Nag", badge: c.shop }
         : null,

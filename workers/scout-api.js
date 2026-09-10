@@ -542,11 +542,145 @@ async function handleGcal(request, env = {}) {
   }
 }
 
+const GALLERY_MAX_BYTES = 2_500_000; // ~2.5MB dopo compressione client
+const GALLERY_META_KEY = "gallery-meta";
+
+function galleryIdOk(id) {
+  return /^[a-zA-Z0-9_-]{6,80}$/.test(String(id || ""));
+}
+
+async function handleGallery(request, env) {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders() });
+  }
+
+  const kv = env.SCOUT_KV;
+  const r2 = env.SCOUT_R2;
+  if (!kv || !r2) {
+    return json(
+      {
+        error:
+          !r2
+            ? "Galleria non configurata: crea il bucket R2 “firenze1-gallery” e il binding SCOUT_R2."
+            : "Sync KV mancante (SCOUT_KV).",
+      },
+      503
+    );
+  }
+
+  const url = new URL(request.url);
+
+  try {
+    if (request.method === "GET") {
+      // /api/gallery/file?id=
+      if (url.pathname.startsWith("/api/gallery/file")) {
+        const id = String(url.searchParams.get("id") || "").trim();
+        if (!galleryIdOk(id)) return json({ error: "id non valido" }, 400);
+        const obj = await r2.get(`gallery/${id}`);
+        if (!obj) return json({ error: "immagine non trovata" }, 404);
+        const headers = corsHeaders({
+          "Content-Type": obj.httpMetadata?.contentType || "image/jpeg",
+          "Cache-Control": "public, max-age=86400",
+        });
+        return new Response(obj.body, { status: 200, headers });
+      }
+
+      // /api/gallery → lista
+      const data = await kvGetJson(kv, GALLERY_META_KEY, { items: [], updatedAt: null });
+      const items = Array.isArray(data.items) ? data.items : [];
+      items.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+      return json({ items, updatedAt: data.updatedAt || null });
+    }
+
+    if (request.method === "POST") {
+      let body = {};
+      try {
+        body = await request.json();
+      } catch {
+        return json({ error: "JSON non valido" }, 400);
+      }
+      if (!writeKeyOk(request, body, env)) {
+        return json({ error: "write key non valida" }, 403);
+      }
+
+      const resource = body.resource || "";
+      const meta = await kvGetJson(kv, GALLERY_META_KEY, { items: [], updatedAt: null });
+      let items = Array.isArray(meta.items) ? [...meta.items] : [];
+
+      if (resource === "upload") {
+        const id = String(body.id || "").trim();
+        if (!galleryIdOk(id)) return json({ error: "id non valido" }, 400);
+        const b64 = String(body.dataBase64 || "");
+        if (!b64) return json({ error: "immagine mancante" }, 400);
+        let binary;
+        try {
+          binary = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+        } catch {
+          return json({ error: "base64 non valido" }, 400);
+        }
+        if (binary.byteLength > GALLERY_MAX_BYTES) {
+          return json({ error: "immagine troppo grande (max circa 2.5 MB)" }, 400);
+        }
+        const contentType = String(body.contentType || "image/jpeg").slice(0, 80);
+        if (!/^image\/(jpeg|png|webp|gif)$/i.test(contentType)) {
+          return json({ error: "formato immagine non supportato" }, 400);
+        }
+        await r2.put(`gallery/${id}`, binary, {
+          httpMetadata: { contentType },
+        });
+        const item = {
+          id,
+          title: String(body.title || "").trim().slice(0, 120),
+          caption: String(body.caption || "").trim().slice(0, 400),
+          contentType,
+          size: binary.byteLength,
+          createdAt: new Date().toISOString(),
+        };
+        items = items.filter((x) => x.id !== id);
+        items.unshift(item);
+        const payload = { items, updatedAt: new Date().toISOString() };
+        await kv.put(GALLERY_META_KEY, JSON.stringify(payload));
+        return json({ ok: true, item });
+      }
+
+      if (resource === "delete") {
+        const id = String(body.id || "").trim();
+        if (!galleryIdOk(id)) return json({ error: "id non valido" }, 400);
+        await r2.delete(`gallery/${id}`);
+        items = items.filter((x) => x.id !== id);
+        const payload = { items, updatedAt: new Date().toISOString() };
+        await kv.put(GALLERY_META_KEY, JSON.stringify(payload));
+        return json({ ok: true });
+      }
+
+      if (resource === "update") {
+        const id = String(body.id || "").trim();
+        const item = items.find((x) => x.id === id);
+        if (!item) return json({ error: "foto non trovata" }, 404);
+        if (body.title != null) item.title = String(body.title || "").trim().slice(0, 120);
+        if (body.caption != null) item.caption = String(body.caption || "").trim().slice(0, 400);
+        const payload = { items, updatedAt: new Date().toISOString() };
+        await kv.put(GALLERY_META_KEY, JSON.stringify(payload));
+        return json({ ok: true, item });
+      }
+
+      return json({ error: "resource sconosciuta" }, 400);
+    }
+
+    return json({ error: "method not allowed" }, 405);
+  } catch (err) {
+    return json({ error: err.message || "Errore server" }, 500);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/api/gcal" || url.pathname.startsWith("/api/gcal/")) {
       return handleGcal(request, env);
+    }
+    if (url.pathname === "/api/gallery" || url.pathname.startsWith("/api/gallery/")) {
+      return handleGallery(request, env);
     }
     if (url.pathname === "/api/sync" || url.pathname.startsWith("/api/sync/")) {
       return handleSync(request, env);
