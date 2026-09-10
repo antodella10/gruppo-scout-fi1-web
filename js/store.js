@@ -494,7 +494,12 @@ const ScoutStore = (() => {
     if (Array.isArray(remote.meetingHours) && remote.meetingHours.length) {
       next.meetingHours = remote.meetingHours;
     }
-    if (Array.isArray(remote.googleCalendars)) next.googleCalendars = remote.googleCalendars;
+    // Non sovrascrivere calendari locali con un array cloud vuoto
+    if (Array.isArray(remote.googleCalendars) && remote.googleCalendars.length) {
+      next.googleCalendars = remote.googleCalendars;
+    } else if ((next.googleCalendars || []).length) {
+      pushRemoteSettings().catch(() => {});
+    }
     write(KEYS.settings, next);
     return true;
   }

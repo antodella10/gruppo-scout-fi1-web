@@ -141,7 +141,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (token !== loadToken) return;
       googleEvents = [];
       setSyncHint(
-        "Calendario Google non sincronizzato: rendi il calendario pubblico nelle impostazioni Google, poi ricarica."
+        err?.message ||
+          "Calendario Google non sincronizzato: rendi il calendario pubblico nelle impostazioni Google, poi ricarica."
       );
       console.warn(err);
     }

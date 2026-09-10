@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .join("");
   }
 
-  gcalForm?.addEventListener("submit", (e) => {
+  gcalForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const data = new FormData(gcalForm);
     try {
@@ -37,22 +37,29 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       gcalForm.reset();
       refreshGcalList();
+      if (typeof GoogleCal !== "undefined") GoogleCal.clearCache();
+      await ScoutStore.pushRemoteSettings?.().catch(() => {});
     } catch (err) {
       alert(err.message);
     }
   });
 
-  gcalList?.addEventListener("click", (e) => {
+  gcalList?.addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-del-gcal]");
     if (!btn) return;
     if (!confirm("Rimuovere questo calendario Google?")) return;
     try {
       ScoutStore.removeGoogleCalendar(btn.dataset.delGcal, user);
       refreshGcalList();
+      if (typeof GoogleCal !== "undefined") GoogleCal.clearCache();
+      await ScoutStore.pushRemoteSettings?.().catch(() => {});
     } catch (err) {
       alert(err.message);
     }
   });
 
-  refreshGcalList();
+  (async () => {
+    await ScoutStore.pullRemoteSettings?.().catch(() => {});
+    refreshGcalList();
+  })();
 });

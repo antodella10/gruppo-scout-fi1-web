@@ -82,20 +82,30 @@ window.GoogleCal = (() => {
     });
   }
 
-  async function fetchViaNetlify(calendarId, from, to) {
+  async function fetchViaProxy(calendarId, from, to) {
     const params = new URLSearchParams({ id: calendarId, from, to });
-    const url = `/.netlify/functions/gcal-events?${params}`;
-    const res = await fetch(url);
-    if (res.status === 404) {
-      throw new Error(
-        "Sincronizzazione Google disponibile sul sito pubblicato (Netlify). In locale puoi impostare googleCalendarApiKey in config.js."
-      );
+    const endpoints = ["/api/gcal", "/.netlify/functions/gcal-events"];
+    let lastErr = null;
+
+    for (const base of endpoints) {
+      try {
+        const res = await fetch(`${base}?${params}`, { cache: "no-store" });
+        if (res.status === 404) {
+          lastErr = new Error("Proxy calendario non trovato su questo host.");
+          continue;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          lastErr = new Error(data.error || `Proxy calendario fallito (${res.status})`);
+          continue;
+        }
+        return data.events || [];
+      } catch (err) {
+        lastErr = err;
+      }
     }
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      throw new Error(data.error || "Impossibile sincronizzare Google Calendar.");
-    }
-    return data.events || [];
+
+    throw lastErr || new Error("Impossibile sincronizzare Google Calendar.");
   }
 
   async function loadCalendarEvents(calendar, viewDate) {
@@ -110,10 +120,11 @@ window.GoogleCal = (() => {
     let raw;
     try {
       if (apiKey) raw = await fetchViaApi(calendarId, from, to, apiKey);
-      else raw = await fetchViaNetlify(calendarId, from, to);
+      else raw = await fetchViaProxy(calendarId, from, to);
     } catch (err) {
       console.warn("[GoogleCal]", calendarId, err.message);
-      return hit?.events || [];
+      if (hit?.events?.length) return hit.events;
+      throw err;
     }
 
     const mapped = raw.map((e) => ({
@@ -141,8 +152,17 @@ window.GoogleCal = (() => {
     const calendars =
       typeof ScoutStore !== "undefined" ? ScoutStore.getGoogleCalendarsForView(selectedBranca) : [];
     if (!calendars.length) return [];
-    const lists = await Promise.all(calendars.map((c) => loadCalendarEvents(c, viewDate)));
-    return lists.flat();
+    const results = await Promise.allSettled(calendars.map((c) => loadCalendarEvents(c, viewDate)));
+    const events = [];
+    const errors = [];
+    for (const r of results) {
+      if (r.status === "fulfilled") events.push(...r.value);
+      else errors.push(r.reason?.message || "errore sync");
+    }
+    if (!events.length && errors.length) {
+      throw new Error(errors[0]);
+    }
+    return events;
   }
 
   function clearCache() {
