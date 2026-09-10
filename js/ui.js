@@ -26,6 +26,28 @@ function escapeHtml(str) {
     .replaceAll('"', "&quot;");
 }
 
+/** Blocco “pagina non ancora pronta” con illustrazione. */
+function pageSoonHtml({ base = "", message } = {}) {
+  const msg =
+    message ||
+    "Questa pagina non è ancora disponibile o completa. Torna a trovarci presto!";
+  const src = `${base}photos/page-not-found.jpg`;
+  return `
+    <div class="page-soon-inner">
+      <img src="${escapeHtml(src)}" alt="Pagina non ancora disponibile" loading="lazy">
+      <p>${escapeHtml(msg)}</p>
+    </div>`;
+}
+
+function fillPageSoonBlocks(root = document, { base = "" } = {}) {
+  root.querySelectorAll("[data-page-soon]").forEach((el) => {
+    const msg = el.dataset.pageSoonMessage || undefined;
+    const localBase = el.dataset.pageSoonBase || base;
+    el.classList.add("page-soon");
+    el.innerHTML = pageSoonHtml({ base: localBase, message: msg });
+  });
+}
+
 function eventBadge(event) {
   const label = ScoutStore.scopeLabel(event.scope, event.branca || event.googleBranca);
   const cls =
@@ -419,7 +441,7 @@ function renderSocialFull(container) {
       url: social.facebook.url,
     });
   }
-  ["gruppo", "lupetti", "reparto", "noviziato", "clan"].forEach((id) => {
+  ["gruppo", "branco", "reparto", "noviziato", "clan"].forEach((id) => {
     const ig = social.instagram?.[id];
     if (ig?.url) {
       items.push({ kind: "ig", label: ig.label || id, url: ig.url });

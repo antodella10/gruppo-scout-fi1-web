@@ -5,7 +5,7 @@ window.GalleryStore = (() => {
   const FEATURED_MAX = 15;
   const BRANCHES = [
     { id: "gruppo", label: "Gruppo" },
-    { id: "lupetti", label: "Lupetti" },
+    { id: "branco", label: "Branco" },
     { id: "reparto", label: "Reparto" },
     { id: "noviziato", label: "Noviziato" },
     { id: "clan", label: "Clan" },

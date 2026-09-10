@@ -1,12 +1,18 @@
 const BranchView = (() => {
   const KEY = "firenze1_selected_branca";
 
+  function normalizeBranca(id) {
+    if (id === "lupetti") return "branco";
+    return id;
+  }
+
   function isValid(id) {
-    return !!(id && window.SCOUT_BRANCHES?.[id]);
+    const n = normalizeBranca(id);
+    return !!(n && window.SCOUT_BRANCHES?.[n]);
   }
 
   function getStored() {
-    const raw = sessionStorage.getItem(KEY);
+    const raw = normalizeBranca(sessionStorage.getItem(KEY));
     if (!raw || raw === "gruppo") return null;
     return isValid(raw) ? raw : null;
   }
@@ -18,7 +24,7 @@ const BranchView = (() => {
   /** URL > session > staff branca (non admin) */
   function resolveInitial() {
     const params = new URLSearchParams(location.search);
-    const fromUrl = params.get("branca");
+    const fromUrl = normalizeBranca(params.get("branca"));
     if (fromUrl === "gruppo" || fromUrl === "") return null;
     if (isValid(fromUrl)) return fromUrl;
 
@@ -27,7 +33,7 @@ const BranchView = (() => {
 
     const user = typeof ScoutStore !== "undefined" ? ScoutStore.getCurrentUser() : null;
     if (user && !ScoutStore.isAdminUser(user) && isValid(user.branca)) {
-      return user.branca;
+      return normalizeBranca(user.branca);
     }
     return null;
   }
@@ -38,10 +44,11 @@ const BranchView = (() => {
   }
 
   function persist(branca, { updateUrl = true } = {}) {
-    setStored(branca);
+    const clean = branca ? normalizeBranca(branca) : null;
+    setStored(clean);
     if (updateUrl && isHomePage()) {
       const url = new URL(location.href);
-      if (branca) url.searchParams.set("branca", branca);
+      if (clean) url.searchParams.set("branca", clean);
       else url.searchParams.delete("branca");
       // preserva l'ancora (#chi-siamo, #contatti, …)
       history.replaceState({}, "", url.pathname + url.search + url.hash);
@@ -72,5 +79,5 @@ const BranchView = (() => {
     });
   }
 
-  return { resolveInitial, persist, homeHref, groupHomeHref, wireHomeLinks, getStored, isValid };
+  return { resolveInitial, persist, homeHref, groupHomeHref, wireHomeLinks, getStored, isValid, normalizeBranca };
 })();

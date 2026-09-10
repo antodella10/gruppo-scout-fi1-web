@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const listBackBtnRep = document.getElementById("event-list-back-reparto");
 
   const PASTEL_CLASS = {
-    lupetti: "pastel-lupetti",
+    branco: "pastel-branco",
     reparto: "pastel-reparto",
     noviziato: "pastel-noviziato",
     clan: "pastel-clan",
@@ -49,8 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
       heroLine:
         "Avventura, servizio e crescita tra le colline fiorentine. Un gruppo FederScout, tante strade — un unico sentiero insieme.",
     },
-    lupetti: {
-      calLead: "Calendario lupetti e gruppo.",
+    branco: {
+      calLead: "Calendario branco e gruppo.",
       heroLine: "Branco in cammino: gioco, amicizia e grandi scoperte.",
     },
     reparto: {
@@ -375,4 +375,5 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 5 * 60 * 1000);
 
   applyBranchView(BranchView.resolveInitial());
+  fillPageSoonBlocks();
 });

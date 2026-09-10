@@ -37,7 +37,7 @@ window.SCOUT_CONFIG = {
     },
     instagram: {
       gruppo: { url: "https://www.instagram.com/scout_firenze1", label: "Firenze 1" },
-      lupetti: { url: "https://www.instagram.com/tigerandcavalloni", label: "Lupetti" },
+      branco: { url: "https://www.instagram.com/tigerandcavalloni", label: "Branco" },
       reparto: { url: "https://www.instagram.com/riparto.fi1", label: "Reparto" },
       noviziato: { url: "", label: "Noviziato" },
       clan: { url: "", label: "Clan" },
@@ -48,7 +48,7 @@ window.SCOUT_CONFIG = {
 };
 
 window.SCOUT_BRANCHES = {
-  lupetti: { id: "lupetti", label: "Lupetti", short: "Lupetti" },
+  branco: { id: "branco", label: "Branco", short: "Branco" },
   reparto: { id: "reparto", label: "Reparto", short: "Reparto" },
   noviziato: { id: "noviziato", label: "Noviziato", short: "Noviziato" },
   clan: { id: "clan", label: "Clan", short: "Clan" },
@@ -61,20 +61,20 @@ window.SCOUT_SCOPES = {
   coca: { id: "coca", label: "Co.Ca." },
 };
 
-/** Lupetti + Reparto, ciascuno diviso Girone / Quarate. */
+/** Branco + Reparto, ciascuno diviso Girone / Quarate. */
 window.SCOUT_DEFAULT_MEETING_HOURS = [
   {
-    id: "lupetti-girone",
-    label: "Lupetti — Girone",
-    branca: "lupetti",
+    id: "branco-girone",
+    label: "Branco — Girone",
+    branca: "branco",
     day: "Sabato",
     time: "15:30–17:00",
     place: "Girone",
   },
   {
-    id: "lupetti-quarate",
-    label: "Lupetti — Quarate",
-    branca: "lupetti",
+    id: "branco-quarate",
+    label: "Branco — Quarate",
+    branca: "branco",
     day: "Sabato",
     time: "15:30–17:00",
     place: "Quarate",

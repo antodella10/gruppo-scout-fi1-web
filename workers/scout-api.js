@@ -545,7 +545,12 @@ async function handleGcal(request, env = {}) {
 const GALLERY_MAX_BYTES = 2_500_000; // ~2.5MB dopo compressione client
 const GALLERY_META_KEY = "gallery-meta";
 const GALLERY_FEATURED_MAX = 15;
-const GALLERY_BRANCHES = new Set(["gruppo", "lupetti", "reparto", "noviziato", "clan"]);
+const GALLERY_BRANCHES = new Set(["gruppo", "branco", "reparto", "noviziato", "clan"]);
+
+function normalizeGalleryBranca(branca) {
+  if (branca === "lupetti") return "branco";
+  return branca;
+}
 
 function galleryIdOk(id) {
   return /^[a-zA-Z0-9_-]{6,80}$/.test(String(id || ""));
@@ -555,7 +560,9 @@ function normalizeGalleryMeta(raw) {
   const items = Array.isArray(raw?.items)
     ? raw.items.map((it) => ({
         ...it,
-        branca: GALLERY_BRANCHES.has(it.branca) ? it.branca : "gruppo",
+        branca: GALLERY_BRANCHES.has(normalizeGalleryBranca(it.branca))
+          ? normalizeGalleryBranca(it.branca)
+          : "gruppo",
         folderId: it.folderId || null,
         featured: !!it.featured,
         featuredOrder: Number.isFinite(Number(it.featuredOrder)) ? Number(it.featuredOrder) : 0,
@@ -639,7 +646,7 @@ async function handleGallery(request, env) {
       if (resource === "upload") {
         const id = String(body.id || "").trim();
         if (!galleryIdOk(id)) return json({ error: "id non valido" }, 400);
-        const branca = String(body.branca || "").trim();
+        const branca = normalizeGalleryBranca(String(body.branca || "").trim());
         if (!GALLERY_BRANCHES.has(branca)) {
           return json({ error: "Seleziona branca o gruppo." }, 400);
         }
@@ -699,7 +706,7 @@ async function handleGallery(request, env) {
         if (body.title != null) item.title = String(body.title || "").trim().slice(0, 120);
         if (body.caption != null) item.caption = String(body.caption || "").trim().slice(0, 400);
         if (body.branca != null) {
-          const branca = String(body.branca || "").trim();
+          const branca = normalizeGalleryBranca(String(body.branca || "").trim());
           if (!GALLERY_BRANCHES.has(branca)) return json({ error: "Branca non valida." }, 400);
           item.branca = branca;
         }

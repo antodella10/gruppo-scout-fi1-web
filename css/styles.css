@@ -1267,7 +1267,7 @@ body.staff-menu-open {
   font-weight: 800;
 }
 
-.branch-menu-trigger.is-active.pastel-lupetti {
+.branch-menu-trigger.is-active.pastel-branco {
   background: #ffd7a3;
   color: #6b3f00;
 }
@@ -1357,7 +1357,7 @@ body.staff-menu-open {
 }
 
 /* pastelli solo nel menu */
-.pastel-lupetti {
+.pastel-branco {
   background: #ffe8c8;
 }
 
@@ -2828,6 +2828,36 @@ body.pdf-pseudo-fs-open {
 
 body.gallery-lb-open {
   overflow: hidden;
+}
+
+/* —— Pagina non ancora pronta —— */
+.page-soon {
+  margin-top: 0.75rem;
+}
+
+.page-soon-inner {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 0.5rem 0 1rem;
+}
+
+.page-soon-inner img {
+  width: min(420px, 100%);
+  height: auto;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 28px rgba(20, 85, 40, 0.08);
+  background: #e8eee8;
+}
+
+.page-soon-inner p {
+  margin: 0;
+  max-width: 28rem;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.45;
 }
 
 @media (max-width: 900px) {

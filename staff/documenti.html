@@ -29,7 +29,7 @@
       </div>
 
       <section class="panel">
-        <div class="placeholder-box">Presto: documenti staff e cartelle OneDrive.</div>
+        <div class="page-soon" data-page-soon data-page-soon-base="../" data-page-soon-message="Questa sezione non è ancora disponibile o completa. Torna a trovarci presto!"></div>
       </section>
     </div>
   </main>
@@ -46,6 +46,7 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       StaffShell.boot({ active: "documenti" });
+      fillPageSoonBlocks(document, { base: "../" });
     });
   </script>
 </body>

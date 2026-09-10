@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campo estivo · Firenze 1</title>
+  <meta name="description" content="Campo estivo del Gruppo Scout Firenze 1.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="photos/logo.jpeg">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="index.html" data-home-link data-home-base="">
+        <img src="photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html?branca=gruppo" data-group-home data-home-base="">Home</a>
+        <a href="chi-siamo.html">Chi siamo</a>
+        <a href="index.html?branca=gruppo#calendario" data-group-home data-home-base="" data-hash="#calendario">Calendario</a>
+        <a href="index.html?branca=gruppo#contatti" data-group-home data-home-base="" data-hash="#contatti">Contatti</a>
+      </div>
+      <div class="nav-actions" data-auth-slot data-base=""></div>
+    </div>
+  </nav>
+
+  <header class="page-hero">
+    <div class="container page-hero-inner">
+      <p class="hero-kicker" style="color:var(--green)">Reparto · Estate</p>
+      <h1>Campo estivo</h1>
+      <p class="page-hero-lead">L’avventura dell’anno: natura, comunità e ricordi che restano.</p>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container">
+      <div class="page-soon" data-page-soon></div>
+      <div class="inline-actions" style="justify-content:center;margin-top:1.25rem">
+        <a class="btn btn-ghost" href="index.html?branca=reparto">← Torna al reparto</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>© 2026 Firenze 1 · FederScout — Associazione Marliani Silvano</div>
+      <div id="footer-social" class="social-block"></div>
+      <a href="staff/login.html">Area staff</a>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/cloud-sync.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/canzoniere-store.js"></script>
+  <script src="js/shop-store.js"></script>
+  <script src="js/staff-notifs.js"></script>
+  <script src="js/branch-view.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fillPageSoonBlocks();
+      renderSocialFollow(document.getElementById("footer-social"));
+    });
+  </script>
+</body>
+</html>

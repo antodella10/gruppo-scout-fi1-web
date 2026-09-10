@@ -29,6 +29,18 @@ const ScoutStore = (() => {
     return `${prefix}_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`;
   }
 
+  /** Compat: vecchio id “lupetti” → “branco”. */
+  function normalizeBrancaId(id) {
+    if (id === "lupetti") return "branco";
+    return id || null;
+  }
+
+  function normalizeMeetingSlotId(id) {
+    if (id === "lupetti" || id === "lupetti-girone") return "branco-girone";
+    if (id === "lupetti-quarate") return "branco-quarate";
+    return id;
+  }
+
   async function hashPassword(password) {
     if (!globalThis.crypto?.subtle?.digest) {
       throw new Error(
@@ -72,7 +84,10 @@ const ScoutStore = (() => {
   }
 
   function getUsers() {
-    return read(KEYS.users, []);
+    return read(KEYS.users, []).map((u) => ({
+      ...u,
+      branca: u.branca ? normalizeBrancaId(u.branca) : u.branca,
+    }));
   }
 
   function saveUsers(users) {
@@ -80,7 +95,10 @@ const ScoutStore = (() => {
   }
 
   function getPending() {
-    return read(KEYS.pending, []);
+    return read(KEYS.pending, []).map((u) => ({
+      ...u,
+      branca: u.branca ? normalizeBrancaId(u.branca) : u.branca,
+    }));
   }
 
   function savePending(list) {
@@ -543,7 +561,10 @@ const ScoutStore = (() => {
   }
 
   function listGoogleCalendars() {
-    return getSettings().googleCalendars || [];
+    return (getSettings().googleCalendars || []).map((c) => ({
+      ...c,
+      branca: c.branca ? normalizeBrancaId(c.branca) : c.branca,
+    }));
   }
 
   function addGoogleCalendar({ branca, embedUrl, color }, user) {
@@ -556,7 +577,7 @@ const ScoutStore = (() => {
     if (!calendarId) {
       throw new Error("Incolla l’URL di incorporamento o l’ID del calendario Google.");
     }
-    const key = branca === "gruppo" ? "gruppo" : branca;
+    const key = branca === "gruppo" ? "gruppo" : normalizeBrancaId(branca);
     if (key !== "gruppo" && !window.SCOUT_BRANCHES?.[key]) {
       throw new Error("Seleziona una branca valida.");
     }
@@ -609,25 +630,27 @@ const ScoutStore = (() => {
       .map((h) => {
         if (!h) return null;
         if (h.id) {
-          const id = h.id === "lupetti" ? "lupetti-girone" : h.id;
+          const id = normalizeMeetingSlotId(h.id === "lupetti" ? "lupetti-girone" : h.id);
           const label =
-            h.id === "lupetti" ? "Lupetti — Girone" : h.label || id;
+            id === "branco-girone" && (!h.label || /lupetti/i.test(h.label))
+              ? "Branco — Girone"
+              : id === "branco-quarate" && (!h.label || /lupetti/i.test(h.label))
+                ? "Branco — Quarate"
+                : h.label || id;
           return {
             id,
             label,
-            branca: h.branca || "",
+            branca: normalizeBrancaId(h.branca) || "",
             day: h.day || "",
             time: h.time || "",
             place: h.place || "",
           };
         }
-        // vecchio formato per sola branca
-        // vecchio formato / id unificato lupetti
-        if (h.branca === "lupetti" || h.id === "lupetti") {
+        if (h.branca === "lupetti" || h.branca === "branco" || h.id === "lupetti") {
           return {
-            id: "lupetti-girone",
-            label: "Lupetti — Girone",
-            branca: "lupetti",
+            id: "branco-girone",
+            label: "Branco — Girone",
+            branca: "branco",
             day: h.day || "",
             time: h.time || "",
             place: h.place || "Girone",
@@ -734,7 +757,7 @@ const ScoutStore = (() => {
       facebook: { url: String(fbFallback).trim(), label: fbLabel },
       instagram: {
         gruppo: pickIg("gruppo", "Firenze 1"),
-        lupetti: pickIg("lupetti", "Lupetti"),
+        branco: pickIg("branco", "Branco"),
         reparto: pickIg("reparto", "Reparto"),
         noviziato: pickIg("noviziato", "Noviziato"),
         clan: pickIg("clan", "Clan"),
@@ -755,21 +778,22 @@ const ScoutStore = (() => {
     );
     if (!fb.url && base.facebook.url) fb.url = base.facebook.url;
 
-    const mergeIg = (id) => {
-      const fromSaved = saved.instagram?.[id];
+    const mergeIg = (id, legacyId) => {
+      const fromSaved = saved.instagram?.[id] ?? (legacyId ? saved.instagram?.[legacyId] : null);
       const fromBase = base.instagram[id];
       const entry = normalizeSocialEntry(fromSaved ?? fromBase, fromBase.url, fromBase.label);
       if (!entry.url && fromBase.url) entry.url = fromBase.url;
-      if (!entry.label) entry.label = fromBase.label;
+      if (!entry.label || entry.label === "Lupetti") entry.label = fromBase.label;
       return entry;
     };
 
-    const homeInstagram = String(saved.homeInstagram || base.homeInstagram || "reparto");
+    let homeInstagram = String(saved.homeInstagram || base.homeInstagram || "reparto");
+    if (homeInstagram === "lupetti") homeInstagram = "branco";
     return {
       facebook: fb,
       instagram: {
         gruppo: mergeIg("gruppo"),
-        lupetti: mergeIg("lupetti"),
+        branco: mergeIg("branco", "lupetti"),
         reparto: mergeIg("reparto"),
         noviziato: mergeIg("noviziato"),
         clan: mergeIg("clan"),
@@ -780,6 +804,8 @@ const ScoutStore = (() => {
 
   function saveSocialLinks(social, user) {
     if (!isAdminUser(user)) throw new Error("Solo admin può aggiornare i social.");
+    let homeInstagram = String(social?.homeInstagram || "reparto");
+    if (homeInstagram === "lupetti") homeInstagram = "branco";
     const next = {
       facebook: {
         url: String(social?.facebook?.url ?? social?.facebook ?? "").trim(),
@@ -790,9 +816,15 @@ const ScoutStore = (() => {
           url: String(social?.instagram?.gruppo?.url ?? social?.instagram?.gruppo ?? "").trim(),
           label: String(social?.instagram?.gruppo?.label || "Firenze 1").trim() || "Firenze 1",
         },
-        lupetti: {
-          url: String(social?.instagram?.lupetti?.url ?? social?.instagram?.lupetti ?? "").trim(),
-          label: String(social?.instagram?.lupetti?.label || "Lupetti").trim() || "Lupetti",
+        branco: {
+          url: String(
+            social?.instagram?.branco?.url ??
+              social?.instagram?.branco ??
+              social?.instagram?.lupetti?.url ??
+              social?.instagram?.lupetti ??
+              ""
+          ).trim(),
+          label: String(social?.instagram?.branco?.label || "Branco").trim() || "Branco",
         },
         reparto: {
           url: String(social?.instagram?.reparto?.url ?? social?.instagram?.reparto ?? "").trim(),
@@ -807,7 +839,7 @@ const ScoutStore = (() => {
           label: String(social?.instagram?.clan?.label || "Clan").trim() || "Clan",
         },
       },
-      homeInstagram: String(social?.homeInstagram || "reparto"),
+      homeInstagram,
     };
     write(KEYS.settings, { ...getSettings(), social: next });
     pushRemoteSettings().catch(() => {});
@@ -835,6 +867,7 @@ const ScoutStore = (() => {
     ADMIN_EMAIL,
     isAdminEmail,
     isAdminUser,
+    normalizeBrancaId,
     branchLabel,
     scopeLabel,
     registerStaff,

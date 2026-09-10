@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (hoursHint) {
     hoursHint.textContent = isAdmin
-      ? "Lupetti e Reparto, ciascuno su Girone e Quarate."
+      ? "Branco e Reparto, ciascuno su Girone e Quarate."
       : `Orari di ${ScoutStore.branchLabel(user.branca)} (Girone e Quarate).`;
   }
 
