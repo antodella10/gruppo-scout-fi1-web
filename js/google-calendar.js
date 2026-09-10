@@ -2,6 +2,19 @@
 window.GoogleCal = (() => {
   const cache = new Map();
   const CACHE_MS = 2 * 60 * 1000;
+  const GOOGLE_EVENT_COLORS = {
+    1: "#a4bdfc",
+    2: "#7ae7bf",
+    3: "#dbadff",
+    4: "#ff887c",
+    5: "#fbd75b",
+    6: "#ffb878",
+    7: "#46d6db",
+    8: "#e1e1e1",
+    9: "#5484ed",
+    10: "#51b749",
+    11: "#dc2127",
+  };
 
   function extractCalendarId(input) {
     const raw = String(input || "").trim();
@@ -78,6 +91,8 @@ window.GoogleCal = (() => {
         dateEnd: dateEnd || dateStart,
         allDay,
         time,
+        colorId: item.colorId || "",
+        color: item.colorId && GOOGLE_EVENT_COLORS[item.colorId] ? GOOGLE_EVENT_COLORS[item.colorId] : "",
       };
     });
   }
@@ -142,6 +157,8 @@ window.GoogleCal = (() => {
       branca: calendar.branca === "gruppo" ? null : calendar.branca,
       fromGoogle: true,
       googleBranca: calendar.branca,
+      colorId: e.colorId || "",
+      color: e.color || calendar.color || "",
     }));
 
     cache.set(cacheKey, { at: Date.now(), events: mapped });

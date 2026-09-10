@@ -394,12 +394,39 @@ function parseIcsEvents(icsText) {
       dateEnd,
       allDay: !!allDay,
       time: allDay ? "" : start.time || "",
+      color: normalizeIcsColor(
+        icsField(block, "COLOR") ||
+          icsField(block, "X-APPLE-CALENDAR-COLOR") ||
+          icsField(block, "X-GOOGLE-CALENDAR-COLOR")
+      ),
+      colorId: icsField(block, "COLOR") || "",
     });
   }
   return events;
 }
 
-async function handleGcal(request) {
+function normalizeIcsColor(raw) {
+  const v = String(raw || "").trim();
+  if (!v) return "";
+  const map = {
+    1: "#a4bdfc",
+    2: "#7ae7bf",
+    3: "#dbadff",
+    4: "#ff887c",
+    5: "#fbd75b",
+    6: "#ffb878",
+    7: "#46d6db",
+    8: "#e1e1e1",
+    9: "#5484ed",
+    10: "#51b749",
+    11: "#dc2127",
+  };
+  if (map[v]) return map[v];
+  if (/^#?[0-9a-f]{3,8}$/i.test(v)) return v.startsWith("#") ? v : `#${v}`;
+  return "";
+}
+
+async function handleGcal(request, env = {}) {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders() });
   }
@@ -412,6 +439,75 @@ async function handleGcal(request) {
     const calendarId = String(url.searchParams.get("id") || "").trim();
     if (!calendarId) {
       return json({ error: "id calendario mancante" }, 400);
+    }
+
+    const from = url.searchParams.get("from") || "";
+    const to = url.searchParams.get("to") || "";
+    const apiKey = env.GOOGLE_CALENDAR_API_KEY || env.SCOUT_GCAL_API_KEY || "";
+
+    // Con API key Google possiamo leggere anche i colori evento
+    if (apiKey) {
+      try {
+        const params = new URLSearchParams({
+          key: apiKey,
+          singleEvents: "true",
+          orderBy: "startTime",
+          maxResults: "250",
+        });
+        if (from) params.set("timeMin", `${from}T00:00:00Z`);
+        if (to) params.set("timeMax", `${to}T23:59:59Z`);
+        const apiUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?${params}`;
+        const apiRes = await fetch(apiUrl);
+        if (apiRes.ok) {
+          const data = await apiRes.json();
+          const colorMap = {
+            1: "#a4bdfc",
+            2: "#7ae7bf",
+            3: "#dbadff",
+            4: "#ff887c",
+            5: "#fbd75b",
+            6: "#ffb878",
+            7: "#46d6db",
+            8: "#e1e1e1",
+            9: "#5484ed",
+            10: "#51b749",
+            11: "#dc2127",
+          };
+          let events = (data.items || []).map((item) => {
+            const start = item.start || {};
+            const end = item.end || {};
+            const allDay = !!start.date;
+            let dateStart = start.date || String(start.dateTime || "").slice(0, 10);
+            let dateEnd = end.date || String(end.dateTime || "").slice(0, 10) || dateStart;
+            if (allDay && dateEnd && dateEnd > dateStart) {
+              dateEnd = addDaysYmd(dateEnd, -1);
+            }
+            let time = "";
+            if (!allDay && start.dateTime) {
+              const dt = new Date(start.dateTime);
+              time = `${String(dt.getHours()).padStart(2, "0")}:${String(dt.getMinutes()).padStart(2, "0")}`;
+            }
+            return {
+              uid: item.id,
+              title: item.summary || "Evento Google",
+              description: item.description || "",
+              place: item.location || "",
+              dateStart,
+              dateEnd: dateEnd || dateStart,
+              allDay,
+              time: allDay ? "" : time,
+              colorId: item.colorId || "",
+              color: item.colorId && colorMap[item.colorId] ? colorMap[item.colorId] : "",
+            };
+          });
+          events.sort(
+            (a, b) => a.dateStart.localeCompare(b.dateStart) || (a.time || "").localeCompare(b.time || "")
+          );
+          return json({ events }, 200, { "Cache-Control": "public, max-age=120" });
+        }
+      } catch (err) {
+        console.warn("[gcal] api fallback to ics", err);
+      }
     }
 
     const icsUrl = `https://calendar.google.com/calendar/ical/${encodeURIComponent(calendarId)}/public/basic.ics`;
@@ -433,8 +529,6 @@ async function handleGcal(request) {
     const ics = await res.text();
     let events = parseIcsEvents(ics);
 
-    const from = url.searchParams.get("from") || "";
-    const to = url.searchParams.get("to") || "";
     if (from) events = events.filter((e) => (e.dateEnd || e.dateStart) >= from);
     if (to) events = events.filter((e) => e.dateStart <= to);
 
@@ -452,7 +546,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/api/gcal" || url.pathname.startsWith("/api/gcal/")) {
-      return handleGcal(request);
+      return handleGcal(request, env);
     }
     if (url.pathname === "/api/sync" || url.pathname.startsWith("/api/sync/")) {
       return handleSync(request, env);

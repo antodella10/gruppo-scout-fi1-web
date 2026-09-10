@@ -312,11 +312,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function onCalClick(calNode, listNode) {
     calNode?.addEventListener("click", (e) => {
-      const bar = e.target.closest(".cal-event-bar");
-      if (bar) {
-        selectEvent(bar.dataset.eventId, bar.dataset.date);
-        return;
-      }
       const day = e.target.closest(".cal-day");
       if (!day) return;
       const date = day.dataset.date;

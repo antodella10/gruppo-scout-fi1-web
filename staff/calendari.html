@@ -31,7 +31,7 @@
       <section class="panel">
         <p class="hint">
           Il calendario deve essere <strong>pubblico</strong> (Google Calendar → Impostazioni → Accessibilità pubblico).
-          Gli eventi vengono uniti al calendario del sito.
+          Gli eventi vengono uniti al calendario del sito. Scegli il <strong>colore</strong> uguale a quello del calendario in Google (il feed pubblico non lo invia da solo).
         </p>
         <form id="gcal-form" class="form-grid">
           <label>
@@ -47,6 +47,22 @@
           <label>
             URL o ID calendario
             <input type="text" name="googleEmbed" placeholder="URL incorporamento oppure ID (…@group.calendar.google.com)" required>
+          </label>
+          <label>
+            Colore (come su Google)
+            <select name="gcalColor" required>
+              <option value="#a4bdfc">Lavanda</option>
+              <option value="#7ae7bf">Salvia</option>
+              <option value="#dbadff">Uva</option>
+              <option value="#ff887c">Flamingo</option>
+              <option value="#fbd75b">Banana</option>
+              <option value="#ffb878">Tangerino</option>
+              <option value="#46d6db">Pavone</option>
+              <option value="#e1e1e1">Grafite</option>
+              <option value="#5484ed">Mirtillo</option>
+              <option value="#51b749">Basilico</option>
+              <option value="#dc2127">Pomodoro</option>
+            </select>
           </label>
           <button class="btn btn-primary" type="submit">Aggiungi calendario</button>
         </form>

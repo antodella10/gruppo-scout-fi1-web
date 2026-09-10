@@ -85,26 +85,69 @@ function formatEventRangeNice(event) {
   return `${formatLongDate(start)} · ore ${event.time}`;
 }
 
-function eventLaneColor(event) {
-  if (event.scope === "google" || event.fromGoogle) return "lane-google";
-  if (event.scope === "gruppo") return "lane-gruppo";
-  if (event.scope === "coca") return "lane-coca";
-  if (event.scope === "staff") return "lane-staff";
-  return "lane-branca";
+const GOOGLE_EVENT_COLORS = {
+  1: "#a4bdfc",
+  2: "#7ae7bf",
+  3: "#dbadff",
+  4: "#ff887c",
+  5: "#fbd75b",
+  6: "#ffb878",
+  7: "#46d6db",
+  8: "#e1e1e1",
+  9: "#5484ed",
+  10: "#51b749",
+  11: "#dc2127",
+};
+
+function normalizeHexColor(input) {
+  const raw = String(input || "").trim();
+  if (!raw) return "";
+  if (/^\d{1,2}$/.test(raw) && GOOGLE_EVENT_COLORS[raw]) return GOOGLE_EVENT_COLORS[raw];
+  const hex = raw.startsWith("#") ? raw : `#${raw}`;
+  if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) return hex.length === 4
+    ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`
+    : hex;
+  return "";
 }
 
-function packEventLanes(segments) {
-  const lanes = [];
-  const sorted = [...segments].sort((a, b) => a.startCol - b.startCol || b.endCol - a.endCol);
-  for (const seg of sorted) {
-    let lane = lanes.findIndex((row) => row.every((s) => seg.endCol < s.startCol || seg.startCol > s.endCol));
-    if (lane < 0) {
-      lane = lanes.length;
-      lanes.push([]);
-    }
-    lanes[lane].push(seg);
-  }
-  return lanes;
+function contrastFg(hex) {
+  const h = normalizeHexColor(hex).slice(1);
+  if (!h) return "#1a1f1c";
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum > 0.62 ? "#1a1f1c" : "#ffffff";
+}
+
+function eventFillColor(event) {
+  const fromEvent = normalizeHexColor(event?.color);
+  if (fromEvent) return fromEvent;
+  if (event?.colorId && GOOGLE_EVENT_COLORS[event.colorId]) return GOOGLE_EVENT_COLORS[event.colorId];
+  if (event?.scope === "google" || event?.fromGoogle) return "#a4bdfc";
+  if (event?.scope === "gruppo") return "#f6d98a";
+  if (event?.scope === "coca") return "#f5d9c8";
+  if (event?.scope === "staff") return "#ead9f5";
+  return "#d9efd8";
+}
+
+function eventDurationDays(event) {
+  const start = event.dateStart || event.date || "";
+  const end = event.dateEnd || start;
+  if (!start) return 1;
+  const a = new Date(`${start}T12:00:00`);
+  const b = new Date(`${end}T12:00:00`);
+  return Math.max(1, Math.round((b - a) / 86400000) + 1);
+}
+
+function pickPrimaryEvent(dayEvents) {
+  if (!dayEvents.length) return null;
+  return [...dayEvents].sort(
+    (a, b) =>
+      eventDurationDays(b) - eventDurationDays(a) ||
+      (a.dateStart || "").localeCompare(b.dateStart || "") ||
+      (a.title || "").localeCompare(b.title || "")
+  )[0];
 }
 
 function renderMonthCalendar(container, events, viewDate, { selectedDate = null } = {}) {
@@ -141,65 +184,59 @@ function renderMonthCalendar(container, events, viewDate, { selectedDate = null 
 
   for (let w = 0; w < 6; w++) {
     const week = cells.slice(w * 7, w * 7 + 7);
-    const weekStart = week[0].key;
-    const weekEnd = week[6].key;
+    html += `<div class="cal-week"><div class="cal-week-days">`;
 
-    const segments = [];
-    for (const ev of events) {
-      const start = ev.dateStart || ev.date || "";
-      const end = ev.dateEnd || start;
-      if (!start) continue;
-      if (end < weekStart || start > weekEnd) continue;
-      const startCol = week.findIndex((d) => eventCoversDate(ev, d.key));
-      const endCol = 6 - [...week].reverse().findIndex((d) => eventCoversDate(ev, d.key));
-      if (startCol < 0 || endCol < 0 || endCol < startCol) continue;
-      segments.push({
-        event: ev,
-        startCol,
-        endCol,
-        continuesLeft: start < weekStart,
-        continuesRight: end > weekEnd,
-      });
-    }
-
-    const lanes = packEventLanes(segments);
-    html += `<div class="cal-week">`;
-    html += `<div class="cal-week-days">`;
-    for (const cell of week) {
+    for (let c = 0; c < 7; c++) {
+      const cell = week[c];
+      const dayEvents = events.filter((e) => eventCoversDate(e, cell.key));
+      const primary = pickPrimaryEvent(dayEvents);
       const classes = ["cal-day"];
       if (cell.muted) classes.push("muted");
       if (cell.key === today) classes.push("today");
-      if (events.some((e) => eventCoversDate(e, cell.key))) classes.push("has-event");
+      if (primary) classes.push("has-event");
       if (selectedDate && cell.key === selectedDate) classes.push("is-selected");
-      html += `<button type="button" class="${classes.join(" ")}" data-date="${cell.key}" aria-label="${cell.key}">${cell.day}</button>`;
-    }
-    html += `</div>`;
 
-    if (lanes.length) {
-      html += `<div class="cal-week-lanes">`;
-      for (const lane of lanes) {
-        html += `<div class="cal-lane">`;
-        for (const seg of lane) {
-          const span = seg.endCol - seg.startCol + 1;
-          const ends = [];
-          if (!seg.continuesLeft) ends.push("is-start");
-          if (!seg.continuesRight) ends.push("is-end");
-          if (seg.continuesLeft) ends.push("is-cont-left");
-          if (seg.continuesRight) ends.push("is-cont-right");
-          const label = escapeHtml(seg.event.title || "Evento");
-          html += `<button type="button" class="cal-event-bar ${eventLaneColor(seg.event)} ${ends.join(" ")}"
-            style="grid-column: ${seg.startCol + 1} / span ${span}"
-            data-event-id="${escapeHtml(seg.event.id)}"
-            data-date="${week[seg.startCol].key}"
-            title="${label}">
-            <span>${label}</span>
-          </button>`;
+      let style = "";
+      let label = "";
+      let extra = "";
+      let eventIdAttr = "";
+
+      if (primary) {
+        const bg = eventFillColor(primary);
+        const fg = contrastFg(bg);
+        style = `style="--ev-bg:${bg};--ev-fg:${fg}"`;
+        eventIdAttr = `data-event-id="${escapeHtml(primary.id || "")}"`;
+
+        const start = primary.dateStart || primary.date || "";
+        const end = primary.dateEnd || start;
+        const prevKey = c > 0 ? week[c - 1].key : null;
+        const nextKey = c < 6 ? week[c + 1].key : null;
+        const contLeft = prevKey && eventCoversDate(primary, prevKey);
+        const contRight = nextKey && eventCoversDate(primary, nextKey);
+        if (!contLeft && !contRight) classes.push("is-span-only");
+        else {
+          if (!contLeft) classes.push("is-span-start");
+          if (!contRight) classes.push("is-span-end");
+          if (contLeft && contRight) classes.push("is-span-mid");
         }
-        html += `</div>`;
+
+        // titolo solo all’inizio del pezzo nella settimana
+        if (!contLeft) {
+          label = `<span class="cal-day-title">${escapeHtml(primary.title || "Evento")}</span>`;
+        }
+        if (dayEvents.length > 1) {
+          extra = `<span class="cal-day-more">+${dayEvents.length - 1}</span>`;
+        }
       }
-      html += `</div>`;
+
+      html += `<button type="button" class="${classes.join(" ")}" data-date="${cell.key}" ${eventIdAttr} ${style} aria-label="${cell.key}">
+        <span class="cal-day-num">${cell.day}</span>
+        ${label}
+        ${extra}
+      </button>`;
     }
-    html += `</div>`;
+
+    html += `</div></div>`;
   }
 
   container.innerHTML = html;

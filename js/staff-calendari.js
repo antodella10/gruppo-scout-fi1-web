@@ -15,10 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
     gcalList.innerHTML = list
       .map((c) => {
         const label = c.branca === "gruppo" ? "Gruppo" : ScoutStore.branchLabel(c.branca);
+        const color = c.color || "#a4bdfc";
         return `
         <div class="event-admin-item">
           <div>
-            <strong>${escapeHtml(label)}</strong><br>
+            <strong><span class="gcal-color-dot" style="background:${escapeHtml(color)}"></span> ${escapeHtml(label)}</strong><br>
             <span style="color:var(--muted);font-size:.85rem;word-break:break-all">${escapeHtml(c.calendarId || c.embedUrl)}</span>
           </div>
           <button type="button" class="btn btn-ghost btn-small" data-del-gcal="${c.id}">Rimuovi</button>
@@ -32,7 +33,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = new FormData(gcalForm);
     try {
       ScoutStore.addGoogleCalendar(
-        { branca: data.get("gcalBranca"), embedUrl: data.get("googleEmbed") },
+        {
+          branca: data.get("gcalBranca"),
+          embedUrl: data.get("googleEmbed"),
+          color: data.get("gcalColor"),
+        },
         user
       );
       gcalForm.reset();

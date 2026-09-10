@@ -508,7 +508,7 @@ const ScoutStore = (() => {
     return getSettings().googleCalendars || [];
   }
 
-  function addGoogleCalendar({ branca, embedUrl }, user) {
+  function addGoogleCalendar({ branca, embedUrl, color }, user) {
     if (!isAdminUser(user)) throw new Error("Solo admin.");
     const raw = String(embedUrl || "").trim();
     const calendarId =
@@ -522,12 +522,14 @@ const ScoutStore = (() => {
     if (key !== "gruppo" && !window.SCOUT_BRANCHES?.[key]) {
       throw new Error("Seleziona una branca valida.");
     }
+    const colorHex = String(color || "").trim();
     const settings = getSettings();
     const list = [...(settings.googleCalendars || [])];
     list.push({
       id: uid("gcal"),
       branca: key,
       calendarId,
+      color: colorHex || "#a4bdfc",
       embedUrl: raw.includes("://") ? raw : `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(calendarId)}`,
       createdAt: new Date().toISOString(),
     });
