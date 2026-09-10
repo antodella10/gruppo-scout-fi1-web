@@ -90,8 +90,9 @@ window.CloudSync = (() => {
   async function getCanzoniereMeta() {
     try {
       return await getJson("canzoniere-meta");
-    } catch {
-      return null;
+    } catch (err) {
+      err.syncFailed = true;
+      throw err;
     }
   }
 
@@ -100,7 +101,7 @@ window.CloudSync = (() => {
       return await postJson({ resource: "canzoniere-meta", meta });
     } catch (err) {
       console.warn("[CloudSync] putCanzoniereMeta", err);
-      return null;
+      throw err;
     }
   }
 

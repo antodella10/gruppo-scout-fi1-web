@@ -7,6 +7,10 @@ directory = "."
 binding = "ASSETS"
 run_worker_first = ["/api/*"]
 
-# Binding KV: crealo dalla Dashboard Cloudflare (non serve metterlo qui).
-# Workers & Pages → scout-firenze1 → Settings → Bindings → Add → KV Namespace
-# Variable name: SCOUT_KV  |  Namespace: crea "firenze1-sync"
+# IMPORTANTE: senza questo blocco ogni deploy Git può togliere il binding KV
+# e la sync torna in 503. Dopo aver creato il namespace in Dashboard → KV,
+# copia l’ID (stringa lunga) al posto di REPLACE_WITH_KV_NAMESPACE_ID.
+#
+# [[kv_namespaces]]
+# binding = "SCOUT_KV"
+# id = "REPLACE_WITH_KV_NAMESPACE_ID"

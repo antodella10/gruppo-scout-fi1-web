@@ -147,17 +147,40 @@ const CanzoniereStore = (() => {
   async function pushMeta() {
     if (typeof CloudSync === "undefined") return null;
     if (!CloudSync.available()) return null;
-    const result = await CloudSync.putCanzoniereMeta(readMeta());
-    if (!result?.ok) throw new Error("Sync cloud delle proposte non riuscita. Riprova.");
-    return result;
+    try {
+      const result = await CloudSync.putCanzoniereMeta(readMeta());
+      if (!result?.ok) throw new Error("Sync cloud delle proposte non riuscita. Riprova.");
+      return result;
+    } catch (err) {
+      const msg = String(err?.message || "");
+      if (/KV|binding|non configurata/i.test(msg)) {
+        throw new Error(
+          "Sync cloud non attiva sul server (manca lo storage KV). Ripristina il binding SCOUT_KV su Cloudflare, poi riprova."
+        );
+      }
+      throw err;
+    }
   }
 
   /** Prima di scrivere: riallinea dal cloud e fa merge, così non si perdono proposte. */
   async function syncMergeFromRemote() {
     if (typeof CloudSync === "undefined" || !CloudSync.available()) return readMeta();
-    const remote = await CloudSync.getCanzoniereMeta();
+    let remote;
+    try {
+      remote = await CloudSync.getCanzoniereMeta();
+    } catch (err) {
+      const msg = String(err?.message || "");
+      if (/KV|binding|non configurata/i.test(msg)) {
+        throw new Error(
+          "Sync cloud non attiva sul server (manca lo storage KV). Ripristina il binding SCOUT_KV su Cloudflare, poi riprova."
+        );
+      }
+      throw new Error(msg || "Impossibile sincronizzare col cloud. Controlla la connessione e riprova.");
+    }
     if (!remote) {
-      throw new Error("Impossibile sincronizzare col cloud. Controlla la connessione e riprova.");
+      throw new Error(
+        "Sync cloud non attiva sul server (manca lo storage KV). Ripristina il binding SCOUT_KV su Cloudflare, poi riprova."
+      );
     }
     const merged = mergeMeta(readMeta(), remote);
     writeMeta(merged);
@@ -204,7 +227,13 @@ const CanzoniereStore = (() => {
   /** Allinea meta dal cloud (telefono/altro browser vedono lo stesso canzoniere). */
   async function pullRemote() {
     if (typeof CloudSync === "undefined") return false;
-    const remote = await CloudSync.getCanzoniereMeta();
+    let remote;
+    try {
+      remote = await CloudSync.getCanzoniereMeta();
+    } catch (err) {
+      console.warn("[CanzoniereStore] pullRemote", err);
+      return false;
+    }
     if (!remote) return false;
     const hasRemote =
       remote.book ||
@@ -217,12 +246,11 @@ const CanzoniereStore = (() => {
       (local.proposals || []).length;
 
     if (hasRemote || hasLocal) {
-      // Sempre merge: evita che un device cancelli le proposte dell’altro
       writeMeta(mergeMeta(local, remote));
       if (hasRemote) return true;
     }
     if (hasLocal && !hasRemote) {
-      await pushLocalFilesToCloud();
+      await pushLocalFilesToCloud().catch((err) => console.warn("[CanzoniereStore] seed cloud", err));
     }
     return false;
   }
