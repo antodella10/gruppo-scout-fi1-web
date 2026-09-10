@@ -205,6 +205,44 @@ const ScoutStore = (() => {
     return getPending().sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
   }
 
+  function listStaffAccounts(adminUser) {
+    if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può vedere gli account.");
+    return getUsers()
+      .filter((u) => u.verified)
+      .map((u) => ({
+        id: u.id,
+        nome: u.nome,
+        cognome: u.cognome,
+        email: u.email,
+        branca: isAdminEmail(u.email) ? null : u.branca || null,
+        isAdmin: isAdminUser(u),
+        createdAt: u.createdAt || null,
+        approvedAt: u.approvedAt || null,
+      }))
+      .sort((a, b) => {
+        if (a.isAdmin !== b.isAdmin) return a.isAdmin ? -1 : 1;
+        const nameA = `${a.cognome || ""} ${a.nome || ""}`.toLowerCase();
+        const nameB = `${b.cognome || ""} ${b.nome || ""}`.toLowerCase();
+        return nameA.localeCompare(nameB, "it");
+      });
+  }
+
+  async function deleteStaffAccount(userId, adminUser) {
+    if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può eliminare account.");
+    const users = getUsers();
+    const target = users.find((u) => u.id === userId);
+    if (!target) throw new Error("Account non trovato.");
+    if (isAdminEmail(target.email)) {
+      throw new Error("Non puoi eliminare l’account admin principale.");
+    }
+    if (target.id === adminUser.id) {
+      throw new Error("Non puoi eliminare il tuo stesso account mentre sei connesso.");
+    }
+    saveUsers(users.filter((u) => u.id !== userId));
+    await pushRemoteAccounts();
+    return true;
+  }
+
   async function approvePending(pendingId, adminUser) {
     if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può approvare.");
     const pending = getPending();
@@ -801,6 +839,8 @@ const ScoutStore = (() => {
     scopeLabel,
     registerStaff,
     listPending,
+    listStaffAccounts,
+    deleteStaffAccount,
     approvePending,
     rejectPending,
     loginStaff,
