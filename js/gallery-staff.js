@@ -122,22 +122,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     listEl.innerHTML = list
       .map((item) => {
-        const checked = featuredDraft.has(item.id) ? "checked" : "";
-        const disabled =
-          !featuredDraft.has(item.id) && featuredDraft.size >= GalleryStore.FEATURED_MAX ? "disabled" : "";
+        const on = featuredDraft.has(item.id);
         const label = item.title || item.caption || "Senza titolo";
         return `
-        <article class="gallery-admin-item">
+        <article class="gallery-admin-item ${on ? "is-featured" : ""}" data-toggle-feat="${escapeHtml(item.id)}" role="button" tabindex="0" aria-pressed="${on ? "true" : "false"}">
           <img src="${escapeHtml(GalleryStore.imageUrl(item.id))}" alt="" loading="lazy">
           <div>
-            <label class="gallery-feat-check">
-              <input type="checkbox" data-feat="${escapeHtml(item.id)}" ${checked} ${disabled}>
-              In primo piano
-            </label>
             <strong>${escapeHtml(label)}</strong>
             <p class="hint">${escapeHtml(GalleryStore.branchLabel(item.branca))}${
-              item.title && item.caption ? " · " + escapeHtml(item.caption) : ""
-            }</p>
+              on ? " · In primo piano" : ""
+            }${item.title && item.caption ? " · " + escapeHtml(item.caption) : ""}</p>
           </div>
           <button type="button" class="btn btn-ghost btn-small" data-del="${escapeHtml(item.id)}">Elimina</button>
         </article>`;
@@ -247,35 +241,43 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  listEl?.addEventListener("change", (e) => {
-    const box = e.target.closest("[data-feat]");
-    if (!box) return;
-    const id = box.dataset.feat;
-    if (box.checked) {
+  listEl?.addEventListener("click", async (e) => {
+    const del = e.target.closest("[data-del]");
+    if (del) {
+      e.stopPropagation();
+      if (!confirm("Eliminare questa foto?")) return;
+      try {
+        await GalleryStore.remove(del.dataset.del, user);
+        featuredDraft.delete(del.dataset.del);
+        flash("Foto eliminata.");
+        await refresh();
+      } catch (err) {
+        flash(err.message || "Eliminazione fallita.", false);
+      }
+      return;
+    }
+
+    const row = e.target.closest("[data-toggle-feat]");
+    if (!row) return;
+    const id = row.dataset.toggleFeat;
+    if (featuredDraft.has(id)) {
+      featuredDraft.delete(id);
+    } else {
       if (featuredDraft.size >= GalleryStore.FEATURED_MAX) {
-        box.checked = false;
         flash(`Massimo ${GalleryStore.FEATURED_MAX} foto in primo piano.`, false);
         return;
       }
       featuredDraft.add(id);
-    } else {
-      featuredDraft.delete(id);
     }
     renderList();
   });
 
-  listEl?.addEventListener("click", async (e) => {
-    const btn = e.target.closest("[data-del]");
-    if (!btn) return;
-    if (!confirm("Eliminare questa foto?")) return;
-    try {
-      await GalleryStore.remove(btn.dataset.del, user);
-      featuredDraft.delete(btn.dataset.del);
-      flash("Foto eliminata.");
-      await refresh();
-    } catch (err) {
-      flash(err.message || "Eliminazione fallita.", false);
-    }
+  listEl?.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const row = e.target.closest("[data-toggle-feat]");
+    if (!row || e.target.closest("[data-del]")) return;
+    e.preventDefault();
+    row.click();
   });
 
   filterFolder?.addEventListener("change", renderList);

@@ -1,6 +1,6 @@
 ﻿# Gruppo Scout Firenze 1 — sito web
 
-FederScout — Associazione Mariano Silvani. Deploy su Netlify.
+FederScout — Associazione Marliani Silvano. Deploy su Netlify.
 
 ## Funzionalità
 

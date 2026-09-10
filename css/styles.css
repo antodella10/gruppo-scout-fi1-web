@@ -1494,16 +1494,22 @@ a.home-tile:hover {
 .home-tile-orari {
   grid-column: span 6;
   background:
-    linear-gradient(160deg, rgba(31, 122, 58, 0.08), transparent 55%),
+    linear-gradient(160deg, rgba(31, 122, 58, 0.14), transparent 55%),
     var(--white);
 }
 
 .home-tile-notizie {
   grid-column: span 3;
+  background:
+    linear-gradient(160deg, rgba(31, 122, 58, 0.1), transparent 55%),
+    var(--white);
 }
 
 .home-tile-sedi {
   grid-column: span 3;
+  background:
+    linear-gradient(160deg, rgba(84, 132, 237, 0.1), transparent 55%),
+    var(--white);
 }
 
 .home-tile-iscrizioni,
@@ -1514,25 +1520,25 @@ a.home-tile:hover {
 
 .home-tile-iscrizioni {
   background:
-    linear-gradient(160deg, rgba(240, 194, 26, 0.16), transparent 55%),
+    linear-gradient(160deg, rgba(240, 194, 26, 0.22), transparent 55%),
     var(--white);
 }
 
 .home-tile-negozio {
   background:
-    linear-gradient(160deg, rgba(196, 120, 40, 0.14), transparent 55%),
+    linear-gradient(160deg, rgba(196, 120, 40, 0.2), transparent 55%),
     var(--white);
 }
 
 .home-tile-galleria {
   background:
-    linear-gradient(160deg, rgba(84, 132, 237, 0.14), transparent 55%),
+    linear-gradient(160deg, rgba(84, 132, 237, 0.2), transparent 55%),
     var(--white);
 }
 
 .home-tile-chisiamo {
   background:
-    linear-gradient(160deg, rgba(31, 122, 58, 0.08), transparent 55%),
+    linear-gradient(160deg, rgba(31, 122, 58, 0.14), transparent 55%),
     var(--white);
 }
 
@@ -2607,7 +2613,7 @@ body.pdf-pseudo-fs-open {
 .gallery-feat-slide {
   appearance: none;
   position: relative;
-  border: 1px solid var(--line);
+  border: 2px solid var(--line);
   border-radius: 16px;
   overflow: hidden;
   padding: 0;
@@ -2626,7 +2632,8 @@ body.pdf-pseudo-fs-open {
 }
 
 .gallery-feat-slide.is-active {
-  box-shadow: 0 0 0 2px var(--green);
+  border-color: var(--green-deep);
+  box-shadow: none;
 }
 
 .gallery-hover-label {
@@ -2754,12 +2761,21 @@ body.pdf-pseudo-fs-open {
   grid-template-columns: 96px 1fr auto;
   gap: 0.85rem;
   align-items: center;
-  padding: 0.65rem 0;
-  border-bottom: 1px solid var(--line);
+  padding: 0.65rem 0.7rem;
+  margin: 0.35rem 0;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-.gallery-admin-item:last-child {
-  border-bottom: 0;
+.gallery-admin-item:hover {
+  background: rgba(31, 122, 58, 0.04);
+}
+
+.gallery-admin-item.is-featured {
+  border-color: var(--green-deep);
+  background: rgba(20, 85, 40, 0.05);
 }
 
 .gallery-admin-item img {
@@ -2768,6 +2784,7 @@ body.pdf-pseudo-fs-open {
   object-fit: cover;
   border-radius: 10px;
   background: #e8eee8;
+  pointer-events: none;
 }
 
 .gallery-lightbox {
