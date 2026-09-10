@@ -28,6 +28,13 @@ document.addEventListener("DOMContentLoaded", () => {
   viewDate.setDate(1);
   let googleEvents = [];
   let loadToken = 0;
+  let selectedDate = null;
+  let selectedEventId = null;
+
+  const listTitleEl = document.getElementById("event-list-title");
+  const listTitleElRep = document.getElementById("event-list-title-reparto");
+  const listBackBtn = document.getElementById("event-list-back");
+  const listBackBtnRep = document.getElementById("event-list-back-reparto");
 
   const PASTEL_CLASS = {
     lupetti: "pastel-lupetti",
@@ -166,22 +173,63 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>`;
   }
 
-  function paintCalendar(targetCal, targetList, targetLabel) {
+  function paintCalendar(targetCal, targetList, targetLabel, titleEl, backBtn) {
     if (!targetCal || !targetList || !targetLabel) return;
     const events = currentEvents();
     targetLabel.textContent = formatMonthYear(viewDate);
-    renderMonthCalendar(targetCal, events, viewDate);
+    renderMonthCalendar(targetCal, events, viewDate, { selectedDate });
+
+    const detailing = !!(selectedDate || selectedEventId);
+    if (backBtn) backBtn.hidden = !detailing;
+
+    if (selectedEventId) {
+      const one = events.filter((e) => e.id === selectedEventId);
+      if (titleEl) titleEl.textContent = "Dettaglio evento";
+      renderEventDetails(targetList, one, { emptyText: "Evento non trovato." });
+      return;
+    }
+
+    if (selectedDate) {
+      const dayEvents = events.filter((e) => eventCoversDate(e, selectedDate));
+      if (titleEl) titleEl.textContent = formatLongDate(selectedDate);
+      renderEventDetails(targetList, dayEvents);
+      return;
+    }
+
+    if (titleEl) titleEl.textContent = "Prossimi appuntamenti";
     renderEventList(targetList, events);
+  }
+
+  function paintCurrent() {
+    if (selectedBranca === "reparto") {
+      renderRepartoNext();
+      paintCalendar(calElRep, listElRep, labelElRep, listTitleElRep, listBackBtnRep);
+      return;
+    }
+    paintCalendar(calEl, listEl, labelEl, listTitleEl, listBackBtn);
   }
 
   async function refreshCalendar() {
     await loadGoogleEvents();
-    if (selectedBranca === "reparto") {
-      renderRepartoNext();
-      paintCalendar(calElRep, listElRep, labelElRep);
-      return;
-    }
-    paintCalendar(calEl, listEl, labelEl);
+    paintCurrent();
+  }
+
+  function clearEventSelection() {
+    selectedDate = null;
+    selectedEventId = null;
+    paintCurrent();
+  }
+
+  function selectDay(dateKey) {
+    selectedDate = dateKey;
+    selectedEventId = null;
+    paintCurrent();
+  }
+
+  function selectEvent(eventId, dateKey) {
+    selectedEventId = eventId;
+    selectedDate = dateKey || null;
+    paintCurrent();
   }
 
   function scrollToHashSoon() {
@@ -196,6 +244,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function applyBranchView(branca) {
     selectedBranca = branca;
+    selectedDate = null;
+    selectedEventId = null;
     BranchView.persist(branca);
     const copy = BRANCH_COPY[branca || "null"] || BRANCH_COPY.null;
     const isReparto = branca === "reparto";
@@ -260,19 +310,30 @@ document.addEventListener("DOMContentLoaded", () => {
     branchTrigger.setAttribute("aria-expanded", "false");
   }
 
-  function onDayClick(calNode) {
+  function onCalClick(calNode, listNode) {
     calNode?.addEventListener("click", (e) => {
-      const day = e.target.closest(".cal-day.has-event");
+      const bar = e.target.closest(".cal-event-bar");
+      if (bar) {
+        selectEvent(bar.dataset.eventId, bar.dataset.date);
+        return;
+      }
+      const day = e.target.closest(".cal-day");
       if (!day) return;
       const date = day.dataset.date;
-      const match = currentEvents().filter((ev) => eventCoversDate(ev, date));
-      if (!match.length) return;
-      const titles = match
-        .map((m) => `• [${ScoutStore.scopeLabel(m.scope, m.branca || m.googleBranca)}] ${m.title} (${formatEventRange(m)})`)
-        .join("\n");
-      alert(`${date}\n\n${titles}`);
+      if (!date) return;
+      if (day.classList.contains("has-event")) selectDay(date);
+      else clearEventSelection();
+    });
+
+    listNode?.addEventListener("click", (e) => {
+      const item = e.target.closest(".event-item[data-event-id]");
+      if (!item || !item.dataset.eventId) return;
+      selectEvent(item.dataset.eventId, item.dataset.date);
     });
   }
+
+  listBackBtn?.addEventListener("click", clearEventSelection);
+  listBackBtnRep?.addEventListener("click", clearEventSelection);
 
   gruppoBtn?.addEventListener("click", () => applyBranchView(null));
 
@@ -295,18 +356,22 @@ document.addEventListener("DOMContentLoaded", () => {
   function bindMonthNav(prev, next) {
     prev?.addEventListener("click", () => {
       viewDate.setMonth(viewDate.getMonth() - 1);
+      selectedDate = null;
+      selectedEventId = null;
       refreshCalendar();
     });
     next?.addEventListener("click", () => {
       viewDate.setMonth(viewDate.getMonth() + 1);
+      selectedDate = null;
+      selectedEventId = null;
       refreshCalendar();
     });
   }
 
   bindMonthNav(prevBtn, nextBtn);
   bindMonthNav(prevBtnRep, nextBtnRep);
-  onDayClick(calEl);
-  onDayClick(calElRep);
+  onCalClick(calEl, listEl);
+  onCalClick(calElRep, listElRep);
 
   // Risincronizza Google ogni 5 minuti
   window.setInterval(() => {

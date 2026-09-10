@@ -62,7 +62,52 @@ function formatEventRange(event) {
   return `${time}${start}`;
 }
 
-function renderMonthCalendar(container, events, viewDate) {
+function formatLongDate(dateStr) {
+  if (!dateStr) return "";
+  return new Date(`${dateStr}T12:00:00`).toLocaleDateString("it-IT", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function formatEventRangeNice(event) {
+  const start = event.dateStart || event.date || "";
+  const end = event.dateEnd || start;
+  if (!start) return "";
+  const allDay = event.allDay || !event.time;
+  if (allDay) {
+    if (end && end !== start) return `${formatLongDate(start)} → ${formatLongDate(end)}`;
+    return formatLongDate(start);
+  }
+  if (end && end !== start) return `${formatLongDate(start)} · ${event.time} → ${formatLongDate(end)}`;
+  return `${formatLongDate(start)} · ore ${event.time}`;
+}
+
+function eventLaneColor(event) {
+  if (event.scope === "google" || event.fromGoogle) return "lane-google";
+  if (event.scope === "gruppo") return "lane-gruppo";
+  if (event.scope === "coca") return "lane-coca";
+  if (event.scope === "staff") return "lane-staff";
+  return "lane-branca";
+}
+
+function packEventLanes(segments) {
+  const lanes = [];
+  const sorted = [...segments].sort((a, b) => a.startCol - b.startCol || b.endCol - a.endCol);
+  for (const seg of sorted) {
+    let lane = lanes.findIndex((row) => row.every((s) => seg.endCol < s.startCol || seg.startCol > s.endCol));
+    if (lane < 0) {
+      lane = lanes.length;
+      lanes.push([]);
+    }
+    lanes[lane].push(seg);
+  }
+  return lanes;
+}
+
+function renderMonthCalendar(container, events, viewDate, { selectedDate = null } = {}) {
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
   const first = new Date(year, month, 1);
@@ -71,14 +116,11 @@ function renderMonthCalendar(container, events, viewDate) {
   const daysInPrev = new Date(year, month, 0).getDate();
   const today = ymd(new Date());
 
-  const dows = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
-  let html = dows.map((d) => `<div class="cal-dow">${d}</div>`).join("");
-
+  const cells = [];
   for (let i = 0; i < 42; i++) {
     let day;
     let muted = false;
     let dateObj;
-
     if (i < startOffset) {
       day = daysInPrev - startOffset + i + 1;
       dateObj = new Date(year, month - 1, day);
@@ -91,14 +133,73 @@ function renderMonthCalendar(container, events, viewDate) {
       day = i - startOffset + 1;
       dateObj = new Date(year, month, day);
     }
+    cells.push({ day, muted, key: ymd(dateObj) });
+  }
 
-    const key = ymd(dateObj);
-    const classes = ["cal-day"];
-    if (muted) classes.push("muted");
-    if (key === today) classes.push("today");
-    if (events.some((e) => eventCoversDate(e, key))) classes.push("has-event");
+  const dows = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
+  let html = `<div class="cal-dows">${dows.map((d) => `<div class="cal-dow">${d}</div>`).join("")}</div>`;
 
-    html += `<div class="${classes.join(" ")}" data-date="${key}" title="${key}">${day}</div>`;
+  for (let w = 0; w < 6; w++) {
+    const week = cells.slice(w * 7, w * 7 + 7);
+    const weekStart = week[0].key;
+    const weekEnd = week[6].key;
+
+    const segments = [];
+    for (const ev of events) {
+      const start = ev.dateStart || ev.date || "";
+      const end = ev.dateEnd || start;
+      if (!start) continue;
+      if (end < weekStart || start > weekEnd) continue;
+      const startCol = week.findIndex((d) => eventCoversDate(ev, d.key));
+      const endCol = 6 - [...week].reverse().findIndex((d) => eventCoversDate(ev, d.key));
+      if (startCol < 0 || endCol < 0 || endCol < startCol) continue;
+      segments.push({
+        event: ev,
+        startCol,
+        endCol,
+        continuesLeft: start < weekStart,
+        continuesRight: end > weekEnd,
+      });
+    }
+
+    const lanes = packEventLanes(segments);
+    html += `<div class="cal-week">`;
+    html += `<div class="cal-week-days">`;
+    for (const cell of week) {
+      const classes = ["cal-day"];
+      if (cell.muted) classes.push("muted");
+      if (cell.key === today) classes.push("today");
+      if (events.some((e) => eventCoversDate(e, cell.key))) classes.push("has-event");
+      if (selectedDate && cell.key === selectedDate) classes.push("is-selected");
+      html += `<button type="button" class="${classes.join(" ")}" data-date="${cell.key}" aria-label="${cell.key}">${cell.day}</button>`;
+    }
+    html += `</div>`;
+
+    if (lanes.length) {
+      html += `<div class="cal-week-lanes">`;
+      for (const lane of lanes) {
+        html += `<div class="cal-lane">`;
+        for (const seg of lane) {
+          const span = seg.endCol - seg.startCol + 1;
+          const ends = [];
+          if (!seg.continuesLeft) ends.push("is-start");
+          if (!seg.continuesRight) ends.push("is-end");
+          if (seg.continuesLeft) ends.push("is-cont-left");
+          if (seg.continuesRight) ends.push("is-cont-right");
+          const label = escapeHtml(seg.event.title || "Evento");
+          html += `<button type="button" class="cal-event-bar ${eventLaneColor(seg.event)} ${ends.join(" ")}"
+            style="grid-column: ${seg.startCol + 1} / span ${span}"
+            data-event-id="${escapeHtml(seg.event.id)}"
+            data-date="${week[seg.startCol].key}"
+            title="${label}">
+            <span>${label}</span>
+          </button>`;
+        }
+        html += `</div>`;
+      }
+      html += `</div>`;
+    }
+    html += `</div>`;
   }
 
   container.innerHTML = html;
@@ -118,14 +219,12 @@ function renderEventList(container, events, { upcomingOnly = true, limit = 10 } 
   }
 
   container.innerHTML = list
-    .map((e) => {
-      const start = e.dateStart || e.date || "";
-      const desc = e.description || e.notes || "";
-      return `
-      <article class="event-item">
+    .map(
+      (e) => `
+      <article class="event-item" data-event-id="${escapeHtml(e.id || "")}" data-date="${escapeHtml(e.dateStart || e.date || "")}">
         <div class="event-date">
-          <span class="day">${dayNumber(start)}</span>
-          <span class="mon">${formatShortMonth(start)}</span>
+          <span class="day">${dayNumber(e.dateStart || e.date || "")}</span>
+          <span class="mon">${formatShortMonth(e.dateStart || e.date || "")}</span>
         </div>
         <div>
           <div class="event-item-top">${eventBadge(e)}</div>
@@ -133,8 +232,33 @@ function renderEventList(container, events, { upcomingOnly = true, limit = 10 } 
           <p>
             ${escapeHtml(formatEventRange(e))}
             ${e.place ? " · " + escapeHtml(e.place) : ""}
-            ${desc ? "<br>" + escapeHtml(desc) : ""}
           </p>
+        </div>
+      </article>`
+    )
+    .join("");
+}
+
+function renderEventDetails(container, events, { emptyText = "Nessun evento in questa data." } = {}) {
+  if (!events.length) {
+    container.innerHTML = `<div class="empty-state">${escapeHtml(emptyText)}</div>`;
+    return;
+  }
+  container.innerHTML = events
+    .map((e) => {
+      const desc = e.description || e.notes || "";
+      return `
+      <article class="event-item event-item-detail">
+        <div class="event-date">
+          <span class="day">${dayNumber(e.dateStart || e.date || "")}</span>
+          <span class="mon">${formatShortMonth(e.dateStart || e.date || "")}</span>
+        </div>
+        <div>
+          <div class="event-item-top">${eventBadge(e)}</div>
+          <h4>${escapeHtml(e.title)}</h4>
+          <p><strong>Quando:</strong> ${escapeHtml(formatEventRangeNice(e))}</p>
+          <p><strong>Luogo:</strong> ${escapeHtml(e.place || "Da definire")}</p>
+          ${desc ? `<p class="event-detail-desc">${escapeHtml(desc)}</p>` : ""}
         </div>
       </article>`;
     })
