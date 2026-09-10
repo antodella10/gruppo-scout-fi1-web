@@ -1,14 +1,26 @@
-/* Galleria foto pubblica: meta + file su Cloudflare R2 via /api/gallery. */
+/* Galleria foto: R2 + meta (branca, featured, cartelle staff). */
 window.GalleryStore = (() => {
-  let cache = { items: [], at: 0 };
-  const CACHE_MS = 30_000;
+  let cache = { items: [], folders: [], at: 0 };
+  const CACHE_MS = 20_000;
+  const FEATURED_MAX = 15;
+  const BRANCHES = [
+    { id: "gruppo", label: "Gruppo" },
+    { id: "lupetti", label: "Lupetti" },
+    { id: "reparto", label: "Reparto" },
+    { id: "noviziato", label: "Noviziato" },
+    { id: "clan", label: "Clan" },
+  ];
 
   function canManage(user) {
-    return typeof ScoutStore !== "undefined" && ScoutStore.isAdminUser?.(user);
+    return !!(user && typeof ScoutStore !== "undefined" && ScoutStore.getCurrentUser?.());
   }
 
-  function uid() {
-    return `gal_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`;
+  function branchLabel(id) {
+    return BRANCHES.find((b) => b.id === id)?.label || id || "Gruppo";
+  }
+
+  function uid(prefix = "gal") {
+    return `${prefix}_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`;
   }
 
   function imageUrl(id) {
@@ -18,15 +30,42 @@ window.GalleryStore = (() => {
     return `/api/gallery/file?id=${encodeURIComponent(id)}`;
   }
 
-  async function listItems({ force = false } = {}) {
-    if (!force && cache.items.length && Date.now() - cache.at < CACHE_MS) {
-      return cache.items;
-    }
-    if (typeof CloudSync === "undefined") return cache.items;
+  function applyCache(data) {
+    cache = {
+      items: Array.isArray(data?.items) ? data.items : [],
+      folders: Array.isArray(data?.folders) ? data.folders : [],
+      at: Date.now(),
+    };
+    return cache;
+  }
+
+  async function pull({ force = false } = {}) {
+    if (!force && cache.at && Date.now() - cache.at < CACHE_MS) return cache;
+    if (typeof CloudSync === "undefined") return cache;
     const data = await CloudSync.galleryGet();
-    const items = Array.isArray(data?.items) ? data.items : [];
-    cache = { items, at: Date.now() };
-    return items;
+    return applyCache(data);
+  }
+
+  async function listItems(opts) {
+    const data = await pull(opts);
+    return data.items;
+  }
+
+  async function listFolders(opts) {
+    const data = await pull(opts);
+    return data.folders;
+  }
+
+  function featuredItems(items) {
+    return [...(items || [])]
+      .filter((i) => i.featured)
+      .sort((a, b) => (a.featuredOrder || 0) - (b.featuredOrder || 0) || String(b.createdAt || "").localeCompare(String(a.createdAt || "")))
+      .slice(0, FEATURED_MAX);
+  }
+
+  function byBranca(items, branca) {
+    if (!branca || branca === "tutte") return items;
+    return (items || []).filter((i) => i.branca === branca);
   }
 
   async function fileToJpegBlob(file, maxSide = 1600, quality = 0.82) {
@@ -61,10 +100,13 @@ window.GalleryStore = (() => {
     });
   }
 
-  async function upload({ file, title, caption }, user) {
-    if (!canManage(user)) throw new Error("Solo l’admin può caricare foto in galleria.");
+  async function upload({ file, title, caption, branca, folderId }, user) {
+    if (!canManage(user)) throw new Error("Devi essere loggato come staff.");
     if (typeof CloudSync === "undefined" || !CloudSync.available()) {
       throw new Error("Galleria disponibile solo sul sito online (Cloudflare).");
+    }
+    if (!BRANCHES.some((b) => b.id === branca)) {
+      throw new Error("Seleziona la branca (o Gruppo).");
     }
     const jpeg = await fileToJpegBlob(file);
     if (jpeg.size > 2_400_000) {
@@ -77,30 +119,73 @@ window.GalleryStore = (() => {
       id,
       title: String(title || "").trim() || file.name.replace(/\.[^.]+$/, ""),
       caption: String(caption || "").trim(),
+      branca,
+      folderId: folderId || null,
       contentType: "image/jpeg",
       dataBase64,
     });
-    cache = { items: [], at: 0 };
+    applyCache(result);
     return result?.item || null;
   }
 
   async function remove(id, user) {
-    if (!canManage(user)) throw new Error("Solo l’admin può eliminare foto.");
-    await CloudSync.galleryPost({ resource: "delete", id });
-    cache = { items: [], at: 0 };
+    if (!canManage(user)) throw new Error("Devi essere loggato come staff.");
+    const result = await CloudSync.galleryPost({ resource: "delete", id });
+    applyCache(result);
   }
 
-  async function updateMeta(id, { title, caption }, user) {
-    if (!canManage(user)) throw new Error("Solo l’admin può modificare la galleria.");
-    const result = await CloudSync.galleryPost({
-      resource: "update",
-      id,
-      title,
-      caption,
-    });
-    cache = { items: [], at: 0 };
+  async function updateMeta(id, patch, user) {
+    if (!canManage(user)) throw new Error("Devi essere loggato come staff.");
+    const result = await CloudSync.galleryPost({ resource: "update", id, ...patch });
+    applyCache(result);
     return result?.item || null;
   }
 
-  return { canManage, listItems, imageUrl, upload, remove, updateMeta };
+  async function setFeatured(ids, user) {
+    if (!canManage(user)) throw new Error("Devi essere loggato come staff.");
+    const clean = [...new Set((ids || []).map(String))].slice(0, FEATURED_MAX);
+    const result = await CloudSync.galleryPost({ resource: "set-featured", ids: clean });
+    applyCache(result);
+    return featuredItems(cache.items);
+  }
+
+  async function createFolder(name, user) {
+    if (!canManage(user)) throw new Error("Devi essere loggato come staff.");
+    const result = await CloudSync.galleryPost({ resource: "folder-create", name });
+    applyCache(result);
+    return result?.folder || null;
+  }
+
+  async function renameFolder(id, name, user) {
+    if (!canManage(user)) throw new Error("Devi essere loggato come staff.");
+    const result = await CloudSync.galleryPost({ resource: "folder-rename", id, name });
+    applyCache(result);
+    return result?.folder || null;
+  }
+
+  async function deleteFolder(id, user) {
+    if (!canManage(user)) throw new Error("Devi essere loggato come staff.");
+    const result = await CloudSync.galleryPost({ resource: "folder-delete", id });
+    applyCache(result);
+  }
+
+  return {
+    FEATURED_MAX,
+    BRANCHES,
+    canManage,
+    branchLabel,
+    imageUrl,
+    pull,
+    listItems,
+    listFolders,
+    featuredItems,
+    byBranca,
+    upload,
+    remove,
+    updateMeta,
+    setFeatured,
+    createFolder,
+    renameFolder,
+    deleteFolder,
+  };
 })();

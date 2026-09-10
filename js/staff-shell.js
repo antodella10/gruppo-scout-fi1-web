@@ -35,6 +35,7 @@ window.StaffShell = (() => {
         ? { id: "canzoniere", href: "./canzoniere.html", label: "Canzoniere reparto", badge: c.songs }
         : null,
       canSentiero(user) ? { id: "sentiero", href: "./sentiero.html", label: "Sentiero / specialità" } : null,
+      { id: "galleria", href: "./galleria.html", label: "Gestione galleria" },
       admin ? { id: "notizie", href: "./notizie.html", label: "Gestione notizie" } : null,
       admin ? { id: "iscrizioni", href: "./iscrizioni.html", label: "Form iscrizioni" } : null,
       admin
@@ -42,7 +43,6 @@ window.StaffShell = (() => {
         : null,
       admin ? { id: "social", href: "./social.html", label: "Link social" } : null,
       admin ? { id: "calendari", href: "./calendari.html", label: "Calendari Google" } : null,
-      admin ? { id: "galleria", href: "./galleria.html", label: "Galleria foto" } : null,
       admin
         ? { id: "negozio", href: "./negozio.html", label: "Negozio / Kala Nag", badge: c.shop }
         : null,

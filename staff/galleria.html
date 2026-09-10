@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Galleria · Admin</title>
+  <title>Gestione galleria · Staff</title>
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="icon" href="../photos/logo.jpeg">
 </head>
@@ -22,40 +22,65 @@
     <div class="container">
       <div class="staff-hero">
         <div>
-          <h1>Galleria foto</h1>
-          <p id="staff-meta" data-static="1">Carica immagini sul cloud (R2). Compariranno nella pagina pubblica Galleria.</p>
+          <h1>Gestione galleria</h1>
+          <p id="staff-meta" data-static="1">Solo foto della galleria (Chi siamo). Negozio e altri file restano separati.</p>
         </div>
         <div class="inline-actions">
-          <a class="btn btn-ghost" href="../galleria.html" target="_blank" rel="noopener">Vedi pagina pubblica</a>
+          <a class="btn btn-ghost" href="../chi-siamo.html#galleria" target="_blank" rel="noopener">Vedi su Chi siamo</a>
           <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
         </div>
       </div>
 
       <div id="gallery-alert" class="alert alert-ok" hidden></div>
 
-      <div class="staff-grid">
+      <div class="staff-grid gallery-staff-layout">
         <section class="panel">
           <h2>Carica foto</h2>
-          <p class="hint">JPG/PNG/WebP. Verrà compressa automaticamente (max circa 1600px).</p>
+          <p class="hint">Obbligatorio indicare branca o Gruppo. Le cartelle servono solo in area staff.</p>
           <form id="gallery-form" class="form-grid">
             <label>
               Foto
               <input type="file" name="photo" accept="image/*" required>
             </label>
             <label>
-              Titolo
-              <input type="text" name="title" placeholder="Es. Campo estivo 2026" maxlength="120">
+              Branca / Gruppo
+              <select name="branca" id="gallery-branca" required></select>
             </label>
             <label>
-              Didascalia
-              <textarea name="caption" rows="3" placeholder="Opzionale" maxlength="400"></textarea>
+              Cartella (opzionale)
+              <select name="folderId" id="gallery-folder"></select>
             </label>
-            <button class="btn btn-primary" type="submit">Pubblica in galleria</button>
+            <label>
+              Titolo
+              <input type="text" name="title" placeholder="Es. Campo estivo" maxlength="120">
+            </label>
+            <label>
+              Didascalia (opzionale)
+              <textarea name="caption" rows="2" placeholder="Testo sotto la foto a schermo intero" maxlength="400"></textarea>
+            </label>
+            <button class="btn btn-primary" type="submit">Carica</button>
           </form>
+
+          <hr style="border:none;border-top:1px solid var(--line);margin:1.25rem 0">
+          <h3 style="margin:0 0 .6rem">Cartelle</h3>
+          <form id="folder-form" class="inline-actions" style="flex-wrap:wrap">
+            <input type="text" name="name" placeholder="Nuova cartella" maxlength="80" required style="flex:1;min-width:10rem">
+            <button class="btn btn-ghost btn-small" type="submit">Crea</button>
+          </form>
+          <div id="folder-list" style="margin-top:.75rem"></div>
         </section>
 
         <section class="panel">
-          <h2>Foto pubblicate</h2>
+          <h2>Primo piano <span class="hint" id="featured-count">(0/15)</span></h2>
+          <p class="hint">Seleziona fino a 15 foto per lo scorrimento in alto su Chi siamo.</p>
+          <div class="inline-actions" style="margin-bottom:.75rem">
+            <button type="button" class="btn btn-primary btn-small" id="featured-save">Salva primo piano</button>
+          </div>
+
+          <label style="margin-bottom:.75rem">
+            Filtra cartella
+            <select id="filter-folder"></select>
+          </label>
           <div id="gallery-admin-list"></div>
         </section>
       </div>

@@ -544,9 +544,35 @@ async function handleGcal(request, env = {}) {
 
 const GALLERY_MAX_BYTES = 2_500_000; // ~2.5MB dopo compressione client
 const GALLERY_META_KEY = "gallery-meta";
+const GALLERY_FEATURED_MAX = 15;
+const GALLERY_BRANCHES = new Set(["gruppo", "lupetti", "reparto", "noviziato", "clan"]);
 
 function galleryIdOk(id) {
   return /^[a-zA-Z0-9_-]{6,80}$/.test(String(id || ""));
+}
+
+function normalizeGalleryMeta(raw) {
+  const items = Array.isArray(raw?.items)
+    ? raw.items.map((it) => ({
+        ...it,
+        branca: GALLERY_BRANCHES.has(it.branca) ? it.branca : "gruppo",
+        folderId: it.folderId || null,
+        featured: !!it.featured,
+        featuredOrder: Number.isFinite(Number(it.featuredOrder)) ? Number(it.featuredOrder) : 0,
+      }))
+    : [];
+  const folders = Array.isArray(raw?.folders) ? raw.folders : [];
+  return { items, folders, updatedAt: raw?.updatedAt || null };
+}
+
+async function saveGalleryMeta(kv, meta) {
+  const payload = {
+    items: meta.items || [],
+    folders: meta.folders || [],
+    updatedAt: new Date().toISOString(),
+  };
+  await kv.put(GALLERY_META_KEY, JSON.stringify(payload));
+  return payload;
 }
 
 async function handleGallery(request, env) {
@@ -572,7 +598,6 @@ async function handleGallery(request, env) {
 
   try {
     if (request.method === "GET") {
-      // /api/gallery/file?id=
       if (url.pathname.startsWith("/api/gallery/file")) {
         const id = String(url.searchParams.get("id") || "").trim();
         if (!galleryIdOk(id)) return json({ error: "id non valido" }, 400);
@@ -585,11 +610,12 @@ async function handleGallery(request, env) {
         return new Response(obj.body, { status: 200, headers });
       }
 
-      // /api/gallery → lista
-      const data = await kvGetJson(kv, GALLERY_META_KEY, { items: [], updatedAt: null });
-      const items = Array.isArray(data.items) ? data.items : [];
-      items.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
-      return json({ items, updatedAt: data.updatedAt || null });
+      const data = normalizeGalleryMeta(
+        await kvGetJson(kv, GALLERY_META_KEY, { items: [], folders: [], updatedAt: null })
+      );
+      data.items.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+      data.folders.sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "it"));
+      return json(data);
     }
 
     if (request.method === "POST") {
@@ -604,12 +630,23 @@ async function handleGallery(request, env) {
       }
 
       const resource = body.resource || "";
-      const meta = await kvGetJson(kv, GALLERY_META_KEY, { items: [], updatedAt: null });
-      let items = Array.isArray(meta.items) ? [...meta.items] : [];
+      let meta = normalizeGalleryMeta(
+        await kvGetJson(kv, GALLERY_META_KEY, { items: [], folders: [], updatedAt: null })
+      );
+      let items = [...meta.items];
+      let folders = [...meta.folders];
 
       if (resource === "upload") {
         const id = String(body.id || "").trim();
         if (!galleryIdOk(id)) return json({ error: "id non valido" }, 400);
+        const branca = String(body.branca || "").trim();
+        if (!GALLERY_BRANCHES.has(branca)) {
+          return json({ error: "Seleziona branca o gruppo." }, 400);
+        }
+        const folderId = body.folderId ? String(body.folderId).trim() : null;
+        if (folderId && !folders.some((f) => f.id === folderId)) {
+          return json({ error: "Cartella non trovata." }, 400);
+        }
         const b64 = String(body.dataBase64 || "");
         if (!b64) return json({ error: "immagine mancante" }, 400);
         let binary;
@@ -632,15 +669,18 @@ async function handleGallery(request, env) {
           id,
           title: String(body.title || "").trim().slice(0, 120),
           caption: String(body.caption || "").trim().slice(0, 400),
+          branca,
+          folderId,
+          featured: false,
+          featuredOrder: 0,
           contentType,
           size: binary.byteLength,
           createdAt: new Date().toISOString(),
         };
         items = items.filter((x) => x.id !== id);
         items.unshift(item);
-        const payload = { items, updatedAt: new Date().toISOString() };
-        await kv.put(GALLERY_META_KEY, JSON.stringify(payload));
-        return json({ ok: true, item });
+        const payload = await saveGalleryMeta(kv, { items, folders });
+        return json({ ok: true, item, ...payload });
       }
 
       if (resource === "delete") {
@@ -648,9 +688,8 @@ async function handleGallery(request, env) {
         if (!galleryIdOk(id)) return json({ error: "id non valido" }, 400);
         await r2.delete(`gallery/${id}`);
         items = items.filter((x) => x.id !== id);
-        const payload = { items, updatedAt: new Date().toISOString() };
-        await kv.put(GALLERY_META_KEY, JSON.stringify(payload));
-        return json({ ok: true });
+        const payload = await saveGalleryMeta(kv, { items, folders });
+        return json({ ok: true, ...payload });
       }
 
       if (resource === "update") {
@@ -659,9 +698,73 @@ async function handleGallery(request, env) {
         if (!item) return json({ error: "foto non trovata" }, 404);
         if (body.title != null) item.title = String(body.title || "").trim().slice(0, 120);
         if (body.caption != null) item.caption = String(body.caption || "").trim().slice(0, 400);
-        const payload = { items, updatedAt: new Date().toISOString() };
-        await kv.put(GALLERY_META_KEY, JSON.stringify(payload));
-        return json({ ok: true, item });
+        if (body.branca != null) {
+          const branca = String(body.branca || "").trim();
+          if (!GALLERY_BRANCHES.has(branca)) return json({ error: "Branca non valida." }, 400);
+          item.branca = branca;
+        }
+        if (body.folderId !== undefined) {
+          const folderId = body.folderId ? String(body.folderId).trim() : null;
+          if (folderId && !folders.some((f) => f.id === folderId)) {
+            return json({ error: "Cartella non trovata." }, 400);
+          }
+          item.folderId = folderId;
+        }
+        const payload = await saveGalleryMeta(kv, { items, folders });
+        return json({ ok: true, item, ...payload });
+      }
+
+      if (resource === "set-featured") {
+        const ids = Array.isArray(body.ids) ? body.ids.map((x) => String(x)) : [];
+        if (ids.length > GALLERY_FEATURED_MAX) {
+          return json({ error: `Massimo ${GALLERY_FEATURED_MAX} foto in primo piano.` }, 400);
+        }
+        const idSet = new Set(ids);
+        for (const item of items) {
+          const idx = ids.indexOf(item.id);
+          item.featured = idx >= 0;
+          item.featuredOrder = idx >= 0 ? idx : 0;
+        }
+        // ignore unknown ids silently
+        if ([...idSet].some((id) => !items.some((it) => it.id === id))) {
+          /* ok */
+        }
+        const payload = await saveGalleryMeta(kv, { items, folders });
+        return json({ ok: true, ...payload });
+      }
+
+      if (resource === "folder-create") {
+        const name = String(body.name || "").trim().slice(0, 80);
+        if (!name) return json({ error: "Nome cartella obbligatorio." }, 400);
+        const folder = {
+          id: `fold_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`,
+          name,
+          createdAt: new Date().toISOString(),
+        };
+        folders.push(folder);
+        const payload = await saveGalleryMeta(kv, { items, folders });
+        return json({ ok: true, folder, ...payload });
+      }
+
+      if (resource === "folder-rename") {
+        const id = String(body.id || "").trim();
+        const folder = folders.find((f) => f.id === id);
+        if (!folder) return json({ error: "Cartella non trovata." }, 404);
+        const name = String(body.name || "").trim().slice(0, 80);
+        if (!name) return json({ error: "Nome cartella obbligatorio." }, 400);
+        folder.name = name;
+        const payload = await saveGalleryMeta(kv, { items, folders });
+        return json({ ok: true, folder, ...payload });
+      }
+
+      if (resource === "folder-delete") {
+        const id = String(body.id || "").trim();
+        folders = folders.filter((f) => f.id !== id);
+        for (const item of items) {
+          if (item.folderId === id) item.folderId = null;
+        }
+        const payload = await saveGalleryMeta(kv, { items, folders });
+        return json({ ok: true, ...payload });
       }
 
       return json({ error: "resource sconosciuta" }, 400);

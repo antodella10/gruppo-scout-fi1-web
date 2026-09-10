@@ -1508,9 +1508,8 @@ a.home-tile:hover {
 
 .home-tile-iscrizioni,
 .home-tile-negozio,
-.home-tile-galleria,
 .home-tile-chisiamo {
-  grid-column: span 3;
+  grid-column: span 4;
 }
 
 .home-tile-iscrizioni {
@@ -2535,7 +2534,6 @@ body.pdf-pseudo-fs-open {
   .home-tile-sedi,
   .home-tile-iscrizioni,
   .home-tile-negozio,
-  .home-tile-galleria,
   .home-tile-chisiamo {
     grid-column: span 12;
     min-height: 180px;
@@ -2573,6 +2571,94 @@ body.pdf-pseudo-fs-open {
 }
 
 /* —— Galleria foto —— */
+.gallery-featured {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.gallery-feat-nav {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 999px;
+  font-size: 1.6rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.gallery-featured-viewport {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.gallery-featured-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery-featured-track {
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.15rem;
+}
+
+.gallery-feat-slide {
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  padding: 0;
+  background: #e8eee8;
+  cursor: pointer;
+  flex: 0 0 min(320px, 78%);
+  aspect-ratio: 4 / 3;
+  scroll-snap-align: center;
+}
+
+.gallery-feat-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-feat-slide.is-active {
+  box-shadow: 0 0 0 2px var(--green);
+}
+
+.gallery-branca-select select {
+  min-width: 11rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  font: inherit;
+  background: var(--white);
+}
+
+.gallery-feat-check {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2692,6 +2778,10 @@ body.gallery-lb-open {
 @media (max-width: 900px) {
   .gallery-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .gallery-feat-slide {
+    flex-basis: min(100%, 86vw);
   }
 }
 

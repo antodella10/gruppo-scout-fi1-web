@@ -29,7 +29,7 @@
     <div class="container page-hero-inner">
       <p class="hero-kicker" style="color:var(--green)">FederScout · Associazione Mariano Silvani</p>
       <h1>Chi siamo</h1>
-      <p class="page-hero-lead">La storia e lo spirito del Gruppo Scout Firenze 1.</p>
+      <p class="page-hero-lead">La storia, lo spirito e la galleria del Gruppo Scout Firenze 1.</p>
     </div>
   </header>
 
@@ -45,10 +45,8 @@
             dalle prime scoperte dei lupetti fino alla strada del clan.
           </p>
           <p>
-            Questa pagina ospiterà la storia completa del gruppo: le origini,
-            i luoghi che ci hanno accolto, i campi e le persone che hanno
-            lasciato il segno. Per ora trovi un layout di anteprima —
-            i testi e le foto si potranno arricchire passo dopo passo.
+            Questa pagina ospita la storia del gruppo e la galleria fotografica:
+            i momenti che raccontano sedi, campi e vita di branca.
           </p>
         </div>
         <figure class="about-figure">
@@ -58,19 +56,39 @@
       </div>
     </section>
 
-    <section class="section" style="padding-top:0">
+    <section class="section" id="galleria" style="padding-top:0">
       <div class="container">
         <div class="section-head">
           <div>
-            <h2>Momenti di gruppo</h2>
-            <p>Galleria provvisoria — sostituiremo queste immagini con le vostre foto.</p>
+            <h2>Galleria</h2>
+            <p>Foto in primo piano selezionate dallo staff.</p>
           </div>
         </div>
-        <div class="about-gallery">
-          <div class="about-gallery-item g1" role="img" aria-label="Foto attività all'aperto"></div>
-          <div class="about-gallery-item g2" role="img" aria-label="Foto vita di comunità"></div>
-          <div class="about-gallery-item g3" role="img" aria-label="Foto natura e campo"></div>
+        <p id="gallery-feat-status" class="hint"></p>
+        <div class="gallery-featured">
+          <button type="button" class="gallery-feat-nav btn btn-ghost" id="gallery-feat-prev" aria-label="Foto precedente" hidden>‹</button>
+          <div class="gallery-featured-viewport">
+            <div class="gallery-featured-track" id="gallery-featured-track"></div>
+          </div>
+          <button type="button" class="gallery-feat-nav btn btn-ghost" id="gallery-feat-next" aria-label="Foto successiva" hidden>›</button>
         </div>
+      </div>
+    </section>
+
+    <section class="section" id="galleria-branca" style="padding-top:0">
+      <div class="container">
+        <div class="section-head section-head-songs">
+          <div>
+            <h2>Galleria di branca</h2>
+            <p>Scegli branca o gruppo per filtrare le foto.</p>
+          </div>
+          <label class="gallery-branca-select">
+            <span class="visually-hidden">Selettore branca</span>
+            <select id="gallery-branca-select" aria-label="Seleziona branca"></select>
+          </label>
+        </div>
+        <p id="gallery-branch-status" class="hint"></p>
+        <div class="gallery-grid" id="gallery-branch-grid"></div>
       </div>
     </section>
 
@@ -106,6 +124,12 @@
     </section>
   </main>
 
+  <div id="gallery-lightbox" class="gallery-lightbox" hidden>
+    <button type="button" class="gallery-lb-close btn btn-ghost btn-small" id="gallery-lb-close">Chiudi</button>
+    <img id="gallery-lb-img" alt="">
+    <p id="gallery-lb-cap" class="gallery-lb-cap"></p>
+  </div>
+
   <footer class="site-footer">
     <div class="container footer-inner">
       <div>© 2026 Firenze 1 · FederScout — Associazione Mariano Silvani</div>
@@ -120,8 +144,10 @@
   <script src="js/canzoniere-store.js"></script>
   <script src="js/shop-store.js"></script>
   <script src="js/staff-notifs.js"></script>
+  <script src="js/gallery-store.js"></script>
   <script src="js/branch-view.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/gallery-about.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       renderSocialFull(document.getElementById("about-social"));
