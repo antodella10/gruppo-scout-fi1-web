@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const downloadBtn = document.getElementById("pdf-download");
   const openBtn = document.getElementById("pdf-open");
   const pdfStage = document.getElementById("pdf-stage");
-  const mobilePanel = document.getElementById("pdf-mobile-panel");
   const fsBtn = document.getElementById("pdf-fullscreen");
   const exitFsBtn = document.getElementById("pdf-exit-fs");
   const songsList = document.getElementById("songs-list");
@@ -18,16 +17,24 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentBookUrl = null;
   let currentBookName = "canzoniere.pdf";
 
-  function prefersNativePdf() {
+  function isMobileUi() {
     const ua = navigator.userAgent || "";
-    return /iPhone|iPad|iPod|Android/i.test(ua);
+    return /iPhone|iPad|iPod|Android/i.test(ua) || window.matchMedia("(max-width: 900px)").matches;
   }
 
-  function pdfSrc(url, { toolbar = false, zoom = 110 } = {}) {
+  function pdfSrc(url, { toolbar = true, zoom = 100 } = {}) {
     if (toolbar) {
       return `${url}#toolbar=1&navpanes=0&zoom=${zoom}`;
     }
     return `${url}#toolbar=0&navpanes=0&scrollbar=1&zoom=${zoom}`;
+  }
+
+  function inAnyFullscreen() {
+    return !!(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      pdfStage?.classList.contains("is-pseudo-fs")
+    );
   }
 
   function setExitFsVisible(on) {
@@ -35,6 +42,18 @@ document.addEventListener("DOMContentLoaded", () => {
     exitFsBtn.hidden = !on;
     exitFsBtn.classList.toggle("is-visible", on);
     exitFsBtn.setAttribute("aria-hidden", on ? "false" : "true");
+  }
+
+  function enablePseudoFs() {
+    if (!pdfStage) return;
+    pdfStage.classList.add("is-pseudo-fs");
+    document.body.classList.add("pdf-pseudo-fs-open");
+    setExitFsVisible(true);
+  }
+
+  function disablePseudoFs() {
+    pdfStage?.classList.remove("is-pseudo-fs");
+    document.body.classList.remove("pdf-pseudo-fs-open");
   }
 
   function showEmpty(message) {
@@ -48,10 +67,10 @@ document.addEventListener("DOMContentLoaded", () => {
       bookFrame.removeAttribute("src");
       bookFrame.classList.remove("is-visible");
     }
-    if (mobilePanel) mobilePanel.hidden = true;
     if (fsBtn) fsBtn.hidden = true;
     if (downloadBtn) downloadBtn.hidden = true;
     if (openBtn) openBtn.hidden = true;
+    disablePseudoFs();
     setExitFsVisible(false);
   }
 
@@ -60,25 +79,16 @@ document.addEventListener("DOMContentLoaded", () => {
       bookEmpty.hidden = true;
       bookEmpty.classList.remove("is-visible");
     }
-    const mobile = prefersNativePdf();
-    if (mobilePanel) mobilePanel.hidden = !mobile;
     if (bookFrame) {
-      if (mobile) {
-        bookFrame.hidden = true;
-        bookFrame.removeAttribute("src");
-        bookFrame.classList.remove("is-visible");
-      } else {
-        // non ricaricare se è già lo stesso PDF (evita schermo bianco)
-        const next = pdfSrc(url, { toolbar: true, zoom: 100 });
-        if (bookFrame.getAttribute("src") !== next) bookFrame.src = next;
-        bookFrame.hidden = false;
-        bookFrame.classList.add("is-visible");
-      }
+      const next = pdfSrc(url, { toolbar: true, zoom: isMobileUi() ? 85 : 100 });
+      if (bookFrame.getAttribute("src") !== next) bookFrame.src = next;
+      bookFrame.hidden = false;
+      bookFrame.classList.add("is-visible");
     }
-    if (fsBtn) fsBtn.hidden = mobile;
+    if (fsBtn) fsBtn.hidden = false;
     if (downloadBtn) downloadBtn.hidden = false;
     if (openBtn) openBtn.hidden = false;
-    setExitFsVisible(!!document.fullscreenElement);
+    setExitFsVisible(inAnyFullscreen());
   }
 
   async function refreshBook() {
@@ -133,30 +143,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  function fsTarget() {
-    if (bookFrame?.classList.contains("is-visible")) return bookFrame;
-    return pdfStage;
-  }
-
   async function enterFullscreen() {
-    const el = fsTarget();
+    const el = pdfStage || bookFrame;
     if (!el) return;
     try {
       if (el.requestFullscreen) await el.requestFullscreen();
       else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      else if (pdfStage?.requestFullscreen) await pdfStage.requestFullscreen();
+      else enablePseudoFs();
     } catch {
-      // fallback: apri PDF in nuova scheda
-      openCurrentBook();
+      // iOS / browser senza Fullscreen API
+      enablePseudoFs();
     }
   }
 
   async function exitFullscreen() {
+    disablePseudoFs();
     try {
-      if (document.fullscreenElement) await document.exitFullscreen();
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) await document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
     } catch {
       /* ignore */
     }
+    setExitFsVisible(false);
   }
 
   function openCurrentBook() {
@@ -173,7 +183,6 @@ document.addEventListener("DOMContentLoaded", () => {
   fsBtn?.addEventListener("click", enterFullscreen);
   exitFsBtn?.addEventListener("click", exitFullscreen);
   openBtn?.addEventListener("click", openCurrentBook);
-  document.getElementById("pdf-open-mobile")?.addEventListener("click", openCurrentBook);
 
   downloadBtn?.addEventListener("click", () => {
     if (!currentBookUrl) return;
@@ -185,11 +194,21 @@ document.addEventListener("DOMContentLoaded", () => {
     a.remove();
   });
 
-  document.addEventListener("fullscreenchange", () => {
-    const on = !!document.fullscreenElement;
-    setExitFsVisible(on && document.fullscreenElement === pdfStage);
-    // se fullscreen è sull’iframe, il bottone esci non serve (Esc / UI browser)
-    if (pdfStage) pdfStage.classList.toggle("is-fs", document.fullscreenElement === pdfStage);
+  function onFsChange() {
+    const nativeOn = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    if (pdfStage) {
+      pdfStage.classList.toggle("is-fs", document.fullscreenElement === pdfStage);
+    }
+    setExitFsVisible(nativeOn || !!pdfStage?.classList.contains("is-pseudo-fs"));
+  }
+
+  document.addEventListener("fullscreenchange", onFsChange);
+  document.addEventListener("webkitfullscreenchange", onFsChange);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && pdfStage?.classList.contains("is-pseudo-fs")) {
+      exitFullscreen();
+    }
   });
 
   setExitFsVisible(false);
