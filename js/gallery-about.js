@@ -16,12 +16,21 @@ document.addEventListener("DOMContentLoaded", () => {
   let featured = [];
   let featIndex = 0;
 
+  function overlayHtml(item) {
+    const title = String(item.title || "").trim();
+    const caption = String(item.caption || "").trim();
+    if (!title && !caption) return "";
+    return `<span class="gallery-hover-label">${
+      title ? `<strong>${escapeHtml(title)}</strong>` : ""
+    }${caption ? `<span>${escapeHtml(caption)}</span>` : ""}</span>`;
+  }
+
   function openLb(item) {
     if (!lightbox || !lbImg || !item) return;
     lbImg.src = GalleryStore.imageUrl(item.id);
     lbImg.alt = item.title || "Foto";
     if (lbCap) {
-      const parts = [item.title, item.caption].filter(Boolean);
+      const parts = [item.title, item.caption].filter((x) => String(x || "").trim());
       lbCap.textContent = parts.join(" — ");
       lbCap.hidden = !parts.length;
     }
@@ -65,6 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
         (item, i) => `
       <button type="button" class="gallery-feat-slide ${i === featIndex ? "is-active" : ""}" data-feat-id="${escapeHtml(item.id)}" data-feat-i="${i}">
         <img src="${escapeHtml(GalleryStore.imageUrl(item.id))}" alt="${escapeHtml(item.title || "Foto")}" loading="${i < 3 ? "eager" : "lazy"}">
+        ${overlayHtml(item)}
       </button>`
       )
       .join("");
@@ -120,10 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
         (item) => `
       <button type="button" class="gallery-card" data-id="${escapeHtml(item.id)}">
         <img src="${escapeHtml(GalleryStore.imageUrl(item.id))}" alt="${escapeHtml(item.title || "Foto")}" loading="lazy">
-        <span class="gallery-card-meta">
-          <strong>${escapeHtml(item.title || GalleryStore.branchLabel(item.branca))}</strong>
-          ${item.caption ? `<span>${escapeHtml(item.caption)}</span>` : ""}
-        </span>
+        ${overlayHtml(item)}
       </button>`
       )
       .join("");

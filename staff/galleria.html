@@ -36,12 +36,13 @@
       <div class="staff-grid gallery-staff-layout">
         <section class="panel">
           <h2>Carica foto</h2>
-          <p class="hint">Obbligatorio indicare branca o Gruppo. Le cartelle servono solo in area staff.</p>
+          <p class="hint">Puoi selezionarne tante insieme. Branca obbligatoria; cartella e testi valgono per tutte le foto del lotto.</p>
           <form id="gallery-form" class="form-grid">
             <label>
               Foto
-              <input type="file" name="photo" accept="image/*" required>
+              <input type="file" name="photos" id="gallery-photos" accept="image/*" multiple required>
             </label>
+            <p id="gallery-file-hint" class="hint" hidden></p>
             <label>
               Branca / Gruppo
               <select name="branca" id="gallery-branca" required></select>
@@ -51,14 +52,18 @@
               <select name="folderId" id="gallery-folder"></select>
             </label>
             <label>
-              Titolo
-              <input type="text" name="title" placeholder="Es. Campo estivo" maxlength="120">
+              Titolo (opzionale)
+              <input type="text" name="title" placeholder="Solo se serve · uguale per tutte" maxlength="120">
             </label>
             <label>
               Didascalia (opzionale)
-              <textarea name="caption" rows="2" placeholder="Testo sotto la foto a schermo intero" maxlength="400"></textarea>
+              <textarea name="caption" rows="2" placeholder="Visibile a schermo intero · uguale per tutte" maxlength="400"></textarea>
             </label>
-            <button class="btn btn-primary" type="submit">Carica</button>
+            <div id="gallery-upload-progress" class="gallery-upload-progress" hidden>
+              <div class="gallery-upload-bar"><span id="gallery-upload-bar"></span></div>
+              <p id="gallery-upload-status" class="hint"></p>
+            </div>
+            <button class="btn btn-primary" type="submit" id="gallery-upload-btn">Carica</button>
           </form>
 
           <hr style="border:none;border-top:1px solid var(--line);margin:1.25rem 0">

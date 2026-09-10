@@ -7,6 +7,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const form = document.getElementById("gallery-form");
+  const photosInput = document.getElementById("gallery-photos");
+  const fileHint = document.getElementById("gallery-file-hint");
+  const progressWrap = document.getElementById("gallery-upload-progress");
+  const progressBar = document.getElementById("gallery-upload-bar");
+  const progressStatus = document.getElementById("gallery-upload-status");
+  const uploadBtn = document.getElementById("gallery-upload-btn");
   const folderForm = document.getElementById("folder-form");
   const listEl = document.getElementById("gallery-admin-list");
   const folderList = document.getElementById("folder-list");
@@ -56,6 +62,36 @@ document.addEventListener("DOMContentLoaded", () => {
     return items.filter((i) => i.folderId === fold);
   }
 
+  function updateFileHint() {
+    if (!fileHint || !photosInput) return;
+    const n = photosInput.files?.length || 0;
+    if (!n) {
+      fileHint.hidden = true;
+      fileHint.textContent = "";
+      return;
+    }
+    fileHint.hidden = false;
+    fileHint.textContent = n === 1 ? "1 foto selezionata" : `${n} foto selezionate`;
+  }
+
+  function setProgress(current, total, name) {
+    if (!progressWrap) return;
+    progressWrap.hidden = false;
+    const pct = total ? Math.round((current / total) * 100) : 0;
+    if (progressBar) progressBar.style.width = `${pct}%`;
+    if (progressStatus) {
+      progressStatus.textContent =
+        current >= total
+          ? `Completato (${total})`
+          : `Caricamento ${current}/${total}${name ? ` · ${name}` : ""}`;
+    }
+  }
+
+  function hideProgress() {
+    if (progressWrap) progressWrap.hidden = true;
+    if (progressBar) progressBar.style.width = "0%";
+  }
+
   function renderFolders() {
     if (!folderList) return;
     if (!folders.length) {
@@ -89,6 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const checked = featuredDraft.has(item.id) ? "checked" : "";
         const disabled =
           !featuredDraft.has(item.id) && featuredDraft.size >= GalleryStore.FEATURED_MAX ? "disabled" : "";
+        const label = item.title || item.caption || "Senza titolo";
         return `
         <article class="gallery-admin-item">
           <img src="${escapeHtml(GalleryStore.imageUrl(item.id))}" alt="" loading="lazy">
@@ -97,9 +134,9 @@ document.addEventListener("DOMContentLoaded", () => {
               <input type="checkbox" data-feat="${escapeHtml(item.id)}" ${checked} ${disabled}>
               In primo piano
             </label>
-            <strong>${escapeHtml(item.title || "Senza titolo")}</strong>
+            <strong>${escapeHtml(label)}</strong>
             <p class="hint">${escapeHtml(GalleryStore.branchLabel(item.branca))}${
-              item.caption ? " · " + escapeHtml(item.caption) : ""
+              item.title && item.caption ? " · " + escapeHtml(item.caption) : ""
             }</p>
           </div>
           <button type="button" class="btn btn-ghost btn-small" data-del="${escapeHtml(item.id)}">Elimina</button>
@@ -124,37 +161,53 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   fillBranchSelect();
+  photosInput?.addEventListener("change", updateFileHint);
 
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const data = new FormData(form);
-    const file = data.get("photo");
-    if (!(file instanceof File) || !file.size) {
-      flash("Scegli una foto.", false);
+    const files = photosInput?.files;
+    if (!files?.length) {
+      flash("Scegli almeno una foto.", false);
       return;
     }
-    const btn = form.querySelector('[type="submit"]');
-    if (btn) btn.disabled = true;
+    if (uploadBtn) uploadBtn.disabled = true;
     try {
-      await GalleryStore.upload(
+      const result = await GalleryStore.uploadMany(
         {
-          file,
+          files,
           title: data.get("title"),
           caption: data.get("caption"),
           branca: data.get("branca"),
           folderId: data.get("folderId") || null,
         },
-        user
+        user,
+        setProgress
       );
       form.reset();
       fillBranchSelect();
       fillFolderSelects();
-      flash("Foto caricata.");
+      updateFileHint();
+      const fail = result.errors.length;
+      if (!fail) {
+        flash(result.ok.length === 1 ? "Foto caricata." : `${result.ok.length} foto caricate.`);
+      } else if (result.ok.length) {
+        flash(
+          `Caricate ${result.ok.length}/${result.total}. Errori: ${result.errors
+            .slice(0, 3)
+            .map((x) => x.name)
+            .join(", ")}${fail > 3 ? "…" : ""}`,
+          false
+        );
+      } else {
+        flash(result.errors[0]?.message || "Upload fallito.", false);
+      }
       await refresh();
     } catch (err) {
       flash(err.message || "Upload fallito.", false);
     } finally {
-      if (btn) btn.disabled = false;
+      if (uploadBtn) uploadBtn.disabled = false;
+      setTimeout(hideProgress, 900);
     }
   });
 

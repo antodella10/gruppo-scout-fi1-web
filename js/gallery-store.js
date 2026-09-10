@@ -117,7 +117,7 @@ window.GalleryStore = (() => {
     const result = await CloudSync.galleryPost({
       resource: "upload",
       id,
-      title: String(title || "").trim() || file.name.replace(/\.[^.]+$/, ""),
+      title: String(title || "").trim(),
       caption: String(caption || "").trim(),
       branca,
       folderId: folderId || null,
@@ -126,6 +126,27 @@ window.GalleryStore = (() => {
     });
     applyCache(result);
     return result?.item || null;
+  }
+
+  async function uploadMany({ files, title, caption, branca, folderId }, user, onProgress) {
+    if (!canManage(user)) throw new Error("Devi essere loggato come staff.");
+    const list = [...(files || [])].filter((f) => f && String(f.type || "").startsWith("image/"));
+    if (!list.length) throw new Error("Seleziona almeno un’immagine.");
+    const ok = [];
+    const errors = [];
+    for (let i = 0; i < list.length; i++) {
+      onProgress?.(i + 1, list.length, list[i].name);
+      try {
+        const item = await upload(
+          { file: list[i], title, caption, branca, folderId },
+          user
+        );
+        ok.push(item);
+      } catch (err) {
+        errors.push({ name: list[i].name, message: err?.message || "Errore" });
+      }
+    }
+    return { ok, errors, total: list.length };
   }
 
   async function remove(id, user) {
@@ -181,6 +202,7 @@ window.GalleryStore = (() => {
     featuredItems,
     byBranca,
     upload,
+    uploadMany,
     remove,
     updateMeta,
     setFeatured,
