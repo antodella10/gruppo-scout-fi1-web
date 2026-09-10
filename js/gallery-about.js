@@ -70,11 +70,11 @@ document.addEventListener("DOMContentLoaded", () => {
       .join("");
 
     requestAnimationFrame(() => {
-      track.querySelector(".gallery-feat-slide.is-active")?.scrollIntoView({
-        behavior: "smooth",
-        inline: "center",
-        block: "nearest",
-      });
+      const active = track.querySelector(".gallery-feat-slide.is-active");
+      const viewport = track.parentElement;
+      if (!active || !viewport) return;
+      const left = active.offsetLeft - (viewport.clientWidth - active.clientWidth) / 2;
+      viewport.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
     });
   }
 

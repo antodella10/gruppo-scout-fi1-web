@@ -3,3 +3,10 @@ node_modules/
 *.log
 .env
 .env.*
+
+# Archivio foto locali (galleria usa R2)
+photos/clan/
+photos/lupetti/
+photos/riparto/
+photos/noviziato/
+photos/shop/
