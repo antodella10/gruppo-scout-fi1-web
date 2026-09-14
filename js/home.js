@@ -262,14 +262,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!isReparto) {
           if (calLead) calLead.textContent = copy.calLead;
-          const heroP = document.getElementById("hero-lead");
-          if (heroP) heroP.textContent = copy.heroLine;
 
           document.querySelectorAll("#layout-default [data-branca-panel]").forEach((el) => {
             const only = el.getAttribute("data-branca-panel");
             if (only === "gruppo") el.hidden = !!branca;
             else el.hidden = branca !== only;
           });
+
+          // Messaggio “pagina non completa” se si cambia branca dopo il primo paint
+          fillPageSoonBlocks();
         }
 
         refreshCalendar();
