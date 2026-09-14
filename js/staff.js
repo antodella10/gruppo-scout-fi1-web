@@ -19,6 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const brancaSelect = document.getElementById("event-branca");
   const submitBtn = document.getElementById("event-submit");
   const cancelEditBtn = document.getElementById("cancel-edit");
+  const imageHint = document.getElementById("event-image-hint");
+  const clearImage = document.getElementById("event-clear-image");
+  const clearImageWrap = document.getElementById("event-clear-image-wrap");
   let editingId = null;
 
   if (!isAdmin && brancaWrap) brancaWrap.remove();
@@ -69,6 +72,12 @@ document.addEventListener("DOMContentLoaded", () => {
     editingId = null;
     eventForm?.reset();
     fillScopeOptions();
+    if (clearImage) clearImage.checked = false;
+    if (clearImageWrap) clearImageWrap.hidden = true;
+    if (imageHint) {
+      imageHint.hidden = true;
+      imageHint.textContent = "";
+    }
     if (submitBtn) submitBtn.textContent = "Aggiungi attività";
     if (cancelEditBtn) cancelEditBtn.hidden = true;
   }
@@ -88,7 +97,10 @@ document.addEventListener("DOMContentLoaded", () => {
           <div>
             ${eventBadge(e)}
             <strong style="display:inline-block;margin-left:.35rem">${escapeHtml(e.title)}</strong><br>
-            <span style="color:var(--muted)">${escapeHtml(range)}${e.place ? " · " + escapeHtml(e.place) : ""}</span>
+            <span style="color:var(--muted)">${escapeHtml(range)}${e.place ? " · " + escapeHtml(e.place) : ""}${
+              e.imageId ? " · con immagine" : ""
+            }</span>
+            ${mediaThumbHtml(e.imageId, { alt: e.title, className: "media-thumb media-thumb-admin" })}
           </div>
           <div class="inline-actions">
             <button type="button" class="btn btn-ghost btn-small" data-edit="${e.id}">Modifica</button>
@@ -113,6 +125,14 @@ document.addEventListener("DOMContentLoaded", () => {
     scopeSelect.value = event.scope;
     syncBrancaVisibility();
     if (brancaSelect && event.branca) brancaSelect.value = event.branca;
+    if (clearImage) clearImage.checked = false;
+    if (clearImageWrap) clearImageWrap.hidden = !event.imageId;
+    if (imageHint) {
+      imageHint.hidden = !event.imageId;
+      imageHint.textContent = event.imageId
+        ? "C’è già un’immagine: carica un file per sostituirla, oppure seleziona “Rimuovi immagine”."
+        : "";
+    }
     if (submitBtn) submitBtn.textContent = "Salva modifiche";
     if (cancelEditBtn) cancelEditBtn.hidden = false;
     eventForm.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -120,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   fillScopeOptions();
 
-  eventForm?.addEventListener("submit", (e) => {
+  eventForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const data = new FormData(eventForm);
     const time = String(data.get("time") || "").trim();
@@ -134,25 +154,31 @@ document.addEventListener("DOMContentLoaded", () => {
       description: data.get("description"),
       scope: data.get("scope"),
       branca: isAdmin ? data.get("branca") : user.branca,
+      imageFile: data.get("image"),
+      clearImage: !!clearImage?.checked,
     };
+    if (submitBtn) submitBtn.disabled = true;
     try {
       if (editingId) {
-        ScoutStore.updateEvent(editingId, payload, user);
+        await ScoutStore.updateEvent(editingId, payload, user);
         showAlert("Evento aggiornato.");
       } else {
-        ScoutStore.addEvent(payload, user);
+        await ScoutStore.addEvent(payload, user);
         showAlert("Attività aggiunta.");
       }
       resetForm();
       refreshEvents();
     } catch (err) {
       showAlert(err.message || "Operazione non riuscita.", false);
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
     }
   });
 
   cancelEditBtn?.addEventListener("click", () => resetForm());
 
-  eventList?.addEventListener("click", (e) => {
+  eventList?.addEventListener("click", async (e) => {
+    if (e.target.closest("[data-media-zoom]")) return;
     const editBtn = e.target.closest("[data-edit]");
     if (editBtn) {
       startEdit(editBtn.dataset.edit);
@@ -162,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!delBtn) return;
     if (!confirm("Eliminare questa attività?")) return;
     try {
-      ScoutStore.deleteEvent(delBtn.dataset.delete, user);
+      await ScoutStore.deleteEvent(delBtn.dataset.delete, user);
       if (editingId === delBtn.dataset.delete) resetForm();
       refreshEvents();
     } catch (err) {
@@ -170,5 +196,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  wireMediaLightbox();
   refreshEvents();
 });

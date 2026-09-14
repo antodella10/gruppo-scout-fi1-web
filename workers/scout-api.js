@@ -608,7 +608,7 @@ async function handleGallery(request, env) {
       if (url.pathname.startsWith("/api/gallery/file")) {
         const id = String(url.searchParams.get("id") || "").trim();
         if (!galleryIdOk(id)) return json({ error: "id non valido" }, 400);
-        const obj = await r2.get(`gallery/${id}`);
+        const obj = (await r2.get(`gallery/${id}`)) || (await r2.get(`media/${id}`));
         if (!obj) return json({ error: "immagine non trovata" }, 404);
         const headers = corsHeaders({
           "Content-Type": obj.httpMetadata?.contentType || "image/jpeg",
@@ -637,6 +637,43 @@ async function handleGallery(request, env) {
       }
 
       const resource = body.resource || "";
+
+      if (resource === "media-upload") {
+        const id = String(body.id || "").trim();
+        if (!galleryIdOk(id)) return json({ error: "id non valido" }, 400);
+        const b64 = String(body.dataBase64 || "");
+        if (!b64) return json({ error: "immagine mancante" }, 400);
+        let binary;
+        try {
+          binary = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+        } catch {
+          return json({ error: "base64 non valido" }, 400);
+        }
+        if (binary.byteLength > GALLERY_MAX_BYTES) {
+          return json({ error: "immagine troppo grande (max circa 2.5 MB)" }, 400);
+        }
+        const contentType = String(body.contentType || "image/jpeg").slice(0, 80);
+        if (!/^image\/(jpeg|png|webp|gif)$/i.test(contentType)) {
+          return json({ error: "formato immagine non supportato" }, 400);
+        }
+        await r2.put(`media/${id}`, binary, {
+          httpMetadata: { contentType },
+        });
+        return json({
+          ok: true,
+          id,
+          contentType,
+          size: binary.byteLength,
+        });
+      }
+
+      if (resource === "media-delete") {
+        const id = String(body.id || "").trim();
+        if (!galleryIdOk(id)) return json({ error: "id non valido" }, 400);
+        await r2.delete(`media/${id}`);
+        return json({ ok: true });
+      }
+
       let meta = normalizeGalleryMeta(
         await kvGetJson(kv, GALLERY_META_KEY, { items: [], folders: [], updatedAt: null })
       );

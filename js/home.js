@@ -170,6 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <p class="next-event-meta"><strong>Quando:</strong> ${escapeHtml(formatEventRange(ev))}</p>
         <p class="next-event-meta"><strong>Luogo:</strong> ${escapeHtml(ev.place || "Da definire")}</p>
         ${desc ? `<p class="next-event-desc">${escapeHtml(desc)}</p>` : ""}
+        ${mediaThumbHtml(ev.imageId, { alt: ev.title || "Locandina evento" })}
       </div>`;
   }
 
@@ -376,4 +377,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   applyBranchView(BranchView.resolveInitial());
   fillPageSoonBlocks();
+  wireMediaLightbox();
 });

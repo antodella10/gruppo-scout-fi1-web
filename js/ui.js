@@ -31,7 +31,7 @@ function pageSoonHtml({ base = "", message } = {}) {
   const msg =
     message ||
     "Questa pagina non è ancora disponibile o completa. Torna a trovarci presto!";
-  const src = `${base}photos/page-not-found.jpg`;
+  const src = `${base}photos/pagenotfound.png`;
   return `
     <div class="page-soon-inner">
       <img src="${escapeHtml(src)}" alt="Pagina non ancora disponibile" loading="lazy">
@@ -47,6 +47,80 @@ function fillPageSoonBlocks(root = document, { base = "" } = {}) {
     el.innerHTML = pageSoonHtml({ base: localBase, message: msg });
   });
 }
+
+function mediaImageUrl(id) {
+  if (!id) return "";
+  if (typeof CloudSync !== "undefined" && CloudSync.galleryImageUrl) {
+    return CloudSync.galleryImageUrl(id);
+  }
+  if (typeof GalleryStore !== "undefined" && GalleryStore.imageUrl) {
+    return GalleryStore.imageUrl(id);
+  }
+  return `/api/gallery/file?id=${encodeURIComponent(id)}`;
+}
+
+function mediaThumbHtml(imageId, { alt = "Immagine", className = "media-thumb" } = {}) {
+  if (!imageId) return "";
+  const src = mediaImageUrl(imageId);
+  return `<button type="button" class="${escapeHtml(className)}" data-media-zoom="${escapeHtml(src)}" aria-label="Ingrandisci immagine">
+    <img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" loading="lazy">
+  </button>`;
+}
+
+function ensureMediaLightbox() {
+  let box = document.getElementById("media-lightbox");
+  if (box) return box;
+  box = document.createElement("div");
+  box.id = "media-lightbox";
+  box.className = "gallery-lightbox";
+  box.hidden = true;
+  box.innerHTML = `
+    <button type="button" class="gallery-lb-close btn btn-ghost btn-small" data-media-lb-close>Chiudi</button>
+    <img id="media-lb-img" alt="">
+  `;
+  document.body.appendChild(box);
+  box.addEventListener("click", (e) => {
+    if (e.target === box || e.target.closest("[data-media-lb-close]")) closeMediaLightbox();
+  });
+  return box;
+}
+
+function openMediaLightbox(src, alt = "") {
+  if (!src) return;
+  const box = ensureMediaLightbox();
+  const img = document.getElementById("media-lb-img");
+  if (img) {
+    img.src = src;
+    img.alt = alt || "Immagine";
+  }
+  box.hidden = false;
+  document.body.classList.add("gallery-lb-open");
+}
+
+function closeMediaLightbox() {
+  const box = document.getElementById("media-lightbox");
+  if (!box) return;
+  box.hidden = true;
+  document.body.classList.remove("gallery-lb-open");
+  const img = document.getElementById("media-lb-img");
+  if (img) img.removeAttribute("src");
+}
+
+function wireMediaLightbox(root = document) {
+  ensureMediaLightbox();
+  root.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-media-zoom]");
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openMediaLightbox(btn.dataset.mediaZoom, btn.querySelector("img")?.alt || "");
+  });
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeMediaLightbox();
+});
+
 
 function eventBadge(event) {
   const label = ScoutStore.scopeLabel(event.scope, event.branca || event.googleBranca);
@@ -318,6 +392,7 @@ function renderEventDetails(container, events, { emptyText = "Nessun evento in q
           <p><strong>Quando:</strong> ${escapeHtml(formatEventRangeNice(e))}</p>
           <p><strong>Luogo:</strong> ${escapeHtml(e.place || "Da definire")}</p>
           ${desc ? `<p class="event-detail-desc">${escapeHtml(desc)}</p>` : ""}
+          ${mediaThumbHtml(e.imageId, { alt: e.title || "Locandina evento" })}
         </div>
       </article>`;
     })

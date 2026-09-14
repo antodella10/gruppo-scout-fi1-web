@@ -1,4 +1,4 @@
-/* Notizie gruppo: localStorage. */
+/* Notizie gruppo: localStorage + sync cloud; immagini locandina su R2. */
 
 const NewsStore = (() => {
   const KEY = "firenze1_news_v1";
@@ -59,7 +59,6 @@ const NewsStore = (() => {
       writeAll(remote.items);
       return true;
     }
-    // remote empty / null items: seed local to cloud if we have content
     const local = readAll();
     if (local.length) await CloudSync.putNews(local);
     return false;
@@ -71,6 +70,7 @@ const NewsStore = (() => {
       title: String(item.title || "").trim(),
       date: String(item.date || "").trim(),
       body: String(item.body || "").trim(),
+      imageId: item.imageId || null,
       createdAt: item.createdAt || new Date().toISOString(),
       updatedAt: item.updatedAt || null,
     };
@@ -94,7 +94,7 @@ const NewsStore = (() => {
     return !!(user && typeof ScoutStore !== "undefined" && ScoutStore.isAdminUser?.(user));
   }
 
-  function upsert(payload, user) {
+  async function upsert(payload, user) {
     if (!canManage(user)) throw new Error("Solo l’admin può gestire le notizie.");
     const title = String(payload.title || "").trim();
     const body = String(payload.body || "").trim();
@@ -105,6 +105,7 @@ const NewsStore = (() => {
 
     const list = readAll();
     let item = payload.id ? list.find((x) => x.id === payload.id) : null;
+    const prevImageId = item?.imageId || null;
     if (!item) {
       item = { id: uid("news"), createdAt: new Date().toISOString() };
       list.unshift(item);
@@ -113,15 +114,35 @@ const NewsStore = (() => {
     item.body = body;
     item.date = date;
     item.updatedAt = new Date().toISOString();
+
+    let nextImageId = prevImageId;
+    if (payload.clearImage) {
+      nextImageId = null;
+    } else if (payload.imageFile instanceof File && payload.imageFile.size) {
+      if (typeof GalleryStore === "undefined") {
+        throw new Error("Upload immagine non disponibile.");
+      }
+      nextImageId = await GalleryStore.uploadAttachment(payload.imageFile, user);
+    }
+    item.imageId = nextImageId || null;
+
     writeAll(list);
     pushRemote().catch(() => {});
+
+    if (prevImageId && prevImageId !== item.imageId && typeof GalleryStore !== "undefined") {
+      GalleryStore.deleteAttachment(prevImageId, user).catch(() => {});
+    }
     return normalize(item);
   }
 
-  function remove(id, user) {
+  async function remove(id, user) {
     if (!canManage(user)) throw new Error("Solo l’admin può gestire le notizie.");
+    const item = readAll().find((x) => x.id === id);
     writeAll(readAll().filter((x) => x.id !== id));
     pushRemote().catch(() => {});
+    if (item?.imageId && typeof GalleryStore !== "undefined") {
+      GalleryStore.deleteAttachment(item.imageId, user).catch(() => {});
+    }
   }
 
   function formatDate(isoDate) {
@@ -135,7 +156,6 @@ const NewsStore = (() => {
     }
   }
 
-  /** Preferenze tile dashboard per utente (null = tutte). */
   function getDashTilePrefs(userId) {
     if (!userId) return null;
     try {

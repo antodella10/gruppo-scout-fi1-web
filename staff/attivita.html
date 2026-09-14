@@ -67,6 +67,15 @@
             Descrizione
             <textarea name="description" rows="2" placeholder="Opzionale"></textarea>
           </label>
+          <label>
+            Immagine / locandina (opzionale)
+            <input type="file" name="image" id="event-image" accept="image/*">
+          </label>
+          <p id="event-image-hint" class="hint" hidden></p>
+          <label class="shop-check" id="event-clear-image-wrap" hidden>
+            <input type="checkbox" id="event-clear-image">
+            Rimuovi immagine attuale
+          </label>
           <div class="inline-actions">
             <button class="btn btn-primary" type="submit" id="event-submit">Aggiungi attività</button>
             <button class="btn btn-ghost" type="button" id="cancel-edit" hidden>Annulla modifica</button>
@@ -84,6 +93,7 @@
   <script src="../js/canzoniere-store.js"></script>
   <script src="../js/shop-store.js"></script>
   <script src="../js/staff-notifs.js"></script>
+  <script src="../js/gallery-store.js"></script>
   <script src="../js/branch-view.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/staff-shell.js"></script>

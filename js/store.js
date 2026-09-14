@@ -409,28 +409,40 @@ const ScoutStore = (() => {
       notes: description,
       scope,
       branca,
+      imageId: event.imageId || null,
     };
   }
 
-  function addEvent(event, user) {
+  async function addEvent(event, user) {
     if (!user) throw new Error("Devi essere autenticato.");
     const data = normalizeEventInput(event, user);
     if (!data.title || !data.dateStart) throw new Error("Titolo e data inizio sono obbligatori.");
+
+    let imageId = null;
+    if (event.imageFile instanceof File && event.imageFile.size) {
+      if (typeof GalleryStore === "undefined") throw new Error("Upload immagine non disponibile.");
+      imageId = await GalleryStore.uploadAttachment(event.imageFile, user);
+    }
+
     const item = {
       id: uid("evt"),
       ...data,
+      imageId,
       createdBy: user.id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    if (!canManageEvent(user, item)) throw new Error("Non puoi creare questo tipo di evento.");
+    if (!canManageEvent(user, item)) {
+      if (imageId) GalleryStore.deleteAttachment(imageId, user).catch(() => {});
+      throw new Error("Non puoi creare questo tipo di evento.");
+    }
     const events = getEvents();
     events.push(item);
     saveEvents(events);
     return item;
   }
 
-  function updateEvent(id, patch, user) {
+  async function updateEvent(id, patch, user) {
     if (!user) throw new Error("Devi essere autenticato.");
     const events = getEvents();
     const idx = events.findIndex((e) => e.id === id);
@@ -439,18 +451,40 @@ const ScoutStore = (() => {
     if (!canManageEvent(user, current)) throw new Error("Non puoi modificare questo evento.");
     const merged = normalizeEventInput({ ...current, ...patch }, user);
     if (!canManageEvent(user, merged)) throw new Error("Non puoi impostare questo tipo di evento.");
-    events[idx] = { ...current, ...merged, updatedAt: new Date().toISOString() };
+    if (!merged.title || !merged.dateStart) throw new Error("Titolo e data inizio sono obbligatori.");
+
+    let imageId = current.imageId || null;
+    const prevImageId = imageId;
+    if (patch.clearImage) {
+      imageId = null;
+    } else if (patch.imageFile instanceof File && patch.imageFile.size) {
+      if (typeof GalleryStore === "undefined") throw new Error("Upload immagine non disponibile.");
+      imageId = await GalleryStore.uploadAttachment(patch.imageFile, user);
+    }
+
+    events[idx] = {
+      ...current,
+      ...merged,
+      imageId,
+      updatedAt: new Date().toISOString(),
+    };
     saveEvents(events);
+    if (prevImageId && prevImageId !== imageId && typeof GalleryStore !== "undefined") {
+      GalleryStore.deleteAttachment(prevImageId, user).catch(() => {});
+    }
     return events[idx];
   }
 
-  function deleteEvent(id, user) {
+  async function deleteEvent(id, user) {
     if (!user) throw new Error("Devi essere autenticato.");
     const events = getEvents();
     const item = events.find((e) => e.id === id);
     if (!item) return;
     if (!canManageEvent(user, item)) throw new Error("Non puoi eliminare questo evento.");
     saveEvents(events.filter((e) => e.id !== id));
+    if (item.imageId && typeof GalleryStore !== "undefined") {
+      GalleryStore.deleteAttachment(item.imageId, user).catch(() => {});
+    }
   }
 
   function getVisibleEvents(selectedBranca, user) {

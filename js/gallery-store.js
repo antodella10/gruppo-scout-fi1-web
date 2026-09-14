@@ -190,6 +190,33 @@ window.GalleryStore = (() => {
     applyCache(result);
   }
 
+  async function uploadAttachment(file, user) {
+    if (!canManage(user)) throw new Error("Devi essere loggato come staff.");
+    if (typeof CloudSync === "undefined" || !CloudSync.available()) {
+      throw new Error("Immagine disponibile solo sul sito online (Cloudflare).");
+    }
+    const jpeg = await fileToJpegBlob(file, 1600, 0.84);
+    if (jpeg.size > 2_400_000) {
+      throw new Error("Immagine ancora troppo grande dopo compressione.");
+    }
+    const id = uid("med");
+    const dataBase64 = await blobToBase64(jpeg);
+    await CloudSync.galleryPost({
+      resource: "media-upload",
+      id,
+      contentType: "image/jpeg",
+      dataBase64,
+    });
+    return id;
+  }
+
+  async function deleteAttachment(id, user) {
+    if (!canManage(user)) throw new Error("Devi essere loggato come staff.");
+    if (!id) return;
+    if (typeof CloudSync === "undefined" || !CloudSync.available()) return;
+    await CloudSync.galleryPost({ resource: "media-delete", id });
+  }
+
   return {
     FEATURED_MAX,
     BRANCHES,
@@ -209,5 +236,7 @@ window.GalleryStore = (() => {
     createFolder,
     renameFolder,
     deleteFolder,
+    uploadAttachment,
+    deleteAttachment,
   };
 })();

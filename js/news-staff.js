@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const alertBox = document.getElementById("news-alert");
   const formTitle = document.getElementById("news-form-title");
   const resetBtn = document.getElementById("news-reset");
+  const imageHint = document.getElementById("news-image-hint");
+  const clearImage = document.getElementById("news-clear-image");
 
   function flash(msg, ok = true) {
     flashAlert(alertBox, msg, ok);
@@ -22,6 +24,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (form) {
       form.id.value = "";
       form.date.value = todayIso();
+    }
+    if (clearImage) clearImage.checked = false;
+    if (imageHint) {
+      imageHint.hidden = true;
+      imageHint.textContent = "";
     }
     if (formTitle) formTitle.textContent = "Nuova notizia";
     if (resetBtn) resetBtn.hidden = true;
@@ -40,8 +47,11 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="event-admin-item">
         <div>
           <strong>${escapeHtml(n.title)}</strong><br>
-          <span style="color:var(--muted)">${escapeHtml(NewsStore.formatDate(n.date))}</span>
+          <span style="color:var(--muted)">${escapeHtml(NewsStore.formatDate(n.date))}${
+            n.imageId ? " · con immagine" : ""
+          }</span>
           <p style="margin:.45rem 0 0;color:var(--muted)">${escapeHtml(n.body)}</p>
+          ${mediaThumbHtml(n.imageId, { alt: n.title, className: "media-thumb media-thumb-admin" })}
         </div>
         <div class="inline-actions">
           <button type="button" class="btn btn-ghost btn-small" data-edit="${escapeHtml(n.id)}">Modifica</button>
@@ -52,16 +62,20 @@ document.addEventListener("DOMContentLoaded", () => {
       .join("");
   }
 
-  form?.addEventListener("submit", (e) => {
+  form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const data = new FormData(form);
+    const btn = form.querySelector('[type="submit"]');
+    if (btn) btn.disabled = true;
     try {
-      NewsStore.upsert(
+      await NewsStore.upsert(
         {
           id: data.get("id") || "",
           title: data.get("title"),
           date: data.get("date"),
           body: data.get("body"),
+          imageFile: data.get("image"),
+          clearImage: !!clearImage?.checked,
         },
         user
       );
@@ -70,12 +84,15 @@ document.addEventListener("DOMContentLoaded", () => {
       refresh();
     } catch (err) {
       flash(err.message || "Salvataggio non riuscito.", false);
+    } finally {
+      if (btn) btn.disabled = false;
     }
   });
 
   resetBtn?.addEventListener("click", resetForm);
 
-  listEl?.addEventListener("click", (e) => {
+  listEl?.addEventListener("click", async (e) => {
+    if (e.target.closest("[data-media-zoom]")) return;
     const edit = e.target.closest("[data-edit]");
     const del = e.target.closest("[data-del]");
     try {
@@ -86,13 +103,20 @@ document.addEventListener("DOMContentLoaded", () => {
         form.title.value = item.title;
         form.date.value = item.date;
         form.body.value = item.body;
+        if (clearImage) clearImage.checked = false;
+        if (imageHint) {
+          imageHint.hidden = !item.imageId;
+          imageHint.textContent = item.imageId
+            ? "C’è già un’immagine: carica un file per sostituirla, oppure seleziona “Rimuovi immagine”."
+            : "";
+        }
         if (formTitle) formTitle.textContent = "Modifica notizia";
         if (resetBtn) resetBtn.hidden = false;
         form.scrollIntoView({ behavior: "smooth", block: "start" });
       }
       if (del) {
         if (!confirm("Eliminare questa notizia?")) return;
-        NewsStore.remove(del.dataset.del, user);
+        await NewsStore.remove(del.dataset.del, user);
         flash("Notizia eliminata.");
         if (form?.id.value === del.dataset.del) resetForm();
         refresh();
@@ -102,6 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  wireMediaLightbox();
   resetForm();
   (async () => {
     await NewsStore.pullRemote?.().catch(() => {});

@@ -2844,12 +2844,13 @@ body.gallery-lb-open {
 }
 
 .page-soon-inner img {
-  width: min(420px, 100%);
+  width: min(380px, 92%);
   height: auto;
-  border-radius: 18px;
-  border: 1px solid var(--line);
-  box-shadow: 0 12px 28px rgba(20, 85, 40, 0.08);
-  background: #e8eee8;
+  display: block;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
 }
 
 .page-soon-inner p {
@@ -2858,6 +2859,40 @@ body.gallery-lb-open {
   color: var(--muted);
   font-size: 1.05rem;
   line-height: 1.45;
+}
+
+.media-thumb {
+  appearance: none;
+  display: block;
+  margin-top: 0.75rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #e8eee8;
+  cursor: zoom-in;
+  max-width: min(280px, 100%);
+}
+
+.media-thumb img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 220px;
+  object-fit: cover;
+}
+
+.media-thumb-admin {
+  max-width: 140px;
+  margin-top: 0.5rem;
+}
+
+.media-thumb-admin img {
+  max-height: 100px;
+}
+
+.news-item .media-thumb {
+  max-width: min(360px, 100%);
 }
 
 @media (max-width: 900px) {
