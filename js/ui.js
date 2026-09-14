@@ -585,8 +585,65 @@ function renderMeetingHoursList(container, { compact = false } = {}) {
     </ul>`;
 }
 
+function wireMobileNav() {
+  document.querySelectorAll(".site-nav").forEach((nav) => {
+    const wrap = nav.querySelector(".container");
+    const links = wrap?.querySelector(".nav-links");
+    if (!wrap || !links || wrap.querySelector(".nav-menu-btn")) return;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "nav-menu-btn";
+    btn.setAttribute("aria-label", "Apri menu");
+    btn.setAttribute("aria-expanded", "false");
+    btn.innerHTML = "<span></span><span></span><span></span>";
+
+    const brand = wrap.querySelector(".brand");
+    const cluster = document.createElement("div");
+    cluster.className = "nav-brand-cluster";
+    cluster.appendChild(btn);
+    if (brand) {
+      brand.replaceWith(cluster);
+      cluster.appendChild(brand);
+    } else {
+      wrap.insertBefore(cluster, wrap.firstChild);
+    }
+
+    const close = () => {
+      nav.classList.remove("is-nav-open");
+      btn.setAttribute("aria-expanded", "false");
+      btn.setAttribute("aria-label", "Apri menu");
+    };
+
+    const open = () => {
+      nav.classList.add("is-nav-open");
+      btn.setAttribute("aria-expanded", "true");
+      btn.setAttribute("aria-label", "Chiudi menu");
+    };
+
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (nav.classList.contains("is-nav-open")) close();
+      else open();
+    });
+
+    links.addEventListener("click", (e) => {
+      if (e.target.closest("a")) close();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!nav.contains(e.target)) close();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") close();
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof BranchView !== "undefined") BranchView.wireHomeLinks();
+  wireMobileNav();
   updateNavAuth();
   if (typeof StaffNotifs !== "undefined" && ScoutStore.getSession?.()) {
     StaffNotifs.pullAll().then(() => updateNavAuth());
