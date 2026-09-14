@@ -344,6 +344,7 @@ const ScoutStore = (() => {
         allDay: !!e.allDay,
         description: e.description || e.notes || "",
         notes: e.description || e.notes || "",
+        imageId: e.imageId || null,
       };
     });
     return normalized.sort(
@@ -355,6 +356,28 @@ const ScoutStore = (() => {
 
   function saveEvents(events) {
     write(KEYS.events, events);
+    pushRemoteEvents().catch(() => {});
+  }
+
+  async function pushRemoteEvents() {
+    if (typeof CloudSync === "undefined") return;
+    await CloudSync.putEvents(getEvents());
+  }
+
+  async function pullRemoteEvents() {
+    if (typeof CloudSync === "undefined") return false;
+    const remote = await CloudSync.getEvents();
+    if (!remote) return false;
+    const remoteItems = Array.isArray(remote.items) ? remote.items : [];
+    if (remoteItems.length) {
+      write(KEYS.events, remoteItems);
+      return true;
+    }
+    const local = read(KEYS.events, []);
+    if (Array.isArray(local) && local.length) {
+      await CloudSync.putEvents(getEvents());
+    }
+    return false;
   }
 
   function canManageEvent(user, event) {
@@ -914,6 +937,8 @@ const ScoutStore = (() => {
     logout,
     pullRemoteAccounts,
     pushRemoteAccounts,
+    pullRemoteEvents,
+    pushRemoteEvents,
     pullRemoteSettings,
     pushRemoteSettings,
     getCurrentUser,

@@ -87,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function syncCloudThenPaint() {
     await ScoutStore.pullRemoteSettings?.().catch(() => {});
+    await ScoutStore.pullRemoteEvents?.().catch(() => {});
     await NewsStore.pullRemote?.().catch(() => {});
     paintGroupExtras();
   }
@@ -378,4 +379,12 @@ document.addEventListener("DOMContentLoaded", () => {
   applyBranchView(BranchView.resolveInitial());
   fillPageSoonBlocks();
   wireMediaLightbox();
+
+  // Prima sync eventi/calendari cloud, poi ridisegna (serve su mobile)
+  (async () => {
+    await ScoutStore.pullRemoteSettings?.().catch(() => {});
+    await ScoutStore.pullRemoteEvents?.().catch(() => {});
+    await refreshCalendar();
+    paintGroupExtras();
+  })();
 });

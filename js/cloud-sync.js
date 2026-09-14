@@ -139,6 +139,23 @@ window.CloudSync = (() => {
     }
   }
 
+  async function getEvents() {
+    try {
+      return await getJson("events");
+    } catch {
+      return null;
+    }
+  }
+
+  async function putEvents(items) {
+    try {
+      return await postJson({ resource: "events", items });
+    } catch (err) {
+      console.warn("[CloudSync] putEvents", err);
+      return null;
+    }
+  }
+
   async function getSettings() {
     try {
       return await getJson("settings");
@@ -293,6 +310,8 @@ window.CloudSync = (() => {
     putShopMeta,
     getNews,
     putNews,
+    getEvents,
+    putEvents,
     getSettings,
     putSettings,
     getSentieroMeta,

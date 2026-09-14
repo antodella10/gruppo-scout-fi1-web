@@ -96,6 +96,11 @@ async function handleSync(request, env) {
         return json(data);
       }
 
+      if (resource === "events") {
+        const data = await kvGetJson(kv, "activity-events", { items: [], updatedAt: null });
+        return json(data);
+      }
+
       if (resource === "settings") {
         const data = await kvGetJson(kv, "settings", {
           iscrizioniFormUrl: "",
@@ -204,6 +209,15 @@ async function handleSync(request, env) {
           updatedAt: new Date().toISOString(),
         };
         await kv.put("news", JSON.stringify(payload));
+        return json({ ok: true, updatedAt: payload.updatedAt });
+      }
+
+      if (resource === "events") {
+        const payload = {
+          items: Array.isArray(body.items) ? body.items : [],
+          updatedAt: new Date().toISOString(),
+        };
+        await kv.put("activity-events", JSON.stringify(payload));
         return json({ ok: true, updatedAt: payload.updatedAt });
       }
 

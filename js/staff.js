@@ -197,5 +197,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   wireMediaLightbox();
-  refreshEvents();
+  (async () => {
+    await ScoutStore.pullRemoteEvents?.().catch(() => {});
+    refreshEvents();
+  })();
 });

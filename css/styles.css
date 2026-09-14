@@ -2571,6 +2571,35 @@ body.pdf-pseudo-fs-open {
     grid-template-columns: 1fr;
   }
 
+  .calendar-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .calendar-layout > .panel:first-child {
+    order: 2;
+  }
+
+  .calendar-layout > .panel:last-child {
+    order: 1;
+  }
+
+  .cal-day {
+    min-height: 3.35rem;
+    padding: 0.28rem 0.22rem 0.3rem;
+    font-size: 0.8rem;
+  }
+
+  .cal-day-title {
+    -webkit-line-clamp: 2;
+    font-size: 0.62rem;
+  }
+
+  .event-list {
+    max-height: none;
+  }
+
   .form-row-2 {
     grid-template-columns: 1fr;
   }
