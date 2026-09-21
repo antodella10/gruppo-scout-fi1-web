@@ -1,0 +1,22 @@
+{
+  "name": "Gruppo Scout Firenze 1",
+  "short_name": "Firenze 1",
+  "description": "Sito ufficiale del Gruppo Scout Firenze 1 — FederScout, Associazione Marliani Silvano.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7faf6",
+  "theme_color": "#1f7a3a",
+  "lang": "it",
+  "icons": [
+    {
+      "src": "/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
