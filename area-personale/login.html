@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login staff · Firenze 1</title>
+  <title>Accedi · Firenze 1</title>
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48">
 </head>
@@ -20,10 +20,10 @@
 
   <main class="auth-page">
     <div class="auth-card">
-      <h1>Login staff</h1>
-      <p class="lead">Area riservata FederScout Firenze 1. Esploratori e guide: usate <a href="../area-personale/login.html">Accedi</a>.</p>
+      <h1>Accedi</h1>
+      <p class="lead">Staff o esploratori/guide: usa email e password del tuo account.</p>
       <div id="auth-alert" class="alert alert-error" hidden></div>
-      <form id="login-form" class="form-grid">
+      <form id="login-form" class="form-grid" data-auth-redirect="auto">
         <label>
           Email
           <input type="email" name="email" required autocomplete="username" placeholder="nome@email.it">
@@ -34,7 +34,9 @@
         </label>
         <button class="btn btn-primary" type="submit">Entra</button>
       </form>
-      <p class="form-note">Non hai un account? <a href="register.html">Crea account staff</a></p>
+      <p class="form-note">
+        Esploratore/guida o staff? <a href="register.html">Crea account</a>
+      </p>
     </div>
   </main>
 

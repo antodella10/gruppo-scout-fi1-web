@@ -16,3 +16,11 @@ id = "2334c813ef4c4d9b96463a7688f8d656"
 [[r2_buckets]]
 binding = "SCOUT_R2"
 bucket_name = "firenze1-gallery"
+
+# Email di approvazione account (opzionale, da impostare in Dashboard → Variables / Secrets):
+# APPROVAL_MAIL_WEBHOOK = URL Google Apps Script (invia come scoutfirenze1ms@gmail.com)
+# APPROVAL_MAIL_SECRET  = stesso secret dello script
+# oppure:
+# RESEND_API_KEY = re_...
+# MAIL_FROM = Firenze 1 <beth.t@example.com>
+# MAIL_FROM_EMAIL = scoutfirenze1ms@gmail.com

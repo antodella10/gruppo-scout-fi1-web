@@ -6,6 +6,10 @@ window.StaffShell = (() => {
       location.href = "./login.html";
       return null;
     }
+    if (ScoutStore.isRagazzoUser?.(user)) {
+      location.href = "../area-personale/";
+      return null;
+    }
     return user;
   }
 
@@ -25,9 +29,19 @@ window.StaffShell = (() => {
     return typeof SentieroStore !== "undefined" && SentieroStore.canManage(user);
   }
 
+  function canAccountRequests(user) {
+    return typeof ScoutStore.canOpenAccountRequests === "function"
+      ? ScoutStore.canOpenAccountRequests(user)
+      : isAdmin(user);
+  }
+
   function menuItems(user) {
     const admin = isAdmin(user);
-    const c = typeof StaffNotifs !== "undefined" ? StaffNotifs.counts(user) : { songs: 0, shop: 0, staff: 0 };
+    const c =
+      typeof StaffNotifs !== "undefined"
+        ? StaffNotifs.counts(user)
+        : { songs: 0, shop: 0, staff: 0, ragazzi: 0 };
+    const reqBadge = (c.staff || 0) + (c.ragazzi || 0);
     return [
       { id: "home", href: "./index.html", label: "Dashboard" },
       canMeetings(user) ? { id: "riunioni", href: "./riunioni.html", label: "Gestione riunioni" } : null,
@@ -38,8 +52,8 @@ window.StaffShell = (() => {
       { id: "galleria", href: "./galleria.html", label: "Gestione galleria" },
       admin ? { id: "notizie", href: "./notizie.html", label: "Gestione notizie" } : null,
       admin ? { id: "iscrizioni", href: "./iscrizioni.html", label: "Form iscrizioni" } : null,
-      admin
-        ? { id: "richieste", href: "./richieste.html", label: "Richieste staff", badge: c.staff }
+      canAccountRequests(user)
+        ? { id: "richieste", href: "./richieste.html", label: "Richieste account", badge: reqBadge }
         : null,
       admin ? { id: "social", href: "./social.html", label: "Link social" } : null,
       admin ? { id: "calendari", href: "./calendari.html", label: "Calendari Google" } : null,
@@ -62,7 +76,10 @@ window.StaffShell = (() => {
   }
 
   function applyMenuBadges(user) {
-    const c = typeof StaffNotifs !== "undefined" ? StaffNotifs.counts(user) : { total: 0, songs: 0, shop: 0, staff: 0 };
+    const c =
+      typeof StaffNotifs !== "undefined"
+        ? StaffNotifs.counts(user)
+        : { total: 0, songs: 0, shop: 0, staff: 0, ragazzi: 0 };
     const btn = document.querySelector(".staff-menu-btn");
     if (btn) {
       const existing = btn.querySelector(".notif-badge");
@@ -80,7 +97,7 @@ window.StaffShell = (() => {
     const byId = {
       canzoniere: c.songs,
       negozio: c.shop,
-      richieste: c.staff,
+      richieste: (c.staff || 0) + (c.ragazzi || 0),
     };
     drawer.querySelectorAll(".staff-menu-link").forEach((link) => {
       link.querySelector(".notif-badge")?.remove();
@@ -164,10 +181,14 @@ window.StaffShell = (() => {
     applyMenuBadges(user);
   }
 
-  function boot({ active = "home", requireAdmin = false } = {}) {
+  function boot({ active = "home", requireAdmin = false, requireAccountRequests = false } = {}) {
     const user = requireUser();
     if (!user) return null;
     if (requireAdmin && !isAdmin(user)) {
+      location.href = "./index.html";
+      return null;
+    }
+    if (requireAccountRequests && !canAccountRequests(user)) {
       location.href = "./index.html";
       return null;
     }
@@ -193,6 +214,7 @@ window.StaffShell = (() => {
     canMeetings,
     canCanzoniere,
     canSentiero,
+    canAccountRequests,
     fillHero,
     mountMenu,
     applyMenuBadges,

@@ -31,6 +31,110 @@ function writeKeyOk(request, body, env) {
   return fromHeader === expected || fromBody === expected;
 }
 
+function approvalMailCopy({ nome, role }) {
+  const first = String(nome || "").trim() || "Ciao";
+  const isStaff = role === "staff";
+  const kind = isStaff ? "staff" : "esploratore/guida";
+  const subject = isStaff
+    ? "Il tuo account staff è stato approvato — Firenze 1"
+    : "Il tuo account esploratore/guida è stato approvato — Firenze 1";
+  const text = [
+    `Ciao ${first},`,
+    "",
+    `il tuo account ${kind} sul sito del Gruppo Scout Firenze 1 è stato approvato.`,
+    "Ora puoi accedere con l’email e la password che hai scelto in fase di registrazione.",
+    "",
+    isStaff
+      ? "Area staff: apri il sito e usa Accedi / Area staff."
+      : "Con l’account puoi aprire libretto e specialità nella pagina Sentiero.",
+    "",
+    "Buona strada,",
+    "Gruppo Scout Firenze 1",
+    "scoutfirenze1ms@gmail.com",
+  ].join("\n");
+  return { subject, text };
+}
+
+/** Invia email di approvazione: webhook Google Apps Script e/o Resend. */
+async function sendApprovalEmail(env, { email, nome, cognome, role }) {
+  const to = String(email || "").trim().toLowerCase();
+  if (!to || !to.includes("@")) {
+    return { sent: false, error: "email destinatario non valida" };
+  }
+  const { subject, text } = approvalMailCopy({ nome, role });
+  const fromName = "Gruppo Scout Firenze 1";
+  const replyTo = env.MAIL_FROM_EMAIL || "scoutfirenze1ms@gmail.com";
+  const attempts = [];
+
+  const webhook = String(env.APPROVAL_MAIL_WEBHOOK || "").trim();
+  if (webhook) {
+    try {
+      const res = await fetch(webhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          secret: env.APPROVAL_MAIL_SECRET || "",
+          to,
+          subject,
+          body: text,
+          nome,
+          cognome,
+          role,
+          from: replyTo,
+        }),
+      });
+      const raw = await res.text();
+      if (res.ok) {
+        return { sent: true, via: "gmail-webhook", detail: raw.slice(0, 200) };
+      }
+      attempts.push(`webhook:${res.status}`);
+    } catch (err) {
+      attempts.push(`webhook:${err.message || "error"}`);
+    }
+  }
+
+  const resendKey = String(env.RESEND_API_KEY || "").trim();
+  if (resendKey) {
+    try {
+      const from = String(env.MAIL_FROM || `${fromName} <beth.t@example.com>`);
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from,
+          to: [to],
+          reply_to: replyTo,
+          subject,
+          text,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        return { sent: true, via: "resend", id: data.id || null };
+      }
+      attempts.push(`resend:${data.message || res.status}`);
+    } catch (err) {
+      attempts.push(`resend:${err.message || "error"}`);
+    }
+  }
+
+  if (!webhook && !resendKey) {
+    return {
+      sent: false,
+      skipped: true,
+      reason:
+        "Email automatica non configurata: imposta APPROVAL_MAIL_WEBHOOK (Gmail) o RESEND_API_KEY sul Worker.",
+    };
+  }
+  return {
+    sent: false,
+    error: `Invio email non riuscito (${attempts.join("; ") || "nessun provider"})`,
+  };
+}
+
 async function kvGetJson(kv, key, fallback) {
   const raw = await kv.get(key);
   if (!raw) return fallback;
@@ -169,6 +273,18 @@ async function handleSync(request, env) {
       }
 
       const resource = body.resource || "";
+
+      if (resource === "notify-approved") {
+        const result = await sendApprovalEmail(env, {
+          email: body.email,
+          nome: body.nome,
+          cognome: body.cognome,
+          role: body.role === "staff" ? "staff" : "ragazzo",
+        });
+        if (result.sent) return json({ ok: true, ...result });
+        if (result.skipped) return json({ ok: true, ...result });
+        return json({ ok: false, ...result }, 502);
+      }
 
       if (resource === "accounts") {
         const payload = {

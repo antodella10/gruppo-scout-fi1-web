@@ -4,68 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Crea account staff · Firenze 1</title>
+  <meta http-equiv="refresh" content="0; url=../area-personale/register.html">
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48">
 </head>
 <body>
-  <nav class="site-nav">
-    <div class="container">
-      <a class="brand" href="../index.html" data-home-link data-home-base="../">
-        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
-        <span class="brand-text">Firenze 1</span>
-      </a>
-      <div class="nav-actions" data-auth-slot data-base="../"></div>
-    </div>
-  </nav>
-
   <main class="auth-page">
     <div class="auth-card">
-      <h1>Crea account staff</h1>
-      <p class="lead">
-        La richiesta viene approvata dall’admin
-        (<strong>scoutfirenze1ms@gmail.com</strong>) dall’area staff.
-      </p>
-      <div id="auth-alert" class="alert alert-error" hidden></div>
-      <form id="register-form" class="form-grid">
-        <div class="form-row-2">
-          <label>
-            Nome
-            <input type="text" name="nome" required autocomplete="given-name">
-          </label>
-          <label>
-            Cognome
-            <input type="text" name="cognome" required autocomplete="family-name">
-          </label>
-        </div>
-        <label id="branca-field">
-          Branca
-          <select name="branca" required>
-            <option value="" disabled selected>Seleziona…</option>
-            <option value="branco">Branco</option>
-            <option value="reparto">Reparto</option>
-            <option value="noviziato">Noviziato</option>
-            <option value="clan">Clan</option>
-          </select>
-        </label>
-        <label>
-          Email
-          <input type="email" name="email" required autocomplete="username">
-        </label>
-        <label>
-          Password
-          <input type="password" name="password" required autocomplete="new-password" minlength="6" placeholder="Minimo 6 caratteri">
-        </label>
-        <button class="btn btn-primary" type="submit">Invia richiesta</button>
-      </form>
-      <p class="form-note">Hai già un account? <a href="login.html">Accedi</a></p>
+      <p class="lead">Reindirizzamento alla registrazione unificata…</p>
+      <p class="form-note"><a href="../area-personale/register.html">Crea account</a></p>
     </div>
   </main>
-
-  <script src="../js/config.js"></script>
-  <script src="../js/cloud-sync.js"></script>
-  <script src="../js/store.js"></script>
-  <script src="../js/branch-view.js"></script>
-  <script src="../js/ui.js"></script>
-  <script src="../js/auth.js"></script>
+  <script>location.replace("../area-personale/register.html");</script>
 </body>
 </html>

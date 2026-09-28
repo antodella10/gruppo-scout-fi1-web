@@ -24,8 +24,16 @@ document.addEventListener("DOMContentLoaded", () => {
   function pendingStaffCount() {
     return typeof StaffNotifs !== "undefined"
       ? StaffNotifs.counts(user).staff
-      : isAdmin
-        ? ScoutStore.listPending(user).length
+      : ScoutStore.canManageStaffRequests?.(user)
+        ? ScoutStore.listPendingStaff(user).length
+        : 0;
+  }
+
+  function pendingRagazziCount() {
+    return typeof StaffNotifs !== "undefined"
+      ? StaffNotifs.counts(user).ragazzi || 0
+      : ScoutStore.canManageRagazziRequests?.(user)
+        ? ScoutStore.listPendingRagazzi(user).length
         : 0;
   }
 
@@ -40,6 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function buildTiles() {
     const hours = ScoutStore.getMeetingHours().filter((h) => ScoutStore.canEditMeetingSlot(user, h));
     const pendingStaff = pendingStaffCount();
+    const pendingRagazzi = pendingRagazziCount();
+    const pendingAccounts = pendingStaff + pendingRagazzi;
     const pendingSongs = pendingSongsCount();
     const shopPending = pendingShopCount();
     const calendars = isAdmin ? ScoutStore.listGoogleCalendars() : [];
@@ -105,20 +115,31 @@ document.addEventListener("DOMContentLoaded", () => {
         hint: "Link del Google Form nella pagina pubblica.",
         preview: formUrl ? "Form collegato" : "Nessun link impostato",
       });
+    }
 
+    if (typeof StaffShell !== "undefined" && StaffShell.canAccountRequests?.(user)) {
+      const parts = [];
+      if (pendingStaff) parts.push(`${pendingStaff} staff`);
+      if (pendingRagazzi) parts.push(`${pendingRagazzi} repartari`);
       tiles.push({
         id: "richieste",
         href: "./richieste.html",
-        title: "Richieste staff",
-        hint: "Approva o rifiuta le registrazioni.",
-        badge: pendingStaff,
-        preview: pendingStaff
-          ? (typeof StaffNotifs !== "undefined"
-              ? StaffNotifs.alertText(pendingStaff, "richiesta in attesa", "richieste in attesa")
-              : `<strong>${pendingStaff}</strong> in attesa`)
+        title: "Richieste account",
+        hint: "Approva staff e esploratori/guide.",
+        badge: pendingAccounts,
+        preview: pendingAccounts
+          ? typeof StaffNotifs !== "undefined"
+            ? StaffNotifs.alertText(
+                pendingAccounts,
+                "richiesta in attesa",
+                "richieste in attesa"
+              ) + (parts.length ? ` <span class="hint">(${parts.join(" · ")})</span>` : "")
+            : `<strong>${pendingAccounts}</strong> in attesa`
           : "Nessuna richiesta in attesa",
       });
+    }
 
+    if (isAdmin) {
       const igCount = Object.values(social.instagram || {}).filter((x) => x?.url).length;
       tiles.push({
         id: "social",

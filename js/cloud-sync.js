@@ -87,6 +87,33 @@ window.CloudSync = (() => {
     }
   }
 
+  async function notifyAccountApproved({ email, nome, cognome, role }) {
+    if (!available()) return { sent: false, skipped: true, reason: "offline" };
+    const base = await pickBase();
+    const res = await fetch(base, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Write-Key": writeKey(),
+      },
+      body: JSON.stringify({
+        resource: "notify-approved",
+        writeKey: writeKey(),
+        email,
+        nome,
+        cognome,
+        role,
+      }),
+      credentials: "omit",
+      cache: "no-store",
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.error || `Notifica email fallita (${res.status})`);
+    }
+    return data;
+  }
+
   async function getCanzoniereMeta() {
     try {
       return await getJson("canzoniere-meta");
@@ -304,6 +331,7 @@ window.CloudSync = (() => {
     available,
     getAccounts,
     putAccounts,
+    notifyAccountApproved,
     getCanzoniereMeta,
     putCanzoniereMeta,
     getShopMeta,

@@ -1,7 +1,9 @@
 /* Contatori richieste in attesa per bollini staff (nav, menu, dashboard). */
 window.StaffNotifs = (() => {
   function counts(user) {
-    if (!user) return { songs: 0, shop: 0, staff: 0, total: 0 };
+    if (!user || (ScoutStore.isRagazzoUser && ScoutStore.isRagazzoUser(user))) {
+      return { songs: 0, shop: 0, staff: 0, ragazzi: 0, total: 0 };
+    }
 
     const songs =
       typeof CanzoniereStore !== "undefined" && CanzoniereStore.canManage(user)
@@ -16,11 +18,16 @@ window.StaffNotifs = (() => {
         : 0;
 
     const staff =
-      typeof ScoutStore !== "undefined" && ScoutStore.isAdminUser(user)
-        ? ScoutStore.listPending(user).length
+      typeof ScoutStore !== "undefined" && ScoutStore.canManageStaffRequests?.(user)
+        ? ScoutStore.listPendingStaff(user).length
         : 0;
 
-    return { songs, shop, staff, total: songs + shop + staff };
+    const ragazzi =
+      typeof ScoutStore !== "undefined" && ScoutStore.canManageRagazziRequests?.(user)
+        ? ScoutStore.listPendingRagazzi(user).length
+        : 0;
+
+    return { songs, shop, staff, ragazzi, total: songs + shop + staff + ragazzi };
   }
 
   function formatCount(n) {
@@ -43,6 +50,7 @@ window.StaffNotifs = (() => {
     if (c.songs) parts.push(`${c.songs} proposte canzoniere`);
     if (c.shop) parts.push(`${c.shop} ordini negozio`);
     if (c.staff) parts.push(`${c.staff} richieste staff`);
+    if (c.ragazzi) parts.push(`${c.ragazzi} richieste repartari`);
     return parts.join(" · ") || "Notifiche";
   }
 

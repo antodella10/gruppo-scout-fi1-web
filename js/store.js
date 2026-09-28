@@ -1,4 +1,4 @@
-/* Storage: staff accounts, admin approval, scoped events. */
+/* Storage: staff + ragazzi accounts, admin approval, scoped events. */
 
 const ScoutStore = (() => {
   const KEYS = {
@@ -8,6 +8,9 @@ const ScoutStore = (() => {
     settings: "firenze1_settings_v2",
     pending: "firenze1_pending_staff_v2",
   };
+
+  const ROLE_STAFF = "staff";
+  const ROLE_RAGAZZO = "ragazzo";
 
   const ADMIN_EMAIL = () =>
     (window.SCOUT_CONFIG?.adminEmail || "scoutfirenze1ms@gmail.com").toLowerCase();
@@ -83,11 +86,20 @@ const ScoutStore = (() => {
     return false;
   }
 
-  function getUsers() {
-    return read(KEYS.users, []).map((u) => ({
+  function normalizeAccount(u) {
+    if (!u) return u;
+    const role = u.role === ROLE_RAGAZZO ? ROLE_RAGAZZO : ROLE_STAFF;
+    return {
       ...u,
-      branca: u.branca ? normalizeBrancaId(u.branca) : u.branca,
-    }));
+      role,
+      branca: u.branca ? normalizeBrancaId(u.branca) : u.branca || null,
+      squadriglia: u.squadriglia || null,
+      dataNascita: u.dataNascita || null,
+    };
+  }
+
+  function getUsers() {
+    return read(KEYS.users, []).map(normalizeAccount);
   }
 
   function saveUsers(users) {
@@ -95,10 +107,7 @@ const ScoutStore = (() => {
   }
 
   function getPending() {
-    return read(KEYS.pending, []).map((u) => ({
-      ...u,
-      branca: u.branca ? normalizeBrancaId(u.branca) : u.branca,
-    }));
+    return read(KEYS.pending, []).map(normalizeAccount);
   }
 
   function savePending(list) {
@@ -109,8 +118,37 @@ const ScoutStore = (() => {
     return String(email || "").trim().toLowerCase() === ADMIN_EMAIL();
   }
 
+  function accountRole(user) {
+    if (!user) return null;
+    if (user.role === ROLE_RAGAZZO) return ROLE_RAGAZZO;
+    return ROLE_STAFF;
+  }
+
+  function isRagazzoUser(user) {
+    return accountRole(user) === ROLE_RAGAZZO;
+  }
+
+  function isStaffUser(user) {
+    return !!user && accountRole(user) === ROLE_STAFF;
+  }
+
   function isAdminUser(user) {
-    return !!(user && (user.isAdmin || isAdminEmail(user.email)));
+    return !!(user && isStaffUser(user) && (user.isAdmin || isAdminEmail(user.email)));
+  }
+
+  /** Admin: tutte le richieste. Staff reparto: solo account ragazzi (repartari). */
+  function canManageRagazziRequests(user) {
+    if (!user || !isStaffUser(user)) return false;
+    if (isAdminUser(user)) return true;
+    return user.branca === "reparto";
+  }
+
+  function canManageStaffRequests(user) {
+    return isAdminUser(user);
+  }
+
+  function canOpenAccountRequests(user) {
+    return canManageStaffRequests(user) || canManageRagazziRequests(user);
   }
 
   function getSession() {
@@ -123,12 +161,16 @@ const ScoutStore = (() => {
       return;
     }
     const admin = isAdminUser(user);
+    const role = accountRole(user);
     write(KEYS.session, {
       id: user.id,
       nome: user.nome,
       cognome: user.cognome,
       email: user.email,
+      role,
       branca: admin ? null : user.branca || null,
+      squadriglia: user.squadriglia || null,
+      dataNascita: user.dataNascita || null,
       isAdmin: admin,
     });
   }
@@ -138,11 +180,17 @@ const ScoutStore = (() => {
     if (!session) return null;
     const user = getUsers().find((u) => u.id === session.id);
     if (!user || !user.verified) return null;
-    if (isAdminEmail(user.email)) {
+    if (isAdminEmail(user.email) && isStaffUser(user)) {
       user.isAdmin = true;
       user.branca = null;
     }
     return user;
+  }
+
+  function emailTaken(normalized, { excludeId } = {}) {
+    const inUsers = getUsers().some((u) => u.email === normalized && u.id !== excludeId);
+    const inPending = getPending().some((u) => u.email === normalized && u.id !== excludeId);
+    return inUsers || inPending;
   }
 
   function branchLabel(id) {
@@ -163,26 +211,35 @@ const ScoutStore = (() => {
   }
 
   /** Admin: no branca. Others: pending until admin approves. */
-  async function registerStaff({ nome, cognome, email, password, branca }) {
+  async function registerStaff({ nome, cognome, dataNascita, email, password, branca }) {
     const users = getUsers();
     const pending = getPending();
     const normalized = email.trim().toLowerCase();
+    const birth = String(dataNascita || "").trim();
 
     if (password.length < 6) {
       throw new Error("La password deve avere almeno 6 caratteri.");
     }
-    if (users.some((u) => u.email === normalized)) {
-      throw new Error("Esiste già un account con questa email.");
+    if (!nome?.trim() || !cognome?.trim()) {
+      throw new Error("Inserisci nome e cognome.");
     }
-    if (pending.some((u) => u.email === normalized)) {
-      throw new Error("C’è già una richiesta in attesa di approvazione per questa email.");
+    if (!birth) {
+      throw new Error("Inserisci la data di nascita.");
+    }
+    if (emailTaken(normalized)) {
+      if (pending.some((u) => u.email === normalized)) {
+        throw new Error("C’è già una richiesta in attesa di approvazione per questa email.");
+      }
+      throw new Error("Esiste già un account con questa email.");
     }
 
     if (isAdminEmail(normalized)) {
       const user = {
         id: uid("staff"),
+        role: ROLE_STAFF,
         nome: nome.trim(),
         cognome: cognome.trim(),
+        dataNascita: birth,
         email: normalized,
         branca: null,
         passwordHash: await hashPassword(password),
@@ -203,8 +260,10 @@ const ScoutStore = (() => {
 
     const pendingUser = {
       id: uid("staff"),
+      role: ROLE_STAFF,
       nome: nome.trim(),
       cognome: cognome.trim(),
+      dataNascita: birth,
       email: normalized,
       branca,
       passwordHash: await hashPassword(password),
@@ -218,17 +277,78 @@ const ScoutStore = (() => {
     return { user: pendingUser, pendingApproval: true };
   }
 
-  function listPending(adminUser) {
-    if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può vedere le richieste.");
+  async function registerRagazzo({ nome, cognome, dataNascita, squadriglia, email, password }) {
+    const pending = getPending();
+    const normalized = email.trim().toLowerCase();
+    const sq = String(squadriglia || "").trim();
+    const birth = String(dataNascita || "").trim();
+
+    if (password.length < 6) {
+      throw new Error("La password deve avere almeno 6 caratteri.");
+    }
+    if (!nome?.trim() || !cognome?.trim()) {
+      throw new Error("Inserisci nome e cognome.");
+    }
+    if (!birth) {
+      throw new Error("Inserisci la data di nascita.");
+    }
+    if (!sq) {
+      throw new Error("Inserisci la squadriglia.");
+    }
+    if (isAdminEmail(normalized)) {
+      throw new Error("Questa email è riservata all’admin staff.");
+    }
+    if (emailTaken(normalized)) {
+      if (pending.some((u) => u.email === normalized)) {
+        throw new Error("C’è già una richiesta in attesa di approvazione per questa email.");
+      }
+      throw new Error("Esiste già un account con questa email.");
+    }
+
+    const pendingUser = {
+      id: uid("ragazzo"),
+      role: ROLE_RAGAZZO,
+      nome: nome.trim(),
+      cognome: cognome.trim(),
+      dataNascita: birth,
+      squadriglia: sq,
+      email: normalized,
+      branca: "reparto",
+      passwordHash: await hashPassword(password),
+      createdAt: new Date().toISOString(),
+      verified: false,
+      isAdmin: false,
+    };
+    pending.push(pendingUser);
+    savePending(pending);
+    await pushRemoteAccounts();
+    return { user: pendingUser, pendingApproval: true };
+  }
+
+  function listPending(viewer) {
+    if (!canOpenAccountRequests(viewer)) {
+      throw new Error("Non puoi vedere le richieste account.");
+    }
     return getPending().sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
   }
 
+  function listPendingStaff(viewer) {
+    if (!canManageStaffRequests(viewer)) return [];
+    return listPending(viewer).filter((p) => accountRole(p) === ROLE_STAFF);
+  }
+
+  function listPendingRagazzi(viewer) {
+    if (!canManageRagazziRequests(viewer)) return [];
+    return listPending(viewer).filter((p) => accountRole(p) === ROLE_RAGAZZO);
+  }
+
   function listStaffAccounts(adminUser) {
-    if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può vedere gli account.");
+    if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può vedere gli account staff.");
     return getUsers()
-      .filter((u) => u.verified)
+      .filter((u) => u.verified && accountRole(u) === ROLE_STAFF)
       .map((u) => ({
         id: u.id,
+        role: ROLE_STAFF,
         nome: u.nome,
         cognome: u.cognome,
         email: u.email,
@@ -245,11 +365,40 @@ const ScoutStore = (() => {
       });
   }
 
+  function listRagazziAccounts(viewer) {
+    if (!canManageRagazziRequests(viewer)) {
+      throw new Error("Non puoi vedere gli account del reparto.");
+    }
+    return getUsers()
+      .filter((u) => u.verified && accountRole(u) === ROLE_RAGAZZO)
+      .map((u) => ({
+        id: u.id,
+        role: ROLE_RAGAZZO,
+        nome: u.nome,
+        cognome: u.cognome,
+        email: u.email,
+        squadriglia: u.squadriglia || "",
+        dataNascita: u.dataNascita || "",
+        createdAt: u.createdAt || null,
+        approvedAt: u.approvedAt || null,
+      }))
+      .sort((a, b) => {
+        const sq = (a.squadriglia || "").localeCompare(b.squadriglia || "", "it");
+        if (sq) return sq;
+        const nameA = `${a.cognome || ""} ${a.nome || ""}`.toLowerCase();
+        const nameB = `${b.cognome || ""} ${b.nome || ""}`.toLowerCase();
+        return nameA.localeCompare(nameB, "it");
+      });
+  }
+
   async function deleteStaffAccount(userId, adminUser) {
-    if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può eliminare account.");
+    if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può eliminare account staff.");
     const users = getUsers();
     const target = users.find((u) => u.id === userId);
     if (!target) throw new Error("Account non trovato.");
+    if (accountRole(target) !== ROLE_STAFF) {
+      throw new Error("Usa la sezione repartari per eliminare questo account.");
+    }
     if (isAdminEmail(target.email)) {
       throw new Error("Non puoi eliminare l’account admin principale.");
     }
@@ -261,12 +410,36 @@ const ScoutStore = (() => {
     return true;
   }
 
-  async function approvePending(pendingId, adminUser) {
-    if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può approvare.");
+  async function deleteRagazzoAccount(userId, viewer) {
+    if (!canManageRagazziRequests(viewer)) {
+      throw new Error("Non puoi eliminare account del reparto.");
+    }
+    const users = getUsers();
+    const target = users.find((u) => u.id === userId);
+    if (!target) throw new Error("Account non trovato.");
+    if (accountRole(target) !== ROLE_RAGAZZO) {
+      throw new Error("Questo non è un account esploratore/guida.");
+    }
+    saveUsers(users.filter((u) => u.id !== userId));
+    await pushRemoteAccounts();
+    return true;
+  }
+
+  async function approvePending(pendingId, viewer) {
     const pending = getPending();
     const idx = pending.findIndex((u) => u.id === pendingId);
     if (idx < 0) throw new Error("Richiesta non trovata.");
     const item = pending[idx];
+    const role = accountRole(item);
+
+    if (role === ROLE_RAGAZZO) {
+      if (!canManageRagazziRequests(viewer)) {
+        throw new Error("Non puoi approvare richieste dei repartari.");
+      }
+    } else if (!canManageStaffRequests(viewer)) {
+      throw new Error("Solo l’admin può approvare richieste staff.");
+    }
+
     const users = getUsers();
     if (users.some((u) => u.email === item.email)) {
       pending.splice(idx, 1);
@@ -276,28 +449,55 @@ const ScoutStore = (() => {
     }
     const user = {
       id: item.id,
+      role,
       nome: item.nome,
       cognome: item.cognome,
       email: item.email,
-      branca: item.branca,
+      branca: role === ROLE_RAGAZZO ? "reparto" : item.branca,
+      squadriglia: item.squadriglia || null,
+      dataNascita: item.dataNascita || null,
       passwordHash: item.passwordHash,
       createdAt: item.createdAt,
       verified: true,
       isAdmin: false,
       approvedAt: new Date().toISOString(),
-      approvedBy: adminUser.id,
+      approvedBy: viewer.id,
     };
     users.push(user);
     saveUsers(users);
     pending.splice(idx, 1);
     savePending(pending);
     await pushRemoteAccounts();
-    return user;
+
+    let emailNotify = { sent: false, skipped: true };
+    if (typeof CloudSync !== "undefined" && CloudSync.notifyAccountApproved) {
+      try {
+        emailNotify = await CloudSync.notifyAccountApproved({
+          email: user.email,
+          nome: user.nome,
+          cognome: user.cognome,
+          role,
+        });
+      } catch (err) {
+        emailNotify = { sent: false, error: err.message || "Email non inviata" };
+      }
+    }
+    return { user, emailNotify };
   }
 
-  async function rejectPending(pendingId, adminUser) {
-    if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può rifiutare.");
-    savePending(getPending().filter((u) => u.id !== pendingId));
+  async function rejectPending(pendingId, viewer) {
+    const pending = getPending();
+    const item = pending.find((u) => u.id === pendingId);
+    if (!item) throw new Error("Richiesta non trovata.");
+    const role = accountRole(item);
+    if (role === ROLE_RAGAZZO) {
+      if (!canManageRagazziRequests(viewer)) {
+        throw new Error("Non puoi rifiutare richieste dei repartari.");
+      }
+    } else if (!canManageStaffRequests(viewer)) {
+      throw new Error("Solo l’admin può rifiutare richieste staff.");
+    }
+    savePending(pending.filter((u) => u.id !== pendingId));
     await pushRemoteAccounts();
   }
 
@@ -307,7 +507,7 @@ const ScoutStore = (() => {
     const pending = getPending();
     const normalized = email.trim().toLowerCase();
     if (pending.some((u) => u.email === normalized)) {
-      throw new Error("Account in attesa di approvazione da parte dell’admin.");
+      throw new Error("Account in attesa di approvazione.");
     }
     const user = users.find((u) => u.email === normalized);
     if (!user) throw new Error("Email o password non corretti.");
@@ -315,7 +515,7 @@ const ScoutStore = (() => {
     const hash = await hashPassword(password);
     if (hash !== user.passwordHash) throw new Error("Email o password non corretti.");
 
-    if (isAdminEmail(user.email)) {
+    if (isStaffUser(user) && isAdminEmail(user.email)) {
       user.isAdmin = true;
       user.branca = null;
     } else {
@@ -326,6 +526,8 @@ const ScoutStore = (() => {
     await pushRemoteAccounts();
     return user;
   }
+
+  const login = loginStaff;
 
   function logout() {
     setSession(null);
@@ -922,18 +1124,32 @@ const ScoutStore = (() => {
 
   return {
     ADMIN_EMAIL,
+    ROLE_STAFF,
+    ROLE_RAGAZZO,
     isAdminEmail,
     isAdminUser,
+    isStaffUser,
+    isRagazzoUser,
+    accountRole,
+    canManageStaffRequests,
+    canManageRagazziRequests,
+    canOpenAccountRequests,
     normalizeBrancaId,
     branchLabel,
     scopeLabel,
     registerStaff,
+    registerRagazzo,
     listPending,
+    listPendingStaff,
+    listPendingRagazzi,
     listStaffAccounts,
+    listRagazziAccounts,
     deleteStaffAccount,
+    deleteRagazzoAccount,
     approvePending,
     rejectPending,
     loginStaff,
+    login,
     logout,
     pullRemoteAccounts,
     pushRemoteAccounts,

@@ -402,28 +402,35 @@ function renderEventDetails(container, events, { emptyText = "Nessun evento in q
 function updateNavAuth() {
   const slot = document.querySelector("[data-auth-slot]");
   if (!slot) return;
-  const user = ScoutStore.getSession();
+  const session = ScoutStore.getSession();
   const base = slot.dataset.base || "";
-  if (user) {
-    const full = ScoutStore.getCurrentUser() || user;
-    const br = full.isAdmin
-      ? "Admin"
-      : full.branca
-        ? ScoutStore.branchLabel(full.branca)
-        : "";
+  if (session) {
+    const full = ScoutStore.getCurrentUser() || session;
+    const isKid = ScoutStore.isRagazzoUser?.(full) || full.role === "ragazzo";
+    const br = isKid
+      ? full.squadriglia
+        ? `Sq. ${full.squadriglia}`
+        : "Reparto"
+      : full.isAdmin
+        ? "Admin"
+        : full.branca
+          ? ScoutStore.branchLabel(full.branca)
+          : "";
     let badge = "";
-    if (typeof StaffNotifs !== "undefined") {
+    if (!isKid && typeof StaffNotifs !== "undefined") {
       const c = StaffNotifs.counts(full);
       if (c.total > 0) badge = StaffNotifs.badgeHtml(c.total, StaffNotifs.titleFor(c));
-    } else if (typeof CanzoniereStore !== "undefined" && CanzoniereStore.canManage(full)) {
+    } else if (!isKid && typeof CanzoniereStore !== "undefined" && CanzoniereStore.canManage(full)) {
       const n = CanzoniereStore.pendingProposalsCount();
       if (n > 0) {
         badge = `<span class="notif-badge" title="Proposte canzoni">${n > 9 ? "9+" : n}</span>`;
       }
     }
+    const areaHref = isKid ? `${base}area-personale/` : `${base}staff/`;
+    const areaLabel = isKid ? "Area personale" : "Area staff";
     slot.innerHTML = `
       <span class="user-chip">${escapeHtml(full.nome)} ${escapeHtml(full.cognome)}${br ? " · " + escapeHtml(br) : ""}${badge}</span>
-      <a class="btn btn-primary btn-small" href="${base}staff/">Area staff</a>
+      <a class="btn btn-primary btn-small" href="${areaHref}">${areaLabel}</a>
       <button type="button" class="btn btn-ghost btn-small" data-nav-logout>Esci</button>
     `;
     slot.querySelector("[data-nav-logout]")?.addEventListener("click", () => {
@@ -431,8 +438,107 @@ function updateNavAuth() {
       location.href = `${base}index.html`;
     });
   } else {
-    slot.innerHTML = `<a class="btn btn-yellow btn-small" href="${base}staff/login.html">Login staff</a>`;
+    slot.innerHTML = `<a class="btn btn-yellow btn-small" href="${base}area-personale/login.html">Accedi</a>`;
   }
+}
+
+/** Modale login (es. file Sentiero). Restituisce Promise con user o null. */
+function requireLoginForAction({
+  message = "Per aprire questo file è richiesto il login.",
+  registerHref,
+} = {}) {
+  const existing = ScoutStore.getCurrentUser();
+  if (existing) return Promise.resolve(existing);
+
+  const base =
+    document.querySelector("[data-auth-slot]")?.dataset.base ||
+    (location.pathname.includes("/sentiero") ? "../" : "");
+  const regUrl = registerHref || `${base}area-personale/register.html`;
+
+  return new Promise((resolve) => {
+    let dialog = document.getElementById("login-required-dialog");
+    if (!dialog) {
+      dialog = document.createElement("dialog");
+      dialog.id = "login-required-dialog";
+      dialog.className = "login-dialog";
+      document.body.appendChild(dialog);
+    }
+
+    dialog.innerHTML = `
+      <form method="dialog" class="login-dialog-form" id="login-required-form">
+        <h2>Accesso richiesto</h2>
+        <p class="lead">${escapeHtml(message)}</p>
+        <div id="login-required-alert" class="alert alert-error" hidden></div>
+        <label>
+          Email
+          <input type="email" name="email" required autocomplete="username">
+        </label>
+        <label>
+          Password
+          <input type="password" name="password" required autocomplete="current-password" minlength="6">
+        </label>
+        <div class="inline-actions" style="margin-top:.35rem">
+          <button type="submit" class="btn btn-primary">Accedi</button>
+          <button type="button" class="btn btn-ghost" data-login-cancel>Annulla</button>
+        </div>
+        <p class="form-note" style="margin-bottom:0">
+          Non hai un account? <a href="${escapeHtml(regUrl)}">Crea account</a>
+        </p>
+      </form>
+    `;
+
+    const form = dialog.querySelector("#login-required-form");
+    const alertBox = dialog.querySelector("#login-required-alert");
+    let settled = false;
+
+    function finish(user) {
+      if (settled) return;
+      settled = true;
+      try {
+        dialog.close();
+      } catch {
+        /* ignore */
+      }
+      resolve(user);
+    }
+
+    dialog.querySelector("[data-login-cancel]")?.addEventListener("click", () => finish(null));
+    dialog.addEventListener(
+      "cancel",
+      (e) => {
+        e.preventDefault();
+        finish(null);
+      },
+      { once: true }
+    );
+
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      const btn = form.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = true;
+      try {
+        const user = await ScoutStore.loginStaff({
+          email: data.get("email"),
+          password: data.get("password"),
+        });
+        if (typeof updateNavAuth === "function") updateNavAuth();
+        finish(user);
+      } catch (err) {
+        if (alertBox) {
+          alertBox.hidden = false;
+          alertBox.textContent = err.message || "Accesso non riuscito.";
+        }
+        if (btn) btn.disabled = false;
+      }
+    });
+
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else {
+      alert(message + " Accedi dall’area Accedi in alto.");
+      finish(null);
+    }
+  });
 }
 
 function socialIconFb() {

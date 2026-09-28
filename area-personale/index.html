@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Area personale · Firenze 1</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html" data-home-link data-home-base="../">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="section">
+    <div class="container" style="max-width:640px">
+      <div class="staff-hero" style="margin-bottom:1.25rem">
+        <div>
+          <h1>Area personale</h1>
+          <p class="hint" id="personale-meta">Il tuo profilo esploratore / guida.</p>
+        </div>
+      </div>
+
+      <section class="panel" id="personale-card">
+        <p class="hint">Caricamento…</p>
+      </section>
+
+      <div class="inline-actions" style="margin-top:1.1rem; gap:.6rem; flex-wrap:wrap">
+        <a class="btn btn-primary" href="../sentiero/">Apri Sentiero</a>
+        <a class="btn btn-ghost" href="../index.html?branca=reparto">Torna al reparto</a>
+        <button type="button" class="btn btn-ghost" id="personale-logout">Esci</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/cloud-sync.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/branch-view.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = ScoutStore.getCurrentUser();
+      if (!user) {
+        location.href = "./login.html";
+        return;
+      }
+      if (ScoutStore.isStaffUser(user)) {
+        location.href = "../staff/";
+        return;
+      }
+
+      const card = document.getElementById("personale-card");
+      const birth = user.dataNascita
+        ? new Date(user.dataNascita + "T12:00:00").toLocaleDateString("it-IT")
+        : "—";
+      card.innerHTML = `
+        <h2 style="margin-top:0">${escapeHtml(user.nome)} ${escapeHtml(user.cognome)}</h2>
+        <ul class="home-tile-list" style="margin:0">
+          <li><strong>Squadriglia:</strong> ${escapeHtml(user.squadriglia || "—")}</li>
+          <li><strong>Data di nascita:</strong> ${escapeHtml(birth)}</li>
+          <li><strong>Email:</strong> ${escapeHtml(user.email)}</li>
+        </ul>
+        <p class="hint" style="margin-top:1rem;margin-bottom:0">
+          Con questo account puoi aprire libretto e specialità nella pagina Sentiero.
+        </p>
+      `;
+
+      document.getElementById("personale-logout")?.addEventListener("click", () => {
+        ScoutStore.logout();
+        location.href = "../index.html";
+      });
+    });
+  </script>
+</body>
+</html>

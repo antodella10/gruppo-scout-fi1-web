@@ -8,6 +8,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let libretto = null;
 
+  async function ensureLoggedIn() {
+    if (typeof requireLoginForAction !== "function") {
+      if (!ScoutStore.getCurrentUser()) {
+        alert("Per aprire questo file è richiesto il login.");
+        return null;
+      }
+      return ScoutStore.getCurrentUser();
+    }
+    return requireLoginForAction({
+      message: "Per aprire questo file è richiesto il login.",
+    });
+  }
+
+  async function openProtectedPdf(item) {
+    const user = await ensureLoggedIn();
+    if (!user) return;
+    await SentieroStore.openPdf(item);
+  }
+
   async function renderLibretto() {
     libretto = await SentieroStore.getLibretto();
     if (!libretto) {
@@ -61,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
   libOpen?.addEventListener("click", async () => {
     try {
       const item = libretto || (await SentieroStore.getLibretto());
-      await SentieroStore.openPdf(item);
+      await openProtectedPdf(item);
     } catch (err) {
       alert(err.message || "Impossibile aprire il libretto.");
     }
@@ -73,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const list = await SentieroStore.getSpecialita();
       const item = list.find((x) => x.id === card.dataset.id);
-      await SentieroStore.openPdf(item);
+      await openProtectedPdf(item);
     } catch (err) {
       alert(err.message || "Impossibile aprire il PDF.");
     }

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crea account · Firenze 1</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html" data-home-link data-home-base="../">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="auth-page">
+    <div class="auth-card auth-card-wide">
+      <h1>Crea account</h1>
+      <p class="lead">
+        Scegli il tipo di account. La richiesta viene approvata dallo staff
+        dall’area <strong>Richieste account</strong>.
+      </p>
+      <div id="auth-alert" class="alert alert-error" hidden></div>
+
+      <div class="role-picker" role="radiogroup" aria-label="Tipo account">
+        <button type="button" class="role-pick is-active" data-role="ragazzo" aria-pressed="true">
+          Esploratore / guida
+        </button>
+        <button type="button" class="role-pick role-pick-staff" data-role="staff" aria-pressed="false">
+          Staff
+        </button>
+      </div>
+
+      <form id="register-unified-form" class="form-grid">
+        <input type="hidden" name="role" id="register-role" value="ragazzo">
+        <div class="form-row-2">
+          <label>
+            Nome
+            <input type="text" name="nome" required autocomplete="given-name">
+          </label>
+          <label>
+            Cognome
+            <input type="text" name="cognome" required autocomplete="family-name">
+          </label>
+        </div>
+        <label>
+          Data di nascita
+          <input type="date" name="dataNascita" required>
+        </label>
+        <label id="squadriglia-field">
+          Squadriglia
+          <input type="text" name="squadriglia" placeholder="Es. Aquile, Lupi…" autocomplete="organization">
+        </label>
+        <label id="branca-field" hidden>
+          Branca
+          <select name="branca">
+            <option value="" disabled selected>Seleziona…</option>
+            <option value="branco">Branco</option>
+            <option value="reparto">Reparto</option>
+            <option value="noviziato">Noviziato</option>
+            <option value="clan">Clan</option>
+          </select>
+        </label>
+        <label>
+          Email
+          <input type="email" name="email" required autocomplete="username">
+        </label>
+        <label>
+          Password
+          <input type="password" name="password" required autocomplete="new-password" minlength="6" placeholder="Minimo 6 caratteri">
+        </label>
+        <button class="btn btn-primary" type="submit">Invia richiesta</button>
+      </form>
+      <p class="form-note">Hai già un account? <a href="login.html">Accedi</a></p>
+    </div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/cloud-sync.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/branch-view.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>
