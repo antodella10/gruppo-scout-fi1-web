@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestione sentieri · Staff</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html" data-home-link data-home-base="../">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="staff-shell">
+    <div class="container">
+      <div class="staff-hero">
+        <div>
+          <h1>Gestione sentieri</h1>
+          <p id="staff-meta" data-static="1">Assegna classi e specialità ai repartari.</p>
+        </div>
+        <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
+      </div>
+
+      <div id="sentieri-status" class="alert alert-ok" hidden></div>
+
+      <div class="gestione-sentieri-layout">
+        <section class="panel">
+          <h2 style="margin-top:0">Repartari</h2>
+          <div id="sentieri-list"></div>
+        </section>
+
+        <section class="panel" id="sentieri-editor" hidden>
+          <h2 style="margin-top:0" id="sentieri-editor-title">Dettaglio</h2>
+          <label>
+            Classe attuale
+            <select id="sentieri-classe">
+              <option value="">Nessuna</option>
+            </select>
+          </label>
+          <div style="margin-top:1rem">
+            <h3 style="margin:0 0 .55rem;font-size:1rem">Specialità</h3>
+            <p class="hint">Placeholder: aggungi nome e stato. Poi arriveranno le icone dal catalogo Sentiero.</p>
+            <div id="sentieri-specs"></div>
+            <div class="inline-actions" style="margin-top:.75rem">
+              <button type="button" class="btn btn-ghost btn-small" id="sentieri-add-spec">+ Specialità</button>
+            </div>
+          </div>
+          <div class="inline-actions" style="margin-top:1.1rem">
+            <button type="button" class="btn btn-primary" id="sentieri-save">Salva</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/cloud-sync.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/canzoniere-store.js"></script>
+  <script src="../js/shop-store.js"></script>
+  <script src="../js/staff-notifs.js"></script>
+  <script src="../js/branch-view.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/staff-shell.js"></script>
+  <script src="../js/staff-gestione-sentieri.js"></script>
+</body>
+</html>

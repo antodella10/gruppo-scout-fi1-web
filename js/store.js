@@ -151,6 +151,81 @@ const ScoutStore = (() => {
     return canManageStaffRequests(user) || canManageRagazziRequests(user);
   }
 
+  function canManageSentieri(user) {
+    return canManageRagazziRequests(user);
+  }
+
+  const CLASSI_SENTIERO = [
+    { id: "promessa", label: "Promessa", glow: "green" },
+    { id: "seconda", label: "Seconda classe", glow: "orange" },
+    { id: "prima", label: "Prima classe", glow: "purple" },
+    { id: "scelto", label: "Scelto", glow: "rainbow" },
+  ];
+
+  function classeIndex(id) {
+    return CLASSI_SENTIERO.findIndex((c) => c.id === id);
+  }
+
+  function normalizeProgress(user) {
+    const classe = CLASSI_SENTIERO.some((c) => c.id === user?.classe) ? user.classe : null;
+    const specialita = Array.isArray(user?.specialita)
+      ? user.specialita
+          .map((s) => ({
+            id: String(s.id || ""),
+            name: String(s.name || s.title || "").trim() || "Specialità",
+            status: s.status === "pending" || s.earned === false ? "pending" : "earned",
+          }))
+          .filter((s) => s.id)
+      : [];
+    return { classe, specialita };
+  }
+
+  /** Classi ottenute: dalla più recente (sinistra) alla più vecchia (destra). */
+  function classiOttenuteDisplay(classeId) {
+    const idx = classeIndex(classeId);
+    if (idx < 0) return [];
+    return CLASSI_SENTIERO.slice(0, idx + 1)
+      .slice()
+      .reverse()
+      .map((c, i) => ({ ...c, isLatest: i === 0 }));
+  }
+
+  function getRagazzoProgress(userOrId) {
+    const user =
+      typeof userOrId === "string" ? getUsers().find((u) => u.id === userOrId) : userOrId;
+    if (!user || accountRole(user) !== ROLE_RAGAZZO) return { classe: null, specialita: [] };
+    return normalizeProgress(user);
+  }
+
+  async function updateRagazzoProgress(ragazzoId, patch, viewer) {
+    if (!canManageSentieri(viewer)) {
+      throw new Error("Solo staff reparto o admin possono gestire i sentieri.");
+    }
+    const users = getUsers();
+    const idx = users.findIndex((u) => u.id === ragazzoId && accountRole(u) === ROLE_RAGAZZO);
+    if (idx < 0) throw new Error("Account non trovato.");
+    const current = normalizeProgress(users[idx]);
+    let classe = current.classe;
+    if (patch && "classe" in patch) {
+      const next = patch.classe;
+      if (next === null || next === "") classe = null;
+      else if (classeIndex(next) < 0) throw new Error("Classe non valida.");
+      else classe = next;
+    }
+    let specialita = current.specialita;
+    if (patch && Array.isArray(patch.specialita)) {
+      specialita = patch.specialita.map((s) => ({
+        id: String(s.id || uid("specprog")),
+        name: String(s.name || "").trim() || "Specialità",
+        status: s.status === "pending" ? "pending" : "earned",
+      }));
+    }
+    users[idx] = { ...users[idx], classe, specialita };
+    saveUsers(users);
+    await pushRemoteAccounts();
+    return normalizeProgress(users[idx]);
+  }
+
   function getSession() {
     return read(KEYS.session, null);
   }
@@ -381,6 +456,7 @@ const ScoutStore = (() => {
         dataNascita: u.dataNascita || "",
         createdAt: u.createdAt || null,
         approvedAt: u.approvedAt || null,
+        ...normalizeProgress(u),
       }))
       .sort((a, b) => {
         const sq = (a.squadriglia || "").localeCompare(b.squadriglia || "", "it");
@@ -1134,6 +1210,11 @@ const ScoutStore = (() => {
     canManageStaffRequests,
     canManageRagazziRequests,
     canOpenAccountRequests,
+    canManageSentieri,
+    CLASSI_SENTIERO,
+    classiOttenuteDisplay,
+    getRagazzoProgress,
+    updateRagazzoProgress,
     normalizeBrancaId,
     branchLabel,
     scopeLabel,

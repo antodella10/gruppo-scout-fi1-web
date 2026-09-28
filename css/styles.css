@@ -3262,3 +3262,214 @@ body.gallery-lb-open {
     grid-column: 1 / -1;
   }
 }
+
+/* —— Area personale / sentiero progress —— */
+.personale-page {
+  padding-top: 1.25rem;
+}
+
+.personale-hero.staff-hero {
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.personale-identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.personale-name {
+  margin: 0;
+  font-size: clamp(1.35rem, 4vw, 1.85rem);
+  color: var(--green-deep);
+  line-height: 1.15;
+}
+
+.personale-squad {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-weight: 650;
+}
+
+.personale-squad-icon {
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 14px;
+  border: 1.5px dashed rgba(31, 122, 58, 0.35);
+  background: var(--green-soft);
+  display: grid;
+  place-items: center;
+  color: var(--green-deep);
+  font-weight: 800;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+.personale-block-title {
+  margin: 0 0 0.85rem;
+  font-size: 1.15rem;
+  color: var(--green-deep);
+}
+
+.classi-track {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.35rem 0.15rem 0.55rem;
+}
+
+.classe-badge {
+  flex: 0 0 auto;
+  width: 5.6rem;
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  text-align: center;
+}
+
+.classe-badge-icon {
+  width: 4.4rem;
+  height: 4.4rem;
+  border-radius: 18px;
+  border: 2px solid var(--line);
+  background:
+    linear-gradient(145deg, #f4faf5, #e7f0ea);
+  position: relative;
+  box-shadow: 0 8px 18px rgba(20, 85, 40, 0.08);
+}
+
+.classe-badge-icon::after {
+  content: "";
+  position: absolute;
+  inset: 18%;
+  border-radius: 10px;
+  background: rgba(31, 122, 58, 0.18);
+}
+
+.classe-badge-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.classe-badge.is-placeholder {
+  opacity: 0.42;
+}
+
+.classe-badge.is-latest .classe-badge-icon {
+  border-width: 2.5px;
+}
+
+.classe-badge.glow-green .classe-badge-icon {
+  border-color: #1f7a3a;
+  box-shadow:
+    0 0 0 3px rgba(31, 122, 58, 0.2),
+    0 0 22px rgba(31, 122, 58, 0.55);
+}
+
+.classe-badge.glow-orange .classe-badge-icon {
+  border-color: #e67a22;
+  box-shadow:
+    0 0 0 3px rgba(230, 122, 34, 0.22),
+    0 0 22px rgba(230, 122, 34, 0.55);
+}
+
+.classe-badge.glow-purple .classe-badge-icon {
+  border-color: #7b3fe4;
+  box-shadow:
+    0 0 0 3px rgba(123, 63, 228, 0.22),
+    0 0 22px rgba(123, 63, 228, 0.55);
+}
+
+.classe-badge.glow-rainbow .classe-badge-icon {
+  border-color: transparent;
+  background:
+    linear-gradient(#f4faf5, #e7f0ea) padding-box,
+    linear-gradient(135deg, #ff4d4d, #ffb020, #ffe566, #3ddc84, #4da3ff, #b46bff, #ff4d4d) border-box;
+  border: 2.5px solid transparent;
+  box-shadow:
+    0 0 0 3px rgba(180, 107, 255, 0.18),
+    0 0 26px rgba(255, 176, 32, 0.45),
+    0 0 34px rgba(77, 163, 255, 0.35);
+}
+
+.spec-progress-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.spec-progress-item {
+  width: 4.6rem;
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.spec-progress-icon {
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: radial-gradient(circle at 35% 30%, #fff, #e8f3eb);
+  box-shadow: 0 6px 14px rgba(20, 85, 40, 0.1);
+}
+
+.spec-progress-item.is-pending .spec-progress-icon {
+  filter: grayscale(1);
+  opacity: 0.72;
+  background: radial-gradient(circle at 35% 30%, #f4f4f4, #d9d9d9);
+}
+
+.spec-progress-name {
+  font-size: 0.68rem;
+  font-weight: 650;
+  color: var(--muted);
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gestione-sentieri-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.1rem;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .gestione-sentieri-layout {
+    grid-template-columns: 0.95fr 1.05fr;
+  }
+}
+
+.sentieri-pick {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  font: inherit;
+}
+
+.sentieri-pick.is-active {
+  background: var(--green-soft);
+  border-radius: 14px;
+}
+
+.sentieri-spec-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.45rem;
+  margin-bottom: 0.45rem;
+  align-items: center;
+}

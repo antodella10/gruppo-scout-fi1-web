@@ -49,6 +49,9 @@ window.StaffShell = (() => {
         ? { id: "canzoniere", href: "./canzoniere.html", label: "Canzoniere reparto", badge: c.songs }
         : null,
       canSentiero(user) ? { id: "sentiero", href: "./sentiero.html", label: "Sentiero / specialità" } : null,
+      ScoutStore.canManageSentieri?.(user)
+        ? { id: "gestione-sentieri", href: "./gestione-sentieri.html", label: "Gestione sentieri" }
+        : null,
       { id: "galleria", href: "./galleria.html", label: "Gestione galleria" },
       admin ? { id: "notizie", href: "./notizie.html", label: "Gestione notizie" } : null,
       admin ? { id: "iscrizioni", href: "./iscrizioni.html", label: "Form iscrizioni" } : null,
@@ -181,7 +184,7 @@ window.StaffShell = (() => {
     applyMenuBadges(user);
   }
 
-  function boot({ active = "home", requireAdmin = false, requireAccountRequests = false } = {}) {
+  function boot({ active = "home", requireAdmin = false, requireAccountRequests = false, requireSentieri = false } = {}) {
     const user = requireUser();
     if (!user) return null;
     if (requireAdmin && !isAdmin(user)) {
@@ -189,6 +192,10 @@ window.StaffShell = (() => {
       return null;
     }
     if (requireAccountRequests && !canAccountRequests(user)) {
+      location.href = "./index.html";
+      return null;
+    }
+    if (requireSentieri && !ScoutStore.canManageSentieri?.(user)) {
       location.href = "./index.html";
       return null;
     }

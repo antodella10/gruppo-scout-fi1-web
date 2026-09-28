@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dati personali · Firenze 1</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html" data-home-link data-home-base="../">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="section personale-page">
+    <div class="container" style="max-width:640px">
+      <div class="personale-hero staff-hero">
+        <div>
+          <h1>Dati personali</h1>
+          <p class="hint">I dati del tuo account.</p>
+        </div>
+      </div>
+
+      <section class="panel" id="dati-card">
+        <p class="hint">Caricamento…</p>
+      </section>
+    </div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/cloud-sync.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/branch-view.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/personale-shell.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = PersonaleShell.boot({ active: "dati" });
+      if (!user) return;
+      const birth = user.dataNascita
+        ? new Date(user.dataNascita + "T12:00:00").toLocaleDateString("it-IT")
+        : "—";
+      document.getElementById("dati-card").innerHTML = `
+        <ul class="home-tile-list" style="margin:0">
+          <li><strong>Nome:</strong> ${escapeHtml(user.nome || "—")}</li>
+          <li><strong>Cognome:</strong> ${escapeHtml(user.cognome || "—")}</li>
+          <li><strong>Data di nascita:</strong> ${escapeHtml(birth)}</li>
+          <li><strong>Squadriglia:</strong> ${escapeHtml(user.squadriglia || "—")}</li>
+          <li><strong>Email:</strong> ${escapeHtml(user.email || "—")}</li>
+        </ul>
+      `;
+    });
+  </script>
+</body>
+</html>

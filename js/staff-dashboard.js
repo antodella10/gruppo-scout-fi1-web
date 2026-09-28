@@ -96,6 +96,19 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    if (ScoutStore.canManageSentieri?.(user)) {
+      const nRagazzi = ScoutStore.listRagazziAccounts(user).length;
+      tiles.push({
+        id: "gestione-sentieri",
+        href: "./gestione-sentieri.html",
+        title: "Gestione sentieri",
+        hint: "Classi e specialità dei repartari.",
+        preview: nRagazzi
+          ? `<strong>${nRagazzi}</strong> repartari`
+          : "Nessun repartaro ancora",
+      });
+    }
+
     if (isAdmin) {
       tiles.push({
         id: "notizie",
