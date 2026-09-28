@@ -10,10 +10,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const pendingRagazziList = document.getElementById("pending-ragazzi-list");
   const accountsRagazziList = document.getElementById("accounts-ragazzi-list");
 
-  document.getElementById("section-staff-pending").hidden = !canStaff;
-  document.getElementById("section-staff-accounts").hidden = !canStaff;
-  document.getElementById("section-ragazzi-pending").hidden = !canRagazzi;
-  document.getElementById("section-ragazzi-accounts").hidden = !canRagazzi;
+  document.getElementById("section-staff").hidden = !canStaff;
+  document.getElementById("section-ragazzi").hidden = !canRagazzi;
+  document.getElementById("section-staff")?.classList.toggle("is-hidden", !canStaff);
+  document.getElementById("section-ragazzi")?.classList.toggle("is-hidden", !canRagazzi);
+  document
+    .querySelector(".account-requests-grid")
+    ?.classList.toggle("is-single", !(canStaff && canRagazzi));
 
   function formatDate(iso) {
     if (!iso) return "";

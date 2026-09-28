@@ -963,6 +963,54 @@ select:focus {
   padding: 2rem 0 3rem;
 }
 
+.account-requests-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.1rem;
+  align-items: start;
+}
+
+.account-requests-col {
+  min-width: 0;
+}
+
+.account-requests-title {
+  margin: 0 0 1rem;
+  font-size: 1.35rem;
+}
+
+.account-requests-title-staff {
+  color: #6b2a3a;
+}
+
+.account-requests-title-ragazzi {
+  color: var(--green-deep);
+}
+
+.account-requests-block + .account-requests-block {
+  margin-top: 1.25rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid var(--line);
+}
+
+.account-requests-block h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.02rem;
+  color: var(--ink);
+}
+
+@media (min-width: 900px) {
+  .account-requests-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  .account-requests-grid.is-single {
+    grid-template-columns: 1fr;
+    max-width: 560px;
+  }
+}
+
 .staff-hero {
   display: flex;
   flex-wrap: wrap;

@@ -23,33 +23,40 @@
       <div class="staff-hero">
         <div>
           <h1>Richieste account</h1>
-          <p id="staff-meta" data-static="1">Approva o rifiuta le registrazioni di staff e repartari.</p>
+          <p id="staff-meta" data-static="1">Staff e repartari.</p>
         </div>
         <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
       </div>
 
-      <section class="panel" id="section-staff-pending">
-        <h2 style="margin-top:0">Staff · in attesa</h2>
-        <div id="pending-staff-list"></div>
-      </section>
+      <div class="account-requests-grid">
+        <section class="panel account-requests-col" id="section-staff">
+          <h2 class="account-requests-title account-requests-title-staff">Staff</h2>
 
-      <section class="panel" style="margin-top:1.1rem" id="section-staff-accounts">
-        <h2 style="margin-top:0">Account staff</h2>
-        <p class="hint">Account staff attivi. L’admin principale resta protetto.</p>
-        <div id="accounts-staff-list"></div>
-      </section>
+          <div class="account-requests-block">
+            <h3>In attesa</h3>
+            <div id="pending-staff-list"></div>
+          </div>
 
-      <section class="panel" style="margin-top:1.1rem" id="section-ragazzi-pending">
-        <h2 style="margin-top:0">Repartari · in attesa</h2>
-        <p class="hint">Esploratori e guide che hanno richiesto un account.</p>
-        <div id="pending-ragazzi-list"></div>
-      </section>
+          <div class="account-requests-block">
+            <h3>Account attivi</h3>
+            <div id="accounts-staff-list"></div>
+          </div>
+        </section>
 
-      <section class="panel" style="margin-top:1.1rem" id="section-ragazzi-accounts">
-        <h2 style="margin-top:0">Account repartari</h2>
-        <p class="hint">Account esploratori/guide approvati.</p>
-        <div id="accounts-ragazzi-list"></div>
-      </section>
+        <section class="panel account-requests-col" id="section-ragazzi">
+          <h2 class="account-requests-title account-requests-title-ragazzi">Repartari</h2>
+
+          <div class="account-requests-block">
+            <h3>In attesa</h3>
+            <div id="pending-ragazzi-list"></div>
+          </div>
+
+          <div class="account-requests-block">
+            <h3>Account attivi</h3>
+            <div id="accounts-ragazzi-list"></div>
+          </div>
+        </section>
+      </div>
     </div>
   </main>
 
