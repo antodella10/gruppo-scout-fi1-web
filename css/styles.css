@@ -867,6 +867,11 @@ label {
   font-size: 0.92rem;
 }
 
+[hidden],
+.is-hidden {
+  display: none !important;
+}
+
 input,
 textarea,
 select {

@@ -32,9 +32,15 @@ document.addEventListener("DOMContentLoaded", () => {
   function syncAdminFields() {
     if (!emailInput || !brancaField || !brancaSelect) return;
     const role = roleInput?.value || "staff";
-    if (role !== "staff") return;
+    if (role !== "staff") {
+      brancaField.hidden = true;
+      brancaField.classList.add("is-hidden");
+      brancaSelect.required = false;
+      return;
+    }
     const admin = ScoutStore.isAdminEmail(emailInput.value);
     brancaField.hidden = admin;
+    brancaField.classList.toggle("is-hidden", admin);
     brancaSelect.required = !admin;
     if (admin) brancaSelect.value = "";
   }
@@ -48,14 +54,19 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.setAttribute("aria-pressed", on ? "true" : "false");
     });
     const isStaff = role === "staff";
-    if (squadrigliaField) squadrigliaField.hidden = isStaff;
+    if (squadrigliaField) {
+      squadrigliaField.hidden = isStaff;
+      squadrigliaField.classList.toggle("is-hidden", isStaff);
+    }
     if (squadrigliaInput) {
       squadrigliaInput.required = !isStaff;
       if (isStaff) squadrigliaInput.value = "";
     }
     if (brancaField) {
       const admin = emailInput && ScoutStore.isAdminEmail(emailInput.value);
-      brancaField.hidden = !isStaff || !!admin;
+      const hideBranca = !isStaff || !!admin;
+      brancaField.hidden = hideBranca;
+      brancaField.classList.toggle("is-hidden", hideBranca);
       if (brancaSelect) {
         brancaSelect.required = isStaff && !admin;
         if (!isStaff) brancaSelect.value = "";
@@ -114,9 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (result.pendingApproval) {
-        showOk(
-          "Richiesta inviata. L’admin dovrà approvarla dall’area richieste account. Poi potrai accedere."
-        );
+        showOk("Richiesta inviata. Riceverai una conferma quando l’account sarà attivo.");
         registerForm.reset();
         syncAdminFields();
         return;
@@ -143,9 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
         email: data.get("email"),
         password: data.get("password"),
       });
-      showOk(
-        "Richiesta inviata. Quando lo staff la approva potrai accedere e aprire i file del Sentiero."
-      );
+      showOk("Richiesta inviata. Riceverai una conferma quando l’account sarà attivo.");
       registerRagazzoForm.reset();
     } catch (err) {
       showError(err.message || "Registrazione non riuscita.");
@@ -172,9 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
           branca: data.get("branca"),
         });
         if (result.pendingApproval) {
-          showOk(
-            "Richiesta staff inviata. Dopo l’approvazione riceverai una email e potrai accedere all’area staff."
-          );
+          showOk("Richiesta inviata. Riceverai una conferma quando l’account sarà attivo.");
           registerUnifiedForm.reset();
           setRegisterRole("staff");
           return;
@@ -191,9 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
         email: data.get("email"),
         password: data.get("password"),
       });
-      showOk(
-        "Richiesta inviata. Dopo l’approvazione riceverai una email e potrai aprire i file del Sentiero."
-      );
+      showOk("Richiesta inviata. Riceverai una conferma quando l’account sarà attivo.");
       registerUnifiedForm.reset();
       setRegisterRole("ragazzo");
     } catch (err) {

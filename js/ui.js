@@ -535,7 +535,7 @@ function requireLoginForAction({
 
     if (typeof dialog.showModal === "function") dialog.showModal();
     else {
-      alert(message + " Accedi dall’area Accedi in alto.");
+      alert(message);
       finish(null);
     }
   });
@@ -629,7 +629,7 @@ function renderSocialFull(container) {
     }
   });
   if (!items.length) {
-    container.innerHTML = `<p class="hint" style="margin:0">Social non ancora configurati.</p>`;
+    container.innerHTML = `<p class="hint" style="margin:0">Presto i link social.</p>`;
     return;
   }
   container.innerHTML = `

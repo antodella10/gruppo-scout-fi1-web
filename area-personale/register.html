@@ -21,10 +21,7 @@
   <main class="auth-page">
     <div class="auth-card auth-card-wide">
       <h1>Crea account</h1>
-      <p class="lead">
-        Scegli il tipo di account. La richiesta viene approvata dallo staff
-        dall’area <strong>Richieste account</strong>.
-      </p>
+      <p class="lead">Scegli il tipo di account e compila i dati.</p>
       <div id="auth-alert" class="alert alert-error" hidden></div>
 
       <div class="role-picker" role="radiogroup" aria-label="Tipo account">
@@ -54,9 +51,9 @@
         </label>
         <label id="squadriglia-field">
           Squadriglia
-          <input type="text" name="squadriglia" placeholder="Es. Aquile, Lupi…" autocomplete="organization">
+          <input type="text" name="squadriglia" autocomplete="organization">
         </label>
-        <label id="branca-field" hidden>
+        <label id="branca-field" class="is-hidden" hidden>
           Branca
           <select name="branca">
             <option value="" disabled selected>Seleziona…</option>
@@ -72,7 +69,7 @@
         </label>
         <label>
           Password
-          <input type="password" name="password" required autocomplete="new-password" minlength="6" placeholder="Minimo 6 caratteri">
+          <input type="password" name="password" required autocomplete="new-password" minlength="6">
         </label>
         <button class="btn btn-primary" type="submit">Invia richiesta</button>
       </form>

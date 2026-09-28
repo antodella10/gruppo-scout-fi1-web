@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!bookFrame && !bookEmpty && !bookViewer) return;
 
     if (!book) {
-      showEmpty("Il canzoniere non è ancora stato caricato dallo staff.");
+      showEmpty("Il canzoniere non è ancora disponibile.");
       if (bookMeta) bookMeta.textContent = "Reparto · nessun PDF";
       return;
     }
@@ -323,7 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (proposeAlert) {
         proposeAlert.hidden = false;
         proposeAlert.className = "alert alert-ok";
-        proposeAlert.textContent = "Proposta inviata! Lo staff reparto la vedrà nelle notifiche.";
+        proposeAlert.textContent = "Proposta inviata!";
       }
       updateNavAuth();
     } catch (err) {

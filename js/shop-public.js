@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (orderAlert) {
         orderAlert.hidden = false;
         orderAlert.className = "alert alert-ok";
-        orderAlert.textContent = "Richiesta inviata! L’admin la vedrà nell’area negozio.";
+        orderAlert.textContent = "Richiesta inviata!";
       }
       window.setTimeout(() => {
         if (typeof dialog?.close === "function") dialog.close();
