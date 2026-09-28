@@ -44,14 +44,22 @@
               <option value="">Nessuna</option>
             </select>
           </label>
-          <div style="margin-top:1rem">
-            <h3 style="margin:0 0 .55rem;font-size:1rem">Specialità</h3>
-            <p class="hint">Placeholder: aggungi nome e stato. Poi arriveranno le icone dal catalogo Sentiero.</p>
+          <p class="hint" id="sentieri-classe-hint" style="margin:.45rem 0 0"></p>
+
+          <div style="margin-top:1.15rem">
+            <h3 style="margin:0 0 .55rem;font-size:1rem">Specialità assegnate</h3>
             <div id="sentieri-specs"></div>
-            <div class="inline-actions" style="margin-top:.75rem">
-              <button type="button" class="btn btn-ghost btn-small" id="sentieri-add-spec">+ Specialità</button>
-            </div>
           </div>
+
+          <div style="margin-top:1.15rem">
+            <h3 style="margin:0 0 .55rem;font-size:1rem">Aggiungi dal database</h3>
+            <label>
+              Cerca
+              <input type="search" id="sentieri-spec-search" placeholder="Nome specialità…" autocomplete="off">
+            </label>
+            <div id="sentieri-spec-catalog" class="sentieri-spec-catalog"></div>
+          </div>
+
           <div class="inline-actions" style="margin-top:1.1rem">
             <button type="button" class="btn btn-primary" id="sentieri-save">Salva</button>
           </div>
@@ -63,6 +71,7 @@
   <script src="../js/config.js"></script>
   <script src="../js/cloud-sync.js"></script>
   <script src="../js/store.js"></script>
+  <script src="../js/sentiero-store.js"></script>
   <script src="../js/canzoniere-store.js"></script>
   <script src="../js/shop-store.js"></script>
   <script src="../js/staff-notifs.js"></script>

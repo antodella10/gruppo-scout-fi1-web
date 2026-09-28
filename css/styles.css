@@ -3376,6 +3376,38 @@ body.gallery-lb-open {
   font-size: 0.8rem;
 }
 
+.classe-badge.glow-soft-green .classe-badge-icon {
+  border-color: #1f7a3a;
+  box-shadow:
+    0 0 0 2px rgba(31, 122, 58, 0.14),
+    0 0 12px rgba(31, 122, 58, 0.28);
+}
+
+.classe-badge.glow-soft-orange .classe-badge-icon {
+  border-color: #e67a22;
+  box-shadow:
+    0 0 0 2px rgba(230, 122, 34, 0.14),
+    0 0 12px rgba(230, 122, 34, 0.28);
+}
+
+.classe-badge.glow-soft-purple .classe-badge-icon {
+  border-color: #7b3fe4;
+  box-shadow:
+    0 0 0 2px rgba(123, 63, 228, 0.14),
+    0 0 12px rgba(123, 63, 228, 0.28);
+}
+
+.classe-badge.glow-soft-rainbow .classe-badge-icon {
+  border-color: transparent;
+  background:
+    linear-gradient(#f4faf5, #e7f0ea) padding-box,
+    linear-gradient(135deg, #ff4d4d, #ffb020, #ffe566, #3ddc84, #4da3ff, #b46bff, #ff4d4d) border-box;
+  border: 2px solid transparent;
+  box-shadow:
+    0 0 0 2px rgba(180, 107, 255, 0.12),
+    0 0 14px rgba(255, 176, 32, 0.22);
+}
+
 .classe-badge.is-latest.glow-green .classe-badge-icon {
   border-color: #1f7a3a;
   animation: glow-pulse-green 1.8s ease-in-out infinite;
@@ -3533,4 +3565,29 @@ body.gallery-lb-open {
   gap: 0.45rem;
   margin-bottom: 0.45rem;
   align-items: center;
+}
+
+.sentieri-spec-name {
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+
+.sentieri-spec-catalog {
+  margin-top: 0.65rem;
+  max-height: 260px;
+  overflow: auto;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.sentieri-catalog-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  font-size: 0.9rem;
 }

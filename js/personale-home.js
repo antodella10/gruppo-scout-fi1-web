@@ -34,7 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
         ${obtained
           .map(
             (c) => `
-          <div class="classe-badge ${c.isLatest ? `is-latest glow-${escapeHtml(c.glow)}` : ""}" role="listitem" data-classe="${escapeHtml(c.id)}">
+          <div class="classe-badge ${
+            c.isLatest ? `is-latest glow-${escapeHtml(c.glow)}` : `glow-soft-${escapeHtml(c.glow)}`
+          }" role="listitem" data-classe="${escapeHtml(c.id)}">
             <span class="classe-badge-icon" aria-hidden="true"></span>
             <span class="classe-badge-label">${escapeHtml(c.label)}</span>
           </div>`
