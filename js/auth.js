@@ -35,6 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
       el.hidden = true;
       el.classList.add("is-hidden");
     });
+    const title = document.querySelector(".auth-card h1");
+    if (title) title.textContent = "Richiesta inviata";
     const done = document.getElementById("register-done-actions");
     if (done) {
       done.hidden = false;

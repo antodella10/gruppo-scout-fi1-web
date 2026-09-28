@@ -18,6 +18,16 @@ document.addEventListener("DOMContentLoaded", () => {
     .querySelector(".account-requests-grid")
     ?.classList.toggle("is-single", !(canStaff && canRagazzi));
 
+  const statusEl = document.getElementById("richieste-status");
+
+  function showStatus(msg, kind = "ok") {
+    if (!statusEl) return;
+    statusEl.hidden = false;
+    statusEl.className = `alert alert-${kind === "error" ? "error" : "ok"}`;
+    statusEl.textContent = msg;
+    statusEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
   function formatDate(iso) {
     if (!iso) return "";
     try {
@@ -176,19 +186,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const mail = result?.emailNotify;
         if (mail?.sent) {
-          alert("Account approvato. Email di conferma inviata.");
+          showStatus("Account approvato. Email di conferma inviata.");
         } else if (mail?.skipped) {
-          alert(
-            "Account approvato. Email automatica non ancora configurata: avvisa tu la persona, oppure configura il webhook Gmail sul Worker."
-          );
+          showStatus("Account approvato. Email automatica non configurata: avvisa tu la persona.");
         } else if (mail?.error) {
-          alert(`Account approvato, ma l’email non è partita: ${mail.error}`);
+          showStatus(`Account approvato, ma l’email non è partita: ${mail.error}`, "error");
+        } else {
+          showStatus("Account approvato.");
         }
       }
       if (reject) {
         if (!confirm("Rifiutare questa richiesta?")) return;
         await ScoutStore.rejectPending(reject.dataset.reject, user);
         refreshAll();
+        showStatus("Richiesta rifiutata.");
       }
       if (delStaff) {
         const id = delStaff.dataset.delStaff;
