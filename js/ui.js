@@ -434,8 +434,13 @@ function updateNavAuth() {
           roleLabel ? `<span class="user-chip-role"> · ${escapeHtml(roleLabel)}</span>` : ""
         }${badge}
       </span>
-      <a class="btn btn-primary btn-small nav-area-btn" href="${areaHref}" data-label-full="${escapeHtml(areaLabel)}" data-label-short="${escapeHtml(areaShort)}">${areaLabel}</a>
-      <button type="button" class="btn btn-ghost btn-small" data-nav-logout>Esci</button>
+      <span class="nav-actions-btns">
+        <a class="btn btn-primary btn-small nav-area-btn" href="${areaHref}">
+          <span class="nav-area-full">${escapeHtml(areaLabel)}</span>
+          <span class="nav-area-short">${escapeHtml(areaShort)}</span>
+        </a>
+        <button type="button" class="btn btn-ghost btn-small" data-nav-logout>Esci</button>
+      </span>
     `;
     slot.querySelector("[data-nav-logout]")?.addEventListener("click", () => {
       ScoutStore.logout();
