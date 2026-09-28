@@ -89,9 +89,15 @@ const ScoutStore = (() => {
   function normalizeAccount(u) {
     if (!u) return u;
     const role = u.role === ROLE_RAGAZZO ? ROLE_RAGAZZO : ROLE_STAFF;
+    const email = String(u.email || "").trim().toLowerCase() || null;
+    const username = String(u.username || "")
+      .trim()
+      .toLowerCase() || null;
     return {
       ...u,
       role,
+      email,
+      username,
       branca: u.branca ? normalizeBrancaId(u.branca) : u.branca || null,
       squadriglia: u.squadriglia || null,
       dataNascita: u.dataNascita || null,
@@ -241,7 +247,8 @@ const ScoutStore = (() => {
       id: user.id,
       nome: user.nome,
       cognome: user.cognome,
-      email: user.email,
+      email: user.email || null,
+      username: user.username || null,
       role,
       branca: admin ? null : user.branca || null,
       squadriglia: user.squadriglia || null,
@@ -262,10 +269,62 @@ const ScoutStore = (() => {
     return user;
   }
 
+  function slugPart(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "")
+      .slice(0, 24);
+  }
+
+  function suggestUsername(nome, cognome) {
+    const a = slugPart(nome) || "nome";
+    const b = slugPart(cognome) || "cognome";
+    return `${a}.${b}`;
+  }
+
+  function normalizeUsername(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, ".");
+  }
+
   function emailTaken(normalized, { excludeId } = {}) {
+    if (!normalized) return false;
     const inUsers = getUsers().some((u) => u.email === normalized && u.id !== excludeId);
     const inPending = getPending().some((u) => u.email === normalized && u.id !== excludeId);
     return inUsers || inPending;
+  }
+
+  function usernameTaken(normalized, { excludeId } = {}) {
+    if (!normalized) return false;
+    const inUsers = getUsers().some((u) => u.username === normalized && u.id !== excludeId);
+    const inPending = getPending().some((u) => u.username === normalized && u.id !== excludeId);
+    return inUsers || inPending;
+  }
+
+  function findUserByLogin(login) {
+    const key = String(login || "").trim().toLowerCase();
+    if (!key) return null;
+    return (
+      getUsers().find((u) => u.email === key || u.username === key) || null
+    );
+  }
+
+  function findPendingByLogin(login) {
+    const key = String(login || "").trim().toLowerCase();
+    if (!key) return null;
+    return getPending().find((u) => u.email === key || u.username === key) || null;
+  }
+
+  function canOpenSpecialitaPdf(user, specialitaId) {
+    if (!user) return false;
+    if (isStaffUser(user)) return true;
+    if (!isRagazzoUser(user)) return false;
+    const progress = normalizeProgress(user);
+    return progress.specialita.some((s) => s.id === specialitaId);
   }
 
   function branchLabel(id) {
@@ -352,9 +411,18 @@ const ScoutStore = (() => {
     return { user: pendingUser, pendingApproval: true };
   }
 
-  async function registerRagazzo({ nome, cognome, dataNascita, squadriglia, email, password }) {
+  async function registerRagazzo({
+    nome,
+    cognome,
+    dataNascita,
+    squadriglia,
+    email,
+    username,
+    password,
+  }) {
     const pending = getPending();
-    const normalized = email.trim().toLowerCase();
+    const mail = String(email || "").trim().toLowerCase();
+    const userName = normalizeUsername(username);
     const sq = String(squadriglia || "").trim();
     const birth = String(dataNascita || "").trim();
 
@@ -370,14 +438,27 @@ const ScoutStore = (() => {
     if (!sq) {
       throw new Error("Inserisci la squadriglia.");
     }
-    if (isAdminEmail(normalized)) {
+    if (!mail && !userName) {
+      throw new Error("Inserisci un’email oppure uno username.");
+    }
+    if (mail && isAdminEmail(mail)) {
       throw new Error("Questa email è riservata all’admin staff.");
     }
-    if (emailTaken(normalized)) {
-      if (pending.some((u) => u.email === normalized)) {
+    if (mail && emailTaken(mail)) {
+      if (pending.some((u) => u.email === mail)) {
         throw new Error("C’è già una richiesta in attesa di approvazione per questa email.");
       }
       throw new Error("Esiste già un account con questa email.");
+    }
+    if (!mail) {
+      if (!/^[a-z0-9._-]{3,40}$/i.test(userName)) {
+        throw new Error("Username non valido (usa lettere, numeri, . _ -).");
+      }
+      if (usernameTaken(userName)) {
+        throw new Error("Questo username è già in uso.");
+      }
+    } else if (userName && usernameTaken(userName)) {
+      throw new Error("Questo username è già in uso.");
     }
 
     const pendingUser = {
@@ -387,7 +468,8 @@ const ScoutStore = (() => {
       cognome: cognome.trim(),
       dataNascita: birth,
       squadriglia: sq,
-      email: normalized,
+      email: mail || null,
+      username: userName || (mail ? null : suggestUsername(nome, cognome)),
       branca: "reparto",
       passwordHash: await hashPassword(password),
       createdAt: new Date().toISOString(),
@@ -452,6 +534,7 @@ const ScoutStore = (() => {
         nome: u.nome,
         cognome: u.cognome,
         email: u.email,
+        username: u.username || "",
         squadriglia: u.squadriglia || "",
         dataNascita: u.dataNascita || "",
         createdAt: u.createdAt || null,
@@ -517,18 +600,25 @@ const ScoutStore = (() => {
     }
 
     const users = getUsers();
-    if (users.some((u) => u.email === item.email)) {
+    if (item.email && users.some((u) => u.email === item.email)) {
       pending.splice(idx, 1);
       savePending(pending);
       await pushRemoteAccounts();
       throw new Error("Questa email è già registrata.");
+    }
+    if (item.username && users.some((u) => u.username === item.username)) {
+      pending.splice(idx, 1);
+      savePending(pending);
+      await pushRemoteAccounts();
+      throw new Error("Questo username è già registrato.");
     }
     const user = {
       id: item.id,
       role,
       nome: item.nome,
       cognome: item.cognome,
-      email: item.email,
+      email: item.email || null,
+      username: item.username || null,
       branca: role === ROLE_RAGAZZO ? "reparto" : item.branca,
       squadriglia: item.squadriglia || null,
       dataNascita: item.dataNascita || null,
@@ -546,7 +636,7 @@ const ScoutStore = (() => {
     await pushRemoteAccounts();
 
     let emailNotify = { sent: false, skipped: true };
-    if (typeof CloudSync !== "undefined" && CloudSync.notifyAccountApproved) {
+    if (user.email && typeof CloudSync !== "undefined" && CloudSync.notifyAccountApproved) {
       try {
         emailNotify = await CloudSync.notifyAccountApproved({
           email: user.email,
@@ -557,6 +647,8 @@ const ScoutStore = (() => {
       } catch (err) {
         emailNotify = { sent: false, error: err.message || "Email non inviata" };
       }
+    } else if (!user.email) {
+      emailNotify = { sent: false, skipped: true, reason: "nessuna email" };
     }
     return { user, emailNotify };
   }
@@ -577,19 +669,19 @@ const ScoutStore = (() => {
     await pushRemoteAccounts();
   }
 
-  async function loginStaff({ email, password }) {
+  async function loginStaff({ email, password, login: loginId }) {
     await pullRemoteAccounts();
     const users = getUsers();
-    const pending = getPending();
-    const normalized = email.trim().toLowerCase();
-    if (pending.some((u) => u.email === normalized)) {
+    const key = String(loginId || email || "").trim().toLowerCase();
+    if (!key) throw new Error("Inserisci email o username.");
+    if (findPendingByLogin(key)) {
       throw new Error("Account in attesa di approvazione.");
     }
-    const user = users.find((u) => u.email === normalized);
-    if (!user) throw new Error("Email o password non corretti.");
+    const user = findUserByLogin(key);
+    if (!user) throw new Error("Credenziali non corrette.");
     if (!user.verified) throw new Error("Account non ancora approvato.");
     const hash = await hashPassword(password);
-    if (hash !== user.passwordHash) throw new Error("Email o password non corretti.");
+    if (hash !== user.passwordHash) throw new Error("Credenziali non corrette.");
 
     if (isStaffUser(user) && isAdminEmail(user.email)) {
       user.isAdmin = true;
@@ -1220,6 +1312,8 @@ const ScoutStore = (() => {
     scopeLabel,
     registerStaff,
     registerRagazzo,
+    suggestUsername,
+    canOpenSpecialitaPdf,
     listPending,
     listPendingStaff,
     listPendingRagazzi,

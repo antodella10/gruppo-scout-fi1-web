@@ -11,9 +11,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const emailInput =
     registerUnifiedForm?.querySelector('[name="email"]') ||
     registerForm?.querySelector('[name="email"]');
+  const usernameField = document.getElementById("username-field");
+  const usernameInput = registerUnifiedForm?.querySelector('[name="username"]');
+  const emailOptionalHint = document.getElementById("email-optional-hint");
+  const nomeInput = registerUnifiedForm?.querySelector('[name="nome"]');
+  const cognomeInput = registerUnifiedForm?.querySelector('[name="cognome"]');
   const squadrigliaField = document.getElementById("squadriglia-field");
   const squadrigliaInput = registerUnifiedForm?.querySelector('[name="squadriglia"]');
   const roleInput = document.getElementById("register-role");
+
+  let lastSuggestedUsername = "";
 
   function showError(msg) {
     if (!alertBox) return;
@@ -60,6 +67,38 @@ document.addEventListener("DOMContentLoaded", () => {
     if (admin) brancaSelect.value = "";
   }
 
+  function applyUsernameSuggestion({ force = false } = {}) {
+    if (!usernameInput || !ScoutStore.suggestUsername) return;
+    const suggested = ScoutStore.suggestUsername(nomeInput?.value, cognomeInput?.value);
+    const current = String(usernameInput.value || "").trim().toLowerCase();
+    if (force || !current || current === lastSuggestedUsername) {
+      usernameInput.value = suggested;
+      lastSuggestedUsername = suggested;
+    }
+  }
+
+  function syncUsernameFields() {
+    if (!usernameField || !usernameInput || !emailInput) return;
+    const role = roleInput?.value || "ragazzo";
+    const isRagazzo = role === "ragazzo";
+    usernameField.hidden = !isRagazzo;
+    usernameField.classList.toggle("is-hidden", !isRagazzo);
+    if (emailOptionalHint) {
+      emailOptionalHint.hidden = !isRagazzo;
+    }
+    if (!isRagazzo) {
+      emailInput.required = true;
+      usernameInput.required = false;
+      usernameInput.value = "";
+      lastSuggestedUsername = "";
+      return;
+    }
+    const hasEmail = String(emailInput.value || "").trim().length > 0;
+    emailInput.required = false;
+    usernameInput.required = !hasEmail;
+    if (!hasEmail) applyUsernameSuggestion();
+  }
+
   function setRegisterRole(role) {
     if (!roleInput) return;
     roleInput.value = role;
@@ -87,6 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!isStaff) brancaSelect.value = "";
       }
     }
+    syncUsernameFields();
     syncAdminFields();
   }
 
@@ -95,8 +135,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   if (registerUnifiedForm) setRegisterRole(roleInput?.value || "ragazzo");
 
-  emailInput?.addEventListener("input", syncAdminFields);
+  emailInput?.addEventListener("input", () => {
+    syncAdminFields();
+    syncUsernameFields();
+  });
+  nomeInput?.addEventListener("input", () => applyUsernameSuggestion());
+  cognomeInput?.addEventListener("input", () => applyUsernameSuggestion());
   syncAdminFields();
+  syncUsernameFields();
 
   ScoutStore.pullRemoteAccounts?.().catch(() => {});
 
@@ -107,6 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (submitBtn) submitBtn.disabled = true;
     try {
       const user = await ScoutStore.loginStaff({
+        login: data.get("login") || data.get("email"),
         email: data.get("email"),
         password: data.get("password"),
       });
@@ -165,6 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
         dataNascita: data.get("dataNascita"),
         squadriglia: data.get("squadriglia"),
         email: data.get("email"),
+        username: data.get("username"),
         password: data.get("password"),
       });
       showOk("Richiesta inviata. Riceverai una conferma quando l’account sarà attivo.");
@@ -207,6 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
         dataNascita: data.get("dataNascita"),
         squadriglia: data.get("squadriglia"),
         email: data.get("email"),
+        username: data.get("username"),
         password: data.get("password"),
       });
       showRegisterDone();

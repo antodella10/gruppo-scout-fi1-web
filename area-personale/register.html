@@ -63,9 +63,14 @@
             <option value="clan">Clan</option>
           </select>
         </label>
-        <label>
-          Email
-          <input type="email" name="email" required autocomplete="username">
+        <label id="email-field">
+          Email <span class="hint" id="email-optional-hint" hidden>(facoltativa, per aggiornamenti)</span>
+          <input type="email" name="email" required autocomplete="email" placeholder="nome@email.it">
+        </label>
+        <label id="username-field" class="is-hidden" hidden>
+          Username
+          <input type="text" name="username" autocomplete="username" placeholder="nome.cognome" spellcheck="false">
+          <span class="hint">Se non metti l’email, serve uno username (suggerito: nome.cognome).</span>
         </label>
         <label>
           Password

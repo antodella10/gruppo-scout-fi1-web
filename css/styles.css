@@ -882,6 +882,12 @@ label {
   font-size: 0.92rem;
 }
 
+label .hint {
+  font-weight: 500;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
 [hidden],
 .is-hidden {
   display: none !important;
@@ -2619,6 +2625,17 @@ body.pdf-pseudo-fs-open {
   box-shadow: 0 12px 28px rgba(20, 85, 40, 0.1);
 }
 
+.spec-card.is-locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.spec-card.is-locked:hover {
+  transform: none;
+  border-color: var(--line);
+  box-shadow: none;
+}
+
 .spec-card-media {
   width: 88px;
   height: 88px;
@@ -3269,8 +3286,13 @@ body.gallery-lb-open {
 }
 
 .personale-hero.staff-hero {
-  align-items: flex-start;
+  display: block;
   margin-bottom: 1rem;
+  width: 100%;
+}
+
+.personale-hero #personale-head {
+  width: 100%;
 }
 
 .personale-identity {
@@ -3281,17 +3303,20 @@ body.gallery-lb-open {
   width: 100%;
 }
 
+.personale-identity-text {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .personale-name {
   margin: 0;
-  font-size: clamp(1.35rem, 4vw, 1.85rem);
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
   color: var(--green-deep);
-  line-height: 1.15;
 }
 
 .personale-squad {
-  margin: 0.2rem 0 0;
+  margin: 0.35rem 0 0;
   color: var(--muted);
-  font-weight: 650;
 }
 
 .personale-squad-icon {
@@ -3306,6 +3331,7 @@ body.gallery-lb-open {
   font-weight: 800;
   font-size: 0.78rem;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .personale-block-title {

@@ -479,8 +479,8 @@ function requireLoginForAction({
         <p class="lead">${escapeHtml(message)}</p>
         <div id="login-required-alert" class="alert alert-error" hidden></div>
         <label>
-          Email
-          <input type="email" name="email" required autocomplete="username">
+          Email o username
+          <input type="text" name="login" required autocomplete="username" spellcheck="false">
         </label>
         <label>
           Password
@@ -528,6 +528,7 @@ function requireLoginForAction({
       if (btn) btn.disabled = true;
       try {
         const user = await ScoutStore.loginStaff({
+          login: data.get("login") || data.get("email"),
           email: data.get("email"),
           password: data.get("password"),
         });

@@ -21,9 +21,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  async function openProtectedPdf(item) {
+  async function openProtectedPdf(item, { requireSpecialita = false } = {}) {
     const user = await ensureLoggedIn();
     if (!user) return;
+    if (
+      requireSpecialita &&
+      ScoutStore.canOpenSpecialitaPdf &&
+      !ScoutStore.canOpenSpecialitaPdf(user, item?.id)
+    ) {
+      alert("Puoi aprire solo le specialità che hai richiesto o ottenuto.");
+      return;
+    }
     await SentieroStore.openPdf(item);
   }
 
@@ -41,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function renderSpecs() {
     if (!specGrid) return;
     const list = await SentieroStore.getSpecialita();
+    const user = ScoutStore.getCurrentUser?.();
     if (specCount) {
       specCount.textContent = list.length
         ? `${list.length} specialità in ordine alfabetico.`
@@ -52,15 +61,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     specGrid.innerHTML = list
-      .map(
-        (s) => `
-      <button type="button" class="spec-card" data-id="${escapeHtml(s.id)}">
+      .map((s) => {
+        const locked =
+          user &&
+          ScoutStore.isRagazzoUser?.(user) &&
+          ScoutStore.canOpenSpecialitaPdf &&
+          !ScoutStore.canOpenSpecialitaPdf(user, s.id);
+        return `
+      <button type="button" class="spec-card${locked ? " is-locked" : ""}" data-id="${escapeHtml(s.id)}"${
+          locked ? ' title="Disponibile solo se richiesta o ottenuta"' : ""
+        }>
         <span class="spec-card-media" data-img="${escapeHtml(s.id)}">
           <span class="spec-card-placeholder">★</span>
         </span>
         <span class="spec-card-name">${escapeHtml(s.name)}</span>
-      </button>`
-      )
+      </button>`;
+      })
       .join("");
 
     await Promise.all(
@@ -92,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const list = await SentieroStore.getSpecialita();
       const item = list.find((x) => x.id === card.dataset.id);
-      await openProtectedPdf(item);
+      await openProtectedPdf(item, { requireSpecialita: true });
     } catch (err) {
       alert(err.message || "Impossibile aprire il PDF.");
     }
@@ -100,6 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   (async () => {
     await SentieroStore.ensureMeta();
+    await ScoutStore.pullRemoteAccounts?.().catch(() => {});
     await renderLibretto();
     await renderSpecs();
   })().catch((err) => {

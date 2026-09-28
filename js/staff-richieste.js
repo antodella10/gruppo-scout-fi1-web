@@ -50,6 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function loginLabel(a) {
+    if (a?.email) return a.email;
+    if (a?.username) return a.username;
+    return "—";
+  }
+
   function refreshPendingStaff() {
     if (!pendingStaffList || !canStaff) return;
     const list = ScoutStore.listPendingStaff(user);
@@ -124,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div>
             <strong>${escapeHtml(p.nome)} ${escapeHtml(p.cognome)}</strong><br>
             <span style="color:var(--muted)">
-              ${escapeHtml(p.email)} · Sq. ${escapeHtml(p.squadriglia || "—")}
+              ${escapeHtml(loginLabel(p))} · Sq. ${escapeHtml(p.squadriglia || "—")}
               ${p.dataNascita ? ` · nato/a ${escapeHtml(formatBirth(p.dataNascita))}` : ""}
             </span>
           </div>
@@ -152,7 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div>
             <strong>${escapeHtml(a.nome)} ${escapeHtml(a.cognome)}</strong><br>
             <span style="color:var(--muted)">
-              ${escapeHtml(a.email)} · Sq. ${escapeHtml(a.squadriglia || "—")}
+              ${escapeHtml(loginLabel(a))} · Sq. ${escapeHtml(a.squadriglia || "—")}
               ${a.dataNascita ? ` · ${escapeHtml(formatBirth(a.dataNascita))}` : ""}
               ${when ? ` · dal ${escapeHtml(when)}` : ""}
             </span>
@@ -187,6 +193,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const mail = result?.emailNotify;
         if (mail?.sent) {
           showStatus("Account approvato. Email di conferma inviata.");
+        } else if (mail?.skipped && mail?.reason === "nessuna email") {
+          showStatus("Account approvato. Nessuna email: avvisa tu la persona.");
         } else if (mail?.skipped) {
           showStatus("Account approvato. Email automatica non configurata: avvisa tu la persona.");
         } else if (mail?.error) {
@@ -205,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const id = delStaff.dataset.delStaff;
         const account = ScoutStore.listStaffAccounts(user).find((a) => a.id === id);
         const label = account
-          ? `${account.nome} ${account.cognome} (${account.email})`
+          ? `${account.nome} ${account.cognome} (${loginLabel(account)})`
           : "questo account";
         if (!confirm(`Eliminare ${label}? Non potrà più accedere all’area staff.`)) return;
         await ScoutStore.deleteStaffAccount(id, user);
@@ -215,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const id = delRagazzo.dataset.delRagazzo;
         const account = ScoutStore.listRagazziAccounts(user).find((a) => a.id === id);
         const label = account
-          ? `${account.nome} ${account.cognome} (${account.email})`
+          ? `${account.nome} ${account.cognome} (${loginLabel(account)})`
           : "questo account";
         if (!confirm(`Eliminare ${label}? Non potrà più aprire i file del Sentiero.`)) return;
         await ScoutStore.deleteRagazzoAccount(id, user);
