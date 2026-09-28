@@ -21,10 +21,10 @@
   <main class="auth-page">
     <div class="auth-card auth-card-wide">
       <h1>Crea account</h1>
-      <p class="lead">Scegli il tipo di account e compila i dati.</p>
+      <p class="lead" data-register-intro>Scegli il tipo di account e compila i dati.</p>
       <div id="auth-alert" class="alert alert-error" hidden></div>
 
-      <div class="role-picker" role="radiogroup" aria-label="Tipo account">
+      <div class="role-picker" data-register-fields role="radiogroup" aria-label="Tipo account">
         <button type="button" class="role-pick is-active" data-role="ragazzo" aria-pressed="true">
           Esploratore / guida
         </button>
@@ -33,7 +33,7 @@
         </button>
       </div>
 
-      <form id="register-unified-form" class="form-grid">
+      <form id="register-unified-form" class="form-grid" data-register-fields>
         <input type="hidden" name="role" id="register-role" value="ragazzo">
         <div class="form-row-2">
           <label>
@@ -73,7 +73,10 @@
         </label>
         <button class="btn btn-primary" type="submit">Invia richiesta</button>
       </form>
-      <p class="form-note">Hai già un account? <a href="login.html">Accedi</a></p>
+      <p class="form-note" data-register-fields>Hai già un account? <a href="login.html">Accedi</a></p>
+      <p class="form-note" id="register-done-actions" hidden style="margin-top:1.1rem;margin-bottom:0">
+        <a class="btn btn-primary" href="../index.html">Torna alla home</a>
+      </p>
     </div>
   </main>
 

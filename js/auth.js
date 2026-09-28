@@ -29,6 +29,19 @@ document.addEventListener("DOMContentLoaded", () => {
     alertBox.textContent = msg;
   }
 
+  function showRegisterDone(msg) {
+    showOk(msg || "Richiesta inviata. Riceverai una conferma quando l’account sarà attivo.");
+    document.querySelectorAll("[data-register-fields], [data-register-intro]").forEach((el) => {
+      el.hidden = true;
+      el.classList.add("is-hidden");
+    });
+    const done = document.getElementById("register-done-actions");
+    if (done) {
+      done.hidden = false;
+      done.classList.remove("is-hidden");
+    }
+  }
+
   function syncAdminFields() {
     if (!emailInput || !brancaField || !brancaSelect) return;
     const role = roleInput?.value || "staff";
@@ -179,9 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
           branca: data.get("branca"),
         });
         if (result.pendingApproval) {
-          showOk("Richiesta inviata. Riceverai una conferma quando l’account sarà attivo.");
-          registerUnifiedForm.reset();
-          setRegisterRole("staff");
+          showRegisterDone();
           return;
         }
         location.href = "../staff/";
@@ -196,12 +207,9 @@ document.addEventListener("DOMContentLoaded", () => {
         email: data.get("email"),
         password: data.get("password"),
       });
-      showOk("Richiesta inviata. Riceverai una conferma quando l’account sarà attivo.");
-      registerUnifiedForm.reset();
-      setRegisterRole("ragazzo");
+      showRegisterDone();
     } catch (err) {
       showError(err.message || "Registrazione non riuscita.");
-    } finally {
       if (submitBtn) submitBtn.disabled = false;
     }
   });
