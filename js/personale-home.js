@@ -26,22 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const progress = ScoutStore.getRagazzoProgress(user);
     const obtained = ScoutStore.classiOttenuteDisplay(progress.classe);
     if (!obtained.length) {
-      classiEl.innerHTML = `
-        <p class="hint" style="margin:0">Nessuna classe assegnata ancora. Comparirà qui il percorso Promessa → Scelto.</p>
-        <div class="classi-track classi-track-empty" aria-hidden="true">
-          ${(ScoutStore.CLASSI_SENTIERO || [])
-            .slice()
-            .reverse()
-            .map(
-              (c) => `
-            <div class="classe-badge is-placeholder" data-classe="${escapeHtml(c.id)}">
-              <span class="classe-badge-icon"></span>
-              <span class="classe-badge-label">${escapeHtml(c.label)}</span>
-            </div>`
-            )
-            .join("")}
-        </div>
-      `;
+      classiEl.innerHTML = "";
       return;
     }
     classiEl.innerHTML = `
