@@ -1299,6 +1299,21 @@ body.staff-menu-open {
   font-weight: 700;
   font-size: 0.9rem;
   position: relative;
+  max-width: 14rem;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-chip-name,
+.user-chip-role {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-chip-name {
+  min-width: 0;
 }
 
 .notif-badge {
@@ -2716,6 +2731,53 @@ body.pdf-pseudo-fs-open {
   .nav-links a[aria-current="page"] {
     background: var(--green-soft);
     color: var(--green-deep);
+  }
+
+  .site-nav .container {
+    gap: 0.45rem;
+  }
+
+  .brand {
+    gap: 0.45rem;
+    font-size: 0.92rem;
+  }
+
+  .brand img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .nav-actions {
+    gap: 0.35rem;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .user-chip {
+    max-width: min(34vw, 7.5rem);
+    padding: 0.28rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 650;
+  }
+
+  .user-chip-role {
+    display: none;
+  }
+
+  .nav-actions .btn-small {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .nav-area-btn {
+    font-size: 0;
+  }
+
+  .nav-area-btn::after {
+    content: attr(data-label-short);
+    font-size: 0.75rem;
+    font-weight: 700;
   }
 
   .hero-logo {

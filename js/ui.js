@@ -407,10 +407,8 @@ function updateNavAuth() {
   if (session) {
     const full = ScoutStore.getCurrentUser() || session;
     const isKid = ScoutStore.isRagazzoUser?.(full) || full.role === "ragazzo";
-    const br = isKid
-      ? full.squadriglia
-        ? `Sq. ${full.squadriglia}`
-        : "Reparto"
+    const roleLabel = isKid
+      ? ""
       : full.isAdmin
         ? "Admin"
         : full.branca
@@ -428,9 +426,15 @@ function updateNavAuth() {
     }
     const areaHref = isKid ? `${base}area-personale/` : `${base}staff/`;
     const areaLabel = isKid ? "Area personale" : "Area staff";
+    const areaShort = isKid ? "Profilo" : "Staff";
+    const name = `${full.nome || ""} ${full.cognome || ""}`.trim();
     slot.innerHTML = `
-      <span class="user-chip">${escapeHtml(full.nome)} ${escapeHtml(full.cognome)}${br ? " · " + escapeHtml(br) : ""}${badge}</span>
-      <a class="btn btn-primary btn-small" href="${areaHref}">${areaLabel}</a>
+      <span class="user-chip" title="${escapeHtml(name)}${roleLabel ? " · " + escapeHtml(roleLabel) : ""}">
+        <span class="user-chip-name">${escapeHtml(name)}</span>${
+          roleLabel ? `<span class="user-chip-role"> · ${escapeHtml(roleLabel)}</span>` : ""
+        }${badge}
+      </span>
+      <a class="btn btn-primary btn-small nav-area-btn" href="${areaHref}" data-label-full="${escapeHtml(areaLabel)}" data-label-short="${escapeHtml(areaShort)}">${areaLabel}</a>
       <button type="button" class="btn btn-ghost btn-small" data-nav-logout>Esci</button>
     `;
     slot.querySelector("[data-nav-logout]")?.addEventListener("click", () => {
