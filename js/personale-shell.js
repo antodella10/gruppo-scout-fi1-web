@@ -1,4 +1,4 @@
-/* Shell area personale (repartari): menu a tendina. */
+/* Shell area personale (Ripartari): menu a tendina. */
 window.PersonaleShell = (() => {
   function requireUser() {
     const user = ScoutStore.getCurrentUser();
@@ -18,7 +18,7 @@ window.PersonaleShell = (() => {
       { id: "home", href: "./index.html", label: "Profilo / sentiero" },
       { id: "dati", href: "./dati.html", label: "Dati personali" },
       { id: "sentiero", href: "../sentiero/", label: "Libretto e specialità" },
-      { id: "reparto", href: "../index.html?branca=reparto", label: "Torna al reparto" },
+      { id: "riparto", href: "../index.html?branca=riparto", label: "Torna al Riparto" },
     ];
   }
 

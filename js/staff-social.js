@@ -13,13 +13,13 @@ document.addEventListener("DOMContentLoaded", () => {
     socialForm.igGruppoUrl.value = current.instagram.gruppo.url || "";
     socialForm.igBrancoLabel.value = current.instagram.branco.label || "Branco";
     socialForm.igBrancoUrl.value = current.instagram.branco.url || "";
-    socialForm.igRepartoLabel.value = current.instagram.reparto.label || "Reparto";
-    socialForm.igRepartoUrl.value = current.instagram.reparto.url || "";
+    socialForm.igRipartoLabel.value = current.instagram.riparto.label || "Riparto";
+    socialForm.igRipartoUrl.value = current.instagram.riparto.url || "";
     socialForm.igNoviziatoLabel.value = current.instagram.noviziato.label || "Noviziato";
     socialForm.igNoviziatoUrl.value = current.instagram.noviziato.url || "";
     socialForm.igClanLabel.value = current.instagram.clan.label || "Clan";
     socialForm.igClanUrl.value = current.instagram.clan.url || "";
-    const home = current.homeInstagram || "reparto";
+    const home = current.homeInstagram || "riparto";
     const radio = socialForm.querySelector(`input[name="homeInstagram"][value="${home}"]`);
     if (radio) radio.checked = true;
   }
@@ -37,11 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
           instagram: {
             gruppo: { label: data.get("igGruppoLabel"), url: data.get("igGruppoUrl") },
             branco: { label: data.get("igBrancoLabel"), url: data.get("igBrancoUrl") },
-            reparto: { label: data.get("igRepartoLabel"), url: data.get("igRepartoUrl") },
+            riparto: { label: data.get("igRipartoLabel"), url: data.get("igRipartoUrl") },
             noviziato: { label: data.get("igNoviziatoLabel"), url: data.get("igNoviziatoUrl") },
             clan: { label: data.get("igClanLabel"), url: data.get("igClanUrl") },
           },
-          homeInstagram: data.get("homeInstagram") || "reparto",
+          homeInstagram: data.get("homeInstagram") || "riparto",
         },
         user
       );

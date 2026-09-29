@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  BranchView.persist("reparto", { updateUrl: false });
+  BranchView.persist("riparto", { updateUrl: false });
 
   const bookStatus = document.getElementById("book-status");
   const bookEmpty = document.getElementById("book-empty");
@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!book) {
       showEmpty("Il canzoniere non è ancora disponibile.");
-      if (bookMeta) bookMeta.textContent = "Reparto · nessun PDF";
+      if (bookMeta) bookMeta.textContent = "Riparto · nessun PDF";
       return;
     }
 

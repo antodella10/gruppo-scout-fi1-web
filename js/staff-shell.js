@@ -46,7 +46,7 @@ window.StaffShell = (() => {
       { id: "home", href: "./index.html", label: "Dashboard" },
       canMeetings(user) ? { id: "riunioni", href: "./riunioni.html", label: "Gestione riunioni" } : null,
       canCanzoniere(user)
-        ? { id: "canzoniere", href: "./canzoniere.html", label: "Canzoniere reparto", badge: c.songs }
+        ? { id: "canzoniere", href: "./canzoniere.html", label: "Canzoniere Riparto", badge: c.songs }
         : null,
       canSentiero(user) ? { id: "sentiero", href: "./sentiero.html", label: "Sentiero / specialità" } : null,
       ScoutStore.canManageSentieri?.(user)

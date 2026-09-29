@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tiles.push({
         id: "canzoniere",
         href: "./canzoniere.html",
-        title: "Canzoniere reparto",
+        title: "Canzoniere Riparto",
         hint: "PDF, canzoni sfuse e proposte.",
         badge: pendingSongs,
         preview: pendingSongs
@@ -102,9 +102,9 @@ document.addEventListener("DOMContentLoaded", () => {
         id: "gestione-sentieri",
         href: "./gestione-sentieri.html",
         title: "Gestione sentieri",
-        hint: "Classi e specialità dei repartari.",
+        hint: "Classi e specialità dei Ripartari.",
         preview: nRagazzi
-          ? `<strong>${nRagazzi}</strong> repartari`
+          ? `<strong>${nRagazzi}</strong> Ripartari`
           : "Nessun repartaro ancora",
       });
     }
@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (typeof StaffShell !== "undefined" && StaffShell.canAccountRequests?.(user)) {
       const parts = [];
       if (pendingStaff) parts.push(`${pendingStaff} staff`);
-      if (pendingRagazzi) parts.push(`${pendingRagazzi} repartari`);
+      if (pendingRagazzi) parts.push(`${pendingRagazzi} Ripartari`);
       tiles.push({
         id: "richieste",
         href: "./richieste.html",

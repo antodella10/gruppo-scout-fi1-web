@@ -582,12 +582,12 @@ function renderSocialFollow(container) {
   const fbLabel =
     (typeof fbRaw === "object" && fbRaw?.label) || cfg.facebook?.label || "Facebook";
 
-  const igKey = social.homeInstagram || cfg.homeInstagram || "reparto";
+  const igKey = social.homeInstagram || cfg.homeInstagram || "riparto";
   const igMap = social.instagram || cfg.instagram || {};
-  const igRaw = igMap[igKey] || igMap.reparto || cfg.instagram?.reparto || {};
+  const igRaw = igMap[igKey] || igMap.riparto || cfg.instagram?.riparto || {};
   let igUrl = String((typeof igRaw === "object" ? igRaw?.url : igRaw) || "").trim();
   if (!igUrl) {
-    igUrl = String(cfg.instagram?.reparto?.url || "https://www.instagram.com/riparto.fi1").trim();
+    igUrl = String(cfg.instagram?.riparto?.url || "https://www.instagram.com/riparto.fi1").trim();
   }
   const igLabel =
     (typeof igRaw === "object" && igRaw?.label) || "Instagram";
@@ -632,7 +632,7 @@ function renderSocialFull(container) {
       url: social.facebook.url,
     });
   }
-  ["gruppo", "branco", "reparto", "noviziato", "clan"].forEach((id) => {
+  ["gruppo", "branco", "riparto", "noviziato", "clan"].forEach((id) => {
     const ig = social.instagram?.[id];
     if (ig?.url) {
       items.push({ kind: "ig", label: ig.label || id, url: ig.url });

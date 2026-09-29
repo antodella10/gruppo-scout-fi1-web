@@ -1490,7 +1490,7 @@ body.staff-menu-open {
   color: #6b3f00;
 }
 
-.branch-menu-trigger.is-active.pastel-reparto {
+.branch-menu-trigger.is-active.pastel-riparto {
   background: #b7e8d0;
   color: #0f4a2f;
 }
@@ -1579,7 +1579,7 @@ body.staff-menu-open {
   background: #ffe8c8;
 }
 
-.pastel-reparto {
+.pastel-riparto {
   background: #d8f0e4;
 }
 
@@ -2338,7 +2338,7 @@ a.home-tile:hover {
     url("https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1000&q=80");
 }
 
-.reparto-actions .dest-card {
+.riparto-actions .dest-card {
   grid-column: span 4;
   min-height: 240px;
 }
@@ -2676,7 +2676,7 @@ body.pdf-pseudo-fs-open {
 }
 
 @media (max-width: 900px) {
-  .reparto-actions .dest-card {
+  .riparto-actions .dest-card {
     grid-column: span 12;
   }
 

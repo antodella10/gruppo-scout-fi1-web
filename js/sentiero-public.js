@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  BranchView.persist("reparto", { updateUrl: false });
+  BranchView.persist("riparto", { updateUrl: false });
 
   const libEmpty = document.getElementById("libretto-empty");
   const libOpen = document.getElementById("libretto-open");

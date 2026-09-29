@@ -1,17 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
   const user = ScoutStore.getCurrentUser();
   const syncStatus = document.getElementById("gcal-sync-status");
-  const syncStatusRep = document.getElementById("gcal-sync-status-reparto");
+  const syncStatusRep = document.getElementById("gcal-sync-status-riparto");
   const calEl = document.getElementById("cal-grid");
   const listEl = document.getElementById("event-list");
   const labelEl = document.getElementById("month-label");
   const prevBtn = document.getElementById("month-prev");
   const nextBtn = document.getElementById("month-next");
-  const calElRep = document.getElementById("cal-grid-reparto");
-  const listElRep = document.getElementById("event-list-reparto");
-  const labelElRep = document.getElementById("month-label-reparto");
-  const prevBtnRep = document.getElementById("month-prev-reparto");
-  const nextBtnRep = document.getElementById("month-next-reparto");
+  const calElRep = document.getElementById("cal-grid-riparto");
+  const listElRep = document.getElementById("event-list-riparto");
+  const labelElRep = document.getElementById("month-label-riparto");
+  const prevBtnRep = document.getElementById("month-prev-riparto");
+  const nextBtnRep = document.getElementById("month-next-riparto");
   const viewRoot = document.getElementById("view-root");
   const gruppoBtn = document.getElementById("view-gruppo");
   const branchMenu = document.getElementById("branch-menu");
@@ -20,8 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const branchPanel = document.getElementById("branch-menu-panel");
   const calLead = document.getElementById("cal-lead");
   const layoutDefault = document.getElementById("layout-default");
-  const layoutReparto = document.getElementById("layout-reparto");
-  const nextEventEl = document.getElementById("reparto-next-event");
+  const layoutRiparto = document.getElementById("layout-riparto");
+  const nextEventEl = document.getElementById("riparto-next-event");
 
   let selectedBranca = null;
   let viewDate = new Date();
@@ -32,13 +32,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let selectedEventId = null;
 
   const listTitleEl = document.getElementById("event-list-title");
-  const listTitleElRep = document.getElementById("event-list-title-reparto");
+  const listTitleElRep = document.getElementById("event-list-title-riparto");
   const listBackBtn = document.getElementById("event-list-back");
-  const listBackBtnRep = document.getElementById("event-list-back-reparto");
+  const listBackBtnRep = document.getElementById("event-list-back-riparto");
 
   const PASTEL_CLASS = {
     branco: "pastel-branco",
-    reparto: "pastel-reparto",
+    riparto: "pastel-riparto",
     noviziato: "pastel-noviziato",
     clan: "pastel-clan",
   };
@@ -53,8 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
       calLead: "Calendario branco e gruppo.",
       heroLine: "Branco in cammino: gioco, amicizia e grandi scoperte.",
     },
-    reparto: {
-      calLead: "Eventi reparto e di gruppo.",
+    riparto: {
+      calLead: "Eventi Riparto e di gruppo.",
       heroLine: "",
     },
     noviziato: {
@@ -116,8 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function setSyncHint(msg) {
-    const el = selectedBranca === "reparto" ? syncStatusRep : syncStatus;
-    const other = selectedBranca === "reparto" ? syncStatus : syncStatusRep;
+    const el = selectedBranca === "riparto" ? syncStatusRep : syncStatus;
+    const other = selectedBranca === "riparto" ? syncStatus : syncStatusRep;
     if (other) {
       other.hidden = true;
       other.textContent = "";
@@ -156,11 +156,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function renderRepartoNext() {
+  function renderRipartoNext() {
     if (!nextEventEl) return;
     const ev = nearestEvent();
     if (!ev) {
-      nextEventEl.innerHTML = `<div class="empty-state">Nessun evento in programma per il reparto.</div>`;
+      nextEventEl.innerHTML = `<div class="empty-state">Nessun evento in programma per il Riparto.</div>`;
       return;
     }
     const desc = ev.description || ev.notes || "";
@@ -203,8 +203,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function paintCurrent() {
-    if (selectedBranca === "reparto") {
-      renderRepartoNext();
+    if (selectedBranca === "riparto") {
+      renderRipartoNext();
       paintCalendar(calElRep, listElRep, labelElRep, listTitleElRep, listBackBtnRep);
       return;
     }
@@ -250,17 +250,17 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedEventId = null;
     BranchView.persist(branca);
     const copy = BRANCH_COPY[branca || "null"] || BRANCH_COPY.null;
-    const isReparto = branca === "reparto";
+    const isRiparto = branca === "riparto";
 
     if (viewRoot) {
       viewRoot.classList.add("is-switching");
       window.setTimeout(() => {
         viewRoot.dataset.branca = branca || "gruppo";
 
-        if (layoutDefault) layoutDefault.hidden = isReparto;
-        if (layoutReparto) layoutReparto.hidden = !isReparto;
+        if (layoutDefault) layoutDefault.hidden = isRiparto;
+        if (layoutRiparto) layoutRiparto.hidden = !isRiparto;
 
-        if (!isReparto) {
+        if (!isRiparto) {
           if (calLead) calLead.textContent = copy.calLead;
 
           document.querySelectorAll("#layout-default [data-branca-panel]").forEach((el) => {

@@ -1,4 +1,4 @@
-/* Canzoniere reparto: metadati localStorage + cloud, PDF IndexedDB + Netlify Blobs. */
+/* Canzoniere Riparto: metadati localStorage + cloud, PDF IndexedDB + Netlify Blobs. */
 
 const CanzoniereStore = (() => {
   const META_KEY = "firenze1_canzoniere_meta_v1";
@@ -305,11 +305,11 @@ const CanzoniereStore = (() => {
   function canManage(user) {
     if (!user) return false;
     if (typeof ScoutStore !== "undefined" && ScoutStore.isAdminUser?.(user)) return true;
-    return user.branca === "reparto";
+    return user.branca === "riparto";
   }
 
   async function setBook(file, user) {
-    if (!canManage(user)) throw new Error("Solo staff reparto (o admin) può aggiornare il canzoniere.");
+    if (!canManage(user)) throw new Error("Solo staff Riparto (o admin) può aggiornare il canzoniere.");
     const meta = await syncMergeFromRemote();
     const oldId = meta.book?.fileId;
     const fileId = uid("book");
@@ -331,7 +331,7 @@ const CanzoniereStore = (() => {
   }
 
   async function addSong({ title, file }, user) {
-    if (!canManage(user)) throw new Error("Solo staff reparto (o admin) può aggiungere canzoni.");
+    if (!canManage(user)) throw new Error("Solo staff Riparto (o admin) può aggiungere canzoni.");
     const clean = String(title || "").trim();
     if (!clean) throw new Error("Inserisci il titolo della canzone.");
     const meta = await syncMergeFromRemote();

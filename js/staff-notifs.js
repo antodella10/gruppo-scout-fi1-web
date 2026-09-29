@@ -50,7 +50,7 @@ window.StaffNotifs = (() => {
     if (c.songs) parts.push(`${c.songs} proposte canzoniere`);
     if (c.shop) parts.push(`${c.shop} ordini negozio`);
     if (c.staff) parts.push(`${c.staff} richieste staff`);
-    if (c.ragazzi) parts.push(`${c.ragazzi} richieste repartari`);
+    if (c.ragazzi) parts.push(`${c.ragazzi} richieste Ripartari`);
     return parts.join(" · ") || "Notifiche";
   }
 

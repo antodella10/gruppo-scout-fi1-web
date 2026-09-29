@@ -202,7 +202,7 @@ const SentieroStore = (() => {
   function canManage(user) {
     if (!user) return false;
     if (typeof ScoutStore !== "undefined" && ScoutStore.isAdminUser?.(user)) return true;
-    return user.branca === "reparto";
+    return user.branca === "riparto";
   }
 
   async function resolvePdfUrl(item) {

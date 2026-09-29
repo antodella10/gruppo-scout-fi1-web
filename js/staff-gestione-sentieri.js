@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!listEl) return;
     const list = ScoutStore.listRagazziAccounts(user);
     if (!list.length) {
-      listEl.innerHTML = `<div class="empty-state">Nessun account repartari.</div>`;
+      listEl.innerHTML = `<div class="empty-state">Nessun account Ripartari.</div>`;
       return;
     }
     listEl.innerHTML = list

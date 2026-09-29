@@ -3,6 +3,7 @@ const BranchView = (() => {
 
   function normalizeBranca(id) {
     if (id === "lupetti") return "branco";
+    if (id === "reparto" || id === "Reparto") return "riparto";
     return id;
   }
 

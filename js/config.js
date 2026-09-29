@@ -38,18 +38,18 @@ window.SCOUT_CONFIG = {
     instagram: {
       gruppo: { url: "https://www.instagram.com/scout_firenze1", label: "Firenze 1" },
       branco: { url: "https://www.instagram.com/tigerandcavalloni", label: "Branco" },
-      reparto: { url: "https://www.instagram.com/riparto.fi1", label: "Reparto" },
+      riparto: { url: "https://www.instagram.com/riparto.fi1", label: "Riparto" },
       noviziato: { url: "", label: "Noviziato" },
       clan: { url: "", label: "Clan" },
     },
     /** Quale Instagram usare sull’icona “Seguici” in home. */
-    homeInstagram: "reparto",
+    homeInstagram: "riparto",
   },
 };
 
 window.SCOUT_BRANCHES = {
   branco: { id: "branco", label: "Branco", short: "Branco" },
-  reparto: { id: "reparto", label: "Reparto", short: "Reparto" },
+  riparto: { id: "riparto", label: "Riparto", short: "Riparto" },
   noviziato: { id: "noviziato", label: "Noviziato", short: "Noviziato" },
   clan: { id: "clan", label: "Clan", short: "Clan" },
 };
@@ -61,7 +61,7 @@ window.SCOUT_SCOPES = {
   coca: { id: "coca", label: "Co.Ca." },
 };
 
-/** Branco + Reparto, ciascuno diviso Girone / Quarate. */
+/** Branco + Riparto, ciascuno diviso Girone / Quarate. */
 window.SCOUT_DEFAULT_MEETING_HOURS = [
   {
     id: "branco-girone",
@@ -80,17 +80,17 @@ window.SCOUT_DEFAULT_MEETING_HOURS = [
     place: "Quarate",
   },
   {
-    id: "reparto-girone",
-    label: "Reparto — Girone",
-    branca: "reparto",
+    id: "riparto-girone",
+    label: "Riparto — Girone",
+    branca: "riparto",
     day: "Sabato",
     time: "15:00–17:30",
     place: "Girone",
   },
   {
-    id: "reparto-quarate",
-    label: "Reparto — Quarate",
-    branca: "reparto",
+    id: "riparto-quarate",
+    label: "Riparto — Quarate",
+    branca: "riparto",
     day: "Sabato",
     time: "15:00–17:30",
     place: "Quarate",

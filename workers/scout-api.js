@@ -675,10 +675,11 @@ async function handleGcal(request, env = {}) {
 const GALLERY_MAX_BYTES = 2_500_000; // ~2.5MB dopo compressione client
 const GALLERY_META_KEY = "gallery-meta";
 const GALLERY_FEATURED_MAX = 15;
-const GALLERY_BRANCHES = new Set(["gruppo", "branco", "reparto", "noviziato", "clan"]);
+const GALLERY_BRANCHES = new Set(["gruppo", "branco", "riparto", "noviziato", "clan"]);
 
 function normalizeGalleryBranca(branca) {
   if (branca === "lupetti") return "branco";
+  if (branca === "reparto" || branca === "Reparto") return "riparto";
   return branca;
 }
 

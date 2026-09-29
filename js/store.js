@@ -32,15 +32,18 @@ const ScoutStore = (() => {
     return `${prefix}_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`;
   }
 
-  /** Compat: vecchio id “lupetti” → “branco”. */
+  /** Compat: vecchi id branca → attuali. */
   function normalizeBrancaId(id) {
     if (id === "lupetti") return "branco";
+    if (id === "reparto" || id === "Reparto") return "riparto";
     return id || null;
   }
 
   function normalizeMeetingSlotId(id) {
     if (id === "lupetti" || id === "lupetti-girone") return "branco-girone";
     if (id === "lupetti-quarate") return "branco-quarate";
+    if (id === "reparto-girone" || id === "Reparto-girone") return "riparto-girone";
+    if (id === "reparto-quarate" || id === "Reparto-quarate") return "riparto-quarate";
     return id;
   }
 
@@ -142,11 +145,11 @@ const ScoutStore = (() => {
     return !!(user && isStaffUser(user) && (user.isAdmin || isAdminEmail(user.email)));
   }
 
-  /** Admin: tutte le richieste. Staff reparto: solo account ragazzi (repartari). */
+  /** Admin: tutte le richieste. Staff Riparto: solo account ragazzi (Ripartari). */
   function canManageRagazziRequests(user) {
     if (!user || !isStaffUser(user)) return false;
     if (isAdminUser(user)) return true;
-    return user.branca === "reparto";
+    return user.branca === "riparto";
   }
 
   function canManageStaffRequests(user) {
@@ -205,7 +208,7 @@ const ScoutStore = (() => {
 
   async function updateRagazzoProgress(ragazzoId, patch, viewer) {
     if (!canManageSentieri(viewer)) {
-      throw new Error("Solo staff reparto o admin possono gestire i sentieri.");
+      throw new Error("Solo staff Riparto o admin possono gestire i sentieri.");
     }
     const users = getUsers();
     const idx = users.findIndex((u) => u.id === ragazzoId && accountRole(u) === ROLE_RAGAZZO);
@@ -470,7 +473,7 @@ const ScoutStore = (() => {
       squadriglia: sq,
       email: mail || null,
       username: userName || (mail ? null : suggestUsername(nome, cognome)),
-      branca: "reparto",
+      branca: "riparto",
       passwordHash: await hashPassword(password),
       createdAt: new Date().toISOString(),
       verified: false,
@@ -524,7 +527,7 @@ const ScoutStore = (() => {
 
   function listRagazziAccounts(viewer) {
     if (!canManageRagazziRequests(viewer)) {
-      throw new Error("Non puoi vedere gli account del reparto.");
+      throw new Error("Non puoi vedere gli account del Riparto.");
     }
     return getUsers()
       .filter((u) => u.verified && accountRole(u) === ROLE_RAGAZZO)
@@ -556,7 +559,7 @@ const ScoutStore = (() => {
     const target = users.find((u) => u.id === userId);
     if (!target) throw new Error("Account non trovato.");
     if (accountRole(target) !== ROLE_STAFF) {
-      throw new Error("Usa la sezione repartari per eliminare questo account.");
+      throw new Error("Usa la sezione Ripartari per eliminare questo account.");
     }
     if (isAdminEmail(target.email)) {
       throw new Error("Non puoi eliminare l’account admin principale.");
@@ -571,7 +574,7 @@ const ScoutStore = (() => {
 
   async function deleteRagazzoAccount(userId, viewer) {
     if (!canManageRagazziRequests(viewer)) {
-      throw new Error("Non puoi eliminare account del reparto.");
+      throw new Error("Non puoi eliminare account del Riparto.");
     }
     const users = getUsers();
     const target = users.find((u) => u.id === userId);
@@ -593,7 +596,7 @@ const ScoutStore = (() => {
 
     if (role === ROLE_RAGAZZO) {
       if (!canManageRagazziRequests(viewer)) {
-        throw new Error("Non puoi approvare richieste dei repartari.");
+        throw new Error("Non puoi approvare richieste dei Ripartari.");
       }
     } else if (!canManageStaffRequests(viewer)) {
       throw new Error("Solo l’admin può approvare richieste staff.");
@@ -619,7 +622,7 @@ const ScoutStore = (() => {
       cognome: item.cognome,
       email: item.email || null,
       username: item.username || null,
-      branca: role === ROLE_RAGAZZO ? "reparto" : item.branca,
+      branca: role === ROLE_RAGAZZO ? "riparto" : item.branca,
       squadriglia: item.squadriglia || null,
       dataNascita: item.dataNascita || null,
       passwordHash: item.passwordHash,
@@ -660,7 +663,7 @@ const ScoutStore = (() => {
     const role = accountRole(item);
     if (role === ROLE_RAGAZZO) {
       if (!canManageRagazziRequests(viewer)) {
-        throw new Error("Non puoi rifiutare richieste dei repartari.");
+        throw new Error("Non puoi rifiutare richieste dei Ripartari.");
       }
     } else if (!canManageStaffRequests(viewer)) {
       throw new Error("Solo l’admin può rifiutare richieste staff.");
@@ -1083,11 +1086,11 @@ const ScoutStore = (() => {
             place: h.place || "Girone",
           };
         }
-        if (h.branca === "reparto") {
+        if (h.branca === "riparto") {
           return {
-            id: "reparto-girone",
-            label: "Reparto — Girone",
-            branca: "reparto",
+            id: "riparto-girone",
+            label: "Riparto — Girone",
+            branca: "riparto",
             day: h.day || "",
             time: h.time || "",
             place: h.place || "Girone",
@@ -1185,11 +1188,11 @@ const ScoutStore = (() => {
       instagram: {
         gruppo: pickIg("gruppo", "Firenze 1"),
         branco: pickIg("branco", "Branco"),
-        reparto: pickIg("reparto", "Reparto"),
+        riparto: pickIg("riparto", "Riparto"),
         noviziato: pickIg("noviziato", "Noviziato"),
         clan: pickIg("clan", "Clan"),
       },
-      homeInstagram: String(cfg.homeInstagram || "reparto"),
+      homeInstagram: String(cfg.homeInstagram || "riparto"),
     };
   }
 
@@ -1214,14 +1217,15 @@ const ScoutStore = (() => {
       return entry;
     };
 
-    let homeInstagram = String(saved.homeInstagram || base.homeInstagram || "reparto");
+    let homeInstagram = String(saved.homeInstagram || base.homeInstagram || "riparto");
     if (homeInstagram === "lupetti") homeInstagram = "branco";
+    if (homeInstagram === "reparto" || homeInstagram === "Reparto") homeInstagram = "riparto";
     return {
       facebook: fb,
       instagram: {
         gruppo: mergeIg("gruppo"),
         branco: mergeIg("branco", "lupetti"),
-        reparto: mergeIg("reparto"),
+        riparto: mergeIg("riparto", "reparto"),
         noviziato: mergeIg("noviziato"),
         clan: mergeIg("clan"),
       },
@@ -1231,7 +1235,7 @@ const ScoutStore = (() => {
 
   function saveSocialLinks(social, user) {
     if (!isAdminUser(user)) throw new Error("Solo admin può aggiornare i social.");
-    let homeInstagram = String(social?.homeInstagram || "reparto");
+    let homeInstagram = String(social?.homeInstagram || "riparto");
     if (homeInstagram === "lupetti") homeInstagram = "branco";
     const next = {
       facebook: {
@@ -1253,9 +1257,9 @@ const ScoutStore = (() => {
           ).trim(),
           label: String(social?.instagram?.branco?.label || "Branco").trim() || "Branco",
         },
-        reparto: {
-          url: String(social?.instagram?.reparto?.url ?? social?.instagram?.reparto ?? "").trim(),
-          label: String(social?.instagram?.reparto?.label || "Reparto").trim() || "Reparto",
+        riparto: {
+          url: String(social?.instagram?.riparto?.url ?? social?.instagram?.riparto ?? "").trim(),
+          label: String(social?.instagram?.riparto?.label || "riparto").trim() || "riparto",
         },
         noviziato: {
           url: String(social?.instagram?.noviziato?.url ?? social?.instagram?.noviziato ?? "").trim(),

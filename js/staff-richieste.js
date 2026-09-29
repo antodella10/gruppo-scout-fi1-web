@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!pendingRagazziList || !canRagazzi) return;
     const list = ScoutStore.listPendingRagazzi(user);
     if (!list.length) {
-      pendingRagazziList.innerHTML = `<div class="empty-state">Nessuna richiesta repartari in attesa.</div>`;
+      pendingRagazziList.innerHTML = `<div class="empty-state">Nessuna richiesta Ripartari in attesa.</div>`;
       return;
     }
     pendingRagazziList.innerHTML = list
@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!accountsRagazziList || !canRagazzi) return;
     const list = ScoutStore.listRagazziAccounts(user);
     if (!list.length) {
-      accountsRagazziList.innerHTML = `<div class="empty-state">Nessun account repartari.</div>`;
+      accountsRagazziList.innerHTML = `<div class="empty-state">Nessun account Ripartari.</div>`;
       return;
     }
     accountsRagazziList.innerHTML = list

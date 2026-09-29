@@ -6,7 +6,7 @@ window.GalleryStore = (() => {
   const BRANCHES = [
     { id: "gruppo", label: "Gruppo" },
     { id: "branco", label: "Branco" },
-    { id: "reparto", label: "Reparto" },
+    { id: "riparto", label: "Riparto" },
     { id: "noviziato", label: "Noviziato" },
     { id: "clan", label: "Clan" },
   ];
