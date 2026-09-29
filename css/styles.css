@@ -1385,6 +1385,10 @@ body.staff-menu-open {
   transform: translateY(-1px);
 }
 
+.song-row.is-locked {
+  opacity: 0.72;
+}
+
 .song-title {
   font-weight: 700;
   color: var(--green-deep);

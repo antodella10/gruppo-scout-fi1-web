@@ -20,6 +20,26 @@ document.addEventListener("DOMContentLoaded", () => {
   let pdfJsPromise = null;
   let renderToken = 0;
 
+  function canOpenCanzonierePdf(user) {
+    if (!user) return false;
+    return !!(ScoutStore.isStaffUser?.(user) || ScoutStore.isRagazzoUser?.(user));
+  }
+
+  async function ensureLoggedInForPdf() {
+    const user =
+      typeof requireLoginForAction === "function"
+        ? await requireLoginForAction({
+            message: "Per aprire i PDF del canzoniere serve l’accesso (staff o ripartaro).",
+          })
+        : ScoutStore.getCurrentUser();
+    if (!user) return null;
+    if (!canOpenCanzonierePdf(user)) {
+      alert("Solo staff o ripartari possono aprire i PDF del canzoniere.");
+      return null;
+    }
+    return user;
+  }
+
   function isMobileUi() {
     const ua = navigator.userAgent || "";
     return /iPhone|iPad|iPod|Android/i.test(ua) || window.matchMedia("(max-width: 900px)").matches;
@@ -192,6 +212,27 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const user = ScoutStore.getCurrentUser?.();
+    if (!canOpenCanzonierePdf(user)) {
+      if (currentBookUrl) {
+        URL.revokeObjectURL(currentBookUrl);
+        currentBookUrl = null;
+      }
+      showEmpty("Accedi con un account staff o ripartaro per aprire il canzoniere.");
+      if (bookMeta) bookMeta.textContent = "Accesso richiesto";
+      if (bookEmpty && !bookEmpty.querySelector("[data-canzoniere-login]")) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn btn-primary btn-small";
+        btn.dataset.canzoniereLogin = "1";
+        btn.textContent = "Accedi";
+        btn.style.marginTop = "0.75rem";
+        bookEmpty.appendChild(btn);
+      }
+      return;
+    }
+    bookEmpty?.querySelector("[data-canzoniere-login]")?.remove();
+
     try {
       if (currentBookUrl) URL.revokeObjectURL(currentBookUrl);
       currentBookUrl = await CanzoniereStore.getPdfUrl(book.fileId);
@@ -213,12 +254,15 @@ document.addEventListener("DOMContentLoaded", () => {
       songsList.innerHTML = `<div class="empty-state">Nessuna canzone sfusa ancora.</div>`;
       return;
     }
+    const loggedIn = canOpenCanzonierePdf(ScoutStore.getCurrentUser?.());
     songsList.innerHTML = songs
       .map(
         (s) => `
-        <button type="button" class="song-row" data-file="${s.fileId}">
+        <button type="button" class="song-row${loggedIn ? "" : " is-locked"}" data-file="${escapeHtml(s.fileId)}"${
+          loggedIn ? "" : ' title="Serve l’accesso per aprire il PDF"'
+        }>
           <span class="song-title">${escapeHtml(s.title)}</span>
-          <span class="song-action">Apri PDF</span>
+          <span class="song-action">${loggedIn ? "Apri PDF" : "Accedi per aprire"}</span>
         </button>`
       )
       .join("");
@@ -228,7 +272,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const row = e.target.closest("[data-file]");
     if (!row) return;
     try {
+      const user = await ensureLoggedInForPdf();
+      if (!user) return;
       await CanzoniereStore.openPdf(row.dataset.file);
+      refreshSongs();
+      await refreshBook();
     } catch (err) {
       alert(err.message);
     }
@@ -259,7 +307,10 @@ document.addEventListener("DOMContentLoaded", () => {
     setExitFsVisible(false);
   }
 
-  function openCurrentBook() {
+  async function openCurrentBook() {
+    const user = await ensureLoggedInForPdf();
+    if (!user) return;
+    if (!currentBookUrl) await refreshBook();
     if (!currentBookUrl) return;
     const a = document.createElement("a");
     a.href = currentBookUrl;
@@ -270,11 +321,20 @@ document.addEventListener("DOMContentLoaded", () => {
     a.remove();
   }
 
-  fsBtn?.addEventListener("click", enterFullscreen);
+  fsBtn?.addEventListener("click", async () => {
+    const user = await ensureLoggedInForPdf();
+    if (!user) return;
+    if (!currentBookUrl) await refreshBook();
+    if (!currentBookUrl) return;
+    await enterFullscreen();
+  });
   exitFsBtn?.addEventListener("click", exitFullscreen);
   openBtn?.addEventListener("click", openCurrentBook);
 
-  downloadBtn?.addEventListener("click", () => {
+  downloadBtn?.addEventListener("click", async () => {
+    const user = await ensureLoggedInForPdf();
+    if (!user) return;
+    if (!currentBookUrl) await refreshBook();
     if (!currentBookUrl) return;
     const a = document.createElement("a");
     a.href = currentBookUrl;
@@ -282,6 +342,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(a);
     a.click();
     a.remove();
+  });
+
+  bookEmpty?.addEventListener("click", async (e) => {
+    if (!e.target.closest("[data-canzoniere-login]")) return;
+    const user = await ensureLoggedInForPdf();
+    if (!user) return;
+    await refreshBook();
+    refreshSongs();
   });
 
   function onFsChange() {
