@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!alertBox) return;
     alertBox.hidden = false;
     alertBox.className = "alert alert-error";
+    alertBox.style.whiteSpace = "pre-line";
     alertBox.textContent = msg;
   }
 
@@ -33,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!alertBox) return;
     alertBox.hidden = false;
     alertBox.className = "alert alert-ok";
+    alertBox.style.whiteSpace = "pre-line";
     alertBox.textContent = msg;
   }
 

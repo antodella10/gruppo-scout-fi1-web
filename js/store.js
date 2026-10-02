@@ -7,6 +7,7 @@ const ScoutStore = (() => {
     events: "firenze1_activity_events_v2",
     settings: "firenze1_settings_v2",
     pending: "firenze1_pending_staff_v2",
+    deletedNotices: "firenze1_deleted_account_notices_v1",
   };
 
   const ROLE_STAFF = "staff";
@@ -66,7 +67,7 @@ const ScoutStore = (() => {
 
   async function pushRemoteAccounts() {
     if (typeof CloudSync === "undefined") return;
-    await CloudSync.putAccounts(getUsers(), getPending());
+    await CloudSync.putAccounts(getUsers(), getPending(), getDeletedNotices());
   }
 
   /** Scarica account dal cloud (così login funziona anche da un altro telefono/PC). */
@@ -76,15 +77,19 @@ const ScoutStore = (() => {
     if (!remote) return false;
     const remoteUsers = Array.isArray(remote.users) ? remote.users : [];
     const remotePending = Array.isArray(remote.pending) ? remote.pending : [];
-    if (remoteUsers.length || remotePending.length) {
+    if (remoteUsers.length || remotePending.length || Array.isArray(remote.deletedNotices)) {
       saveUsers(remoteUsers);
       savePending(remotePending);
+      if (Array.isArray(remote.deletedNotices)) {
+        saveDeletedNotices(remote.deletedNotices);
+      }
       return true;
     }
     const localUsers = getUsers();
     const localPending = getPending();
-    if (localUsers.length || localPending.length) {
-      await CloudSync.putAccounts(localUsers, localPending);
+    const localDeleted = getDeletedNotices();
+    if (localUsers.length || localPending.length || localDeleted.length) {
+      await CloudSync.putAccounts(localUsers, localPending, localDeleted);
     }
     return false;
   }
@@ -121,6 +126,70 @@ const ScoutStore = (() => {
 
   function savePending(list) {
     write(KEYS.pending, list);
+  }
+
+  function getDeletedNotices() {
+    const raw = read(KEYS.deletedNotices, []);
+    return Array.isArray(raw) ? raw : [];
+  }
+
+  function saveDeletedNotices(list) {
+    write(KEYS.deletedNotices, Array.isArray(list) ? list : []);
+  }
+
+  function findDeletedNoticeByLogin(login) {
+    const key = String(login || "").trim().toLowerCase();
+    if (!key) return null;
+    return (
+      getDeletedNotices().find(
+        (n) =>
+          (n.email && n.email === key) ||
+          (n.username && n.username === key)
+      ) || null
+    );
+  }
+
+  function clearDeletedNoticesForLogin({ email, username } = {}) {
+    const mail = String(email || "").trim().toLowerCase();
+    const userName = normalizeUsername(username);
+    if (!mail && !userName) return;
+    const next = getDeletedNotices().filter((n) => {
+      if (mail && n.email && n.email === mail) return false;
+      if (userName && n.username && n.username === userName) return false;
+      return true;
+    });
+    saveDeletedNotices(next);
+  }
+
+  function deletedAccountLoginMessage(notice) {
+    const staffMsg = String(notice?.message || "").trim();
+    const lines = ["Questo account è stato eliminato."];
+    if (staffMsg) lines.push(`Messaggio dello staff: ${staffMsg}`);
+    lines.push("Puoi richiedere un nuovo account con la stessa email o username.");
+    return lines.join("\n");
+  }
+
+  function addDeletedNotice(target, { message, deletedBy } = {}) {
+    const email = String(target?.email || "").trim().toLowerCase() || null;
+    const username = normalizeUsername(target?.username) || null;
+    if (!email && !username) return;
+    const rest = getDeletedNotices().filter((n) => {
+      if (email && n.email && n.email === email) return false;
+      if (username && n.username && n.username === username) return false;
+      return true;
+    });
+    rest.push({
+      id: uid("deleted"),
+      email,
+      username,
+      nome: target.nome || "",
+      cognome: target.cognome || "",
+      role: accountRole(target),
+      message: String(message || "").trim().slice(0, 800),
+      deletedAt: new Date().toISOString(),
+      deletedBy: deletedBy || null,
+    });
+    saveDeletedNotices(rest);
   }
 
   function isAdminEmail(email) {
@@ -386,6 +455,7 @@ const ScoutStore = (() => {
       };
       users.push(user);
       saveUsers(users);
+      clearDeletedNoticesForLogin({ email: normalized });
       setSession(user);
       await pushRemoteAccounts();
       return { user, pendingApproval: false };
@@ -410,6 +480,7 @@ const ScoutStore = (() => {
     };
     pending.push(pendingUser);
     savePending(pending);
+    clearDeletedNoticesForLogin({ email: normalized });
     await pushRemoteAccounts();
     return { user: pendingUser, pendingApproval: true };
   }
@@ -481,6 +552,7 @@ const ScoutStore = (() => {
     };
     pending.push(pendingUser);
     savePending(pending);
+    clearDeletedNoticesForLogin({ email: mail, username: pendingUser.username });
     await pushRemoteAccounts();
     return { user: pendingUser, pendingApproval: true };
   }
@@ -553,7 +625,7 @@ const ScoutStore = (() => {
       });
   }
 
-  async function deleteStaffAccount(userId, adminUser) {
+  async function deleteStaffAccount(userId, adminUser, { message } = {}) {
     if (!isAdminUser(adminUser)) throw new Error("Solo l’admin può eliminare account staff.");
     const users = getUsers();
     const target = users.find((u) => u.id === userId);
@@ -567,12 +639,13 @@ const ScoutStore = (() => {
     if (target.id === adminUser.id) {
       throw new Error("Non puoi eliminare il tuo stesso account mentre sei connesso.");
     }
+    addDeletedNotice(target, { message, deletedBy: adminUser.id });
     saveUsers(users.filter((u) => u.id !== userId));
     await pushRemoteAccounts();
     return true;
   }
 
-  async function deleteRagazzoAccount(userId, viewer) {
+  async function deleteRagazzoAccount(userId, viewer, { message } = {}) {
     if (!canManageRagazziRequests(viewer)) {
       throw new Error("Non puoi eliminare account del Riparto.");
     }
@@ -582,6 +655,7 @@ const ScoutStore = (() => {
     if (accountRole(target) !== ROLE_RAGAZZO) {
       throw new Error("Questo non è un account esploratore/guida.");
     }
+    addDeletedNotice(target, { message, deletedBy: viewer.id });
     saveUsers(users.filter((u) => u.id !== userId));
     await pushRemoteAccounts();
     return true;
@@ -681,7 +755,11 @@ const ScoutStore = (() => {
       throw new Error("Account in attesa di approvazione.");
     }
     const user = findUserByLogin(key);
-    if (!user) throw new Error("Credenziali non corrette.");
+    if (!user) {
+      const deleted = findDeletedNoticeByLogin(key);
+      if (deleted) throw new Error(deletedAccountLoginMessage(deleted));
+      throw new Error("Credenziali non corrette.");
+    }
     if (!user.verified) throw new Error("Account non ancora approvato.");
     const hash = await hashPassword(password);
     if (hash !== user.passwordHash) throw new Error("Credenziali non corrette.");

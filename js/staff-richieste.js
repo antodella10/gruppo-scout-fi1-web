@@ -56,6 +56,71 @@ document.addEventListener("DOMContentLoaded", () => {
     return "—";
   }
 
+  function promptDeleteAccount({ label, warning }) {
+    return new Promise((resolve) => {
+      let dialog = document.getElementById("delete-account-dialog");
+      if (!dialog) {
+        dialog = document.createElement("dialog");
+        dialog.id = "delete-account-dialog";
+        dialog.className = "login-dialog";
+        document.body.appendChild(dialog);
+      }
+
+      dialog.innerHTML = `
+        <form method="dialog" class="login-dialog-form" id="delete-account-form">
+          <h2>Elimina account</h2>
+          <p class="lead">Eliminare <strong>${escapeHtml(label)}</strong>? ${escapeHtml(warning)}</p>
+          <label>
+            Messaggio per la persona (facoltativo)
+            <textarea name="message" rows="4" maxlength="800" placeholder="Es. Motivo dell’eliminazione, come richiedere di nuovo l’account…"></textarea>
+          </label>
+          <p class="hint" style="margin:0">Quando proverà ad accedere vedrà questo messaggio. Potrà comunque richiedere un nuovo account con la stessa email/username.</p>
+          <div class="inline-actions" style="margin-top:.5rem">
+            <button type="submit" class="btn btn-primary">Elimina account</button>
+            <button type="button" class="btn btn-ghost" data-delete-cancel>Annulla</button>
+          </div>
+        </form>
+      `;
+
+      const form = dialog.querySelector("#delete-account-form");
+      let settled = false;
+      function finish(value) {
+        if (settled) return;
+        settled = true;
+        try {
+          dialog.close();
+        } catch {
+          /* ignore */
+        }
+        resolve(value);
+      }
+
+      dialog.querySelector("[data-delete-cancel]")?.addEventListener("click", () => finish(null));
+      dialog.addEventListener(
+        "cancel",
+        (e) => {
+          e.preventDefault();
+          finish(null);
+        },
+        { once: true }
+      );
+      form?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const data = new FormData(form);
+        finish({ message: String(data.get("message") || "").trim() });
+      });
+
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else {
+        const message = window.prompt(
+          `Eliminare ${label}? Scrivi un messaggio (facoltativo) che vedrà al prossimo accesso:`
+        );
+        if (message === null) finish(null);
+        else finish({ message: String(message || "").trim() });
+      }
+    });
+  }
+
   function refreshPendingStaff() {
     if (!pendingStaffList || !canStaff) return;
     const list = ScoutStore.listPendingStaff(user);
@@ -215,9 +280,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const label = account
           ? `${account.nome} ${account.cognome} (${loginLabel(account)})`
           : "questo account";
-        if (!confirm(`Eliminare ${label}? Non potrà più accedere all’area staff.`)) return;
-        await ScoutStore.deleteStaffAccount(id, user);
+        const choice = await promptDeleteAccount({
+          label,
+          warning: "Non potrà più accedere all’area staff.",
+        });
+        if (!choice) return;
+        await ScoutStore.deleteStaffAccount(id, user, { message: choice.message });
         refreshAll();
+        showStatus("Account staff eliminato.");
       }
       if (delRagazzo) {
         const id = delRagazzo.dataset.delRagazzo;
@@ -225,9 +295,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const label = account
           ? `${account.nome} ${account.cognome} (${loginLabel(account)})`
           : "questo account";
-        if (!confirm(`Eliminare ${label}? Non potrà più aprire i file del Sentiero.`)) return;
-        await ScoutStore.deleteRagazzoAccount(id, user);
+        const choice = await promptDeleteAccount({
+          label,
+          warning: "Non potrà più aprire i file del Sentiero.",
+        });
+        if (!choice) return;
+        await ScoutStore.deleteRagazzoAccount(id, user, { message: choice.message });
         refreshAll();
+        showStatus("Account ripartaro eliminato.");
       }
     } catch (err) {
       alert(err.message);

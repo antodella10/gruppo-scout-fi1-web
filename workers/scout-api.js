@@ -171,8 +171,10 @@ async function handleSync(request, env) {
         const data = await kvGetJson(kv, "staff-accounts", {
           users: [],
           pending: [],
+          deletedNotices: [],
           updatedAt: null,
         });
+        if (!Array.isArray(data.deletedNotices)) data.deletedNotices = [];
         return json(data);
       }
 
@@ -290,6 +292,7 @@ async function handleSync(request, env) {
         const payload = {
           users: Array.isArray(body.users) ? body.users : [],
           pending: Array.isArray(body.pending) ? body.pending : [],
+          deletedNotices: Array.isArray(body.deletedNotices) ? body.deletedNotices : [],
           updatedAt: new Date().toISOString(),
         };
         await kv.put("staff-accounts", JSON.stringify(payload));

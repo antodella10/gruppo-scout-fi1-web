@@ -864,6 +864,18 @@ h3,
   gap: 0.85rem;
 }
 
+.login-dialog textarea {
+  width: 100%;
+  min-height: 5.5rem;
+  resize: vertical;
+}
+
+.login-dialog .hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 .form-grid {
   display: grid;
   gap: 0.9rem;

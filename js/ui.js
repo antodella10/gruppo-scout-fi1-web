@@ -537,6 +537,7 @@ function requireLoginForAction({
       } catch (err) {
         if (alertBox) {
           alertBox.hidden = false;
+          alertBox.style.whiteSpace = "pre-line";
           alertBox.textContent = err.message || "Accesso non riuscito.";
         }
         if (btn) btn.disabled = false;

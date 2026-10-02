@@ -78,9 +78,14 @@ window.CloudSync = (() => {
     }
   }
 
-  async function putAccounts(users, pending) {
+  async function putAccounts(users, pending, deletedNotices = []) {
     try {
-      return await postJson({ resource: "accounts", users, pending });
+      return await postJson({
+        resource: "accounts",
+        users,
+        pending,
+        deletedNotices: Array.isArray(deletedNotices) ? deletedNotices : [],
+      });
     } catch (err) {
       console.warn("[CloudSync] putAccounts", err);
       return null;
