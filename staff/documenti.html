@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Documenti · Staff</title>
+  <title>File e documenti · Staff</title>
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48">
 </head>
@@ -23,13 +23,27 @@
       <div class="staff-hero">
         <div>
           <h1>File e documenti</h1>
-          <p id="staff-meta" data-static="1">Spazio riservato allo staff.</p>
+          <p id="staff-meta" data-static="1">Hub di gestione: sentiero, specialità e galleria.</p>
         </div>
         <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
       </div>
 
-      <section class="panel">
-        <div class="page-soon" data-page-soon data-page-soon-base="../" data-page-soon-message="Questa sezione non è ancora disponibile o completa. Torna a trovarci presto!"></div>
+      <section class="docs-hub" aria-label="Sezioni file e documenti">
+        <a class="docs-hub-card" href="./sentiero.html" id="hub-sentiero" hidden>
+          <span class="docs-hub-kicker">Cammino</span>
+          <h2>Sentiero</h2>
+          <p>Libretto del sentiero e immagini PNG delle classi.</p>
+        </a>
+        <a class="docs-hub-card" href="./specialita.html" id="hub-specialita" hidden>
+          <span class="docs-hub-kicker">Catalogo</span>
+          <h2>Specialità</h2>
+          <p>Gestione delle specialità del Riparto.</p>
+        </a>
+        <a class="docs-hub-card" href="./galleria.html" id="hub-galleria">
+          <span class="docs-hub-kicker">Foto</span>
+          <h2>Galleria</h2>
+          <p>Cartelle e foto per Chi siamo.</p>
+        </a>
       </section>
     </div>
   </main>
@@ -40,13 +54,20 @@
   <script src="../js/canzoniere-store.js"></script>
   <script src="../js/shop-store.js"></script>
   <script src="../js/staff-notifs.js"></script>
+  <script src="../js/sentiero-store.js"></script>
+  <script src="../js/gallery-store.js"></script>
   <script src="../js/branch-view.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/staff-shell.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      StaffShell.boot({ active: "documenti" });
-      fillPageSoonBlocks(document, { base: "../" });
+      const user = StaffShell.boot({ active: "documenti" });
+      if (!user) return;
+      const canSen = typeof SentieroStore !== "undefined" && SentieroStore.canManage(user);
+      const sen = document.getElementById("hub-sentiero");
+      const spe = document.getElementById("hub-specialita");
+      if (sen) sen.hidden = !canSen;
+      if (spe) spe.hidden = !canSen;
     });
   </script>
 </body>

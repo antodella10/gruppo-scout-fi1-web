@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  function renderClassi() {
+  async function renderClassi() {
     if (!classiEl) return;
     const progress = ScoutStore.getRagazzoProgress(user);
     const obtained = ScoutStore.classiOttenuteDisplay(progress.classe);
@@ -37,13 +37,29 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="classe-badge ${
             c.isLatest ? `is-latest glow-${escapeHtml(c.glow)}` : `glow-soft-${escapeHtml(c.glow)}`
           }" role="listitem" data-classe="${escapeHtml(c.id)}">
-            <span class="classe-badge-icon" aria-hidden="true"></span>
+            <span class="classe-badge-icon" aria-hidden="true" data-classe-icon="${escapeHtml(c.id)}"></span>
             <span class="classe-badge-label">${escapeHtml(c.label)}</span>
           </div>`
           )
           .join("")}
       </div>
     `;
+    if (typeof SentieroStore === "undefined") return;
+    await Promise.all(
+      obtained.map(async (c) => {
+        try {
+          const src = await SentieroStore.resolveClassImageUrl(c.id);
+          const icon = classiEl.querySelector(`[data-classe-icon="${CSS.escape(c.id)}"]`);
+          if (src && icon) {
+            icon.style.backgroundImage = `url("${src}")`;
+            icon.style.backgroundSize = "cover";
+            icon.style.backgroundPosition = "center";
+          }
+        } catch {
+          /* keep CSS fallback */
+        }
+      })
+    );
   }
 
   function renderSpecialita() {

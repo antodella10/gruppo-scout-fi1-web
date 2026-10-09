@@ -86,16 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    if (typeof StaffShell !== "undefined" && StaffShell.canSentiero(user)) {
-      tiles.push({
-        id: "sentiero",
-        href: "./sentiero.html",
-        title: "Sentiero / specialità",
-        hint: "Libretto e catalogo specialità.",
-        preview: "Gestisci libretto e PDF",
-      });
-    }
-
     if (ScoutStore.canManageSentieri?.(user)) {
       const nRagazzi = ScoutStore.listRagazziAccounts(user).length;
       tiles.push({
@@ -191,19 +181,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     tiles.push({
-      id: "galleria",
-      href: "./galleria.html",
-      title: "Gestione galleria",
-      hint: "Foto per Chi siamo: branca, cartelle e primo piano.",
-      preview: "Carica e organizza le foto",
+      id: "note-punteggi",
+      href: "./note-punteggi.html",
+      title: "Note e punteggi",
+      hint: "Note condivise per branca e link ai fogli.",
+      preview: "Apri note dello staff",
     });
 
     tiles.push({
       id: "documenti",
       href: "./documenti.html",
       title: "File e documenti",
-      hint: "Spazio documenti staff.",
-      preview: "Presto disponibile",
+      hint: "Sentiero, specialità e galleria.",
+      preview: "Apri hub documenti",
     });
 
     return tiles;

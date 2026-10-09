@@ -222,16 +222,32 @@ document.addEventListener("DOMContentLoaded", () => {
     paintCurrent();
   }
 
+  function scrollToEventDetails() {
+    const listNode = selectedBranca === "riparto" ? listElRep : listEl;
+    const target =
+      listNode?.closest(".panel") ||
+      listNode?.closest(".calendar-layout") ||
+      listNode;
+    if (!target) return;
+    window.requestAnimationFrame(() => {
+      window.setTimeout(() => {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 40);
+    });
+  }
+
   function selectDay(dateKey) {
     selectedDate = dateKey;
     selectedEventId = null;
     paintCurrent();
+    scrollToEventDetails();
   }
 
   function selectEvent(eventId, dateKey) {
     selectedEventId = eventId;
     selectedDate = dateKey || null;
     paintCurrent();
+    scrollToEventDetails();
   }
 
   function scrollToHashSoon() {

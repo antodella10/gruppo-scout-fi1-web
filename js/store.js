@@ -1009,6 +1009,8 @@ const ScoutStore = (() => {
       meetingHours: Array.isArray(raw.meetingHours) ? raw.meetingHours : [],
       social: raw.social && typeof raw.social === "object" ? raw.social : null,
       iscrizioniFormUrl: String(raw.iscrizioniFormUrl || "").trim(),
+      branchNotes:
+        raw.branchNotes && typeof raw.branchNotes === "object" ? raw.branchNotes : {},
     };
   }
 
@@ -1028,6 +1030,7 @@ const ScoutStore = (() => {
       social: s.social,
       meetingHours: getMeetingHours(),
       googleCalendars: listGoogleCalendars(),
+      branchNotes: s.branchNotes || {},
     });
   }
 
@@ -1039,14 +1042,16 @@ const ScoutStore = (() => {
       remote.iscrizioniFormUrl ||
       remote.social ||
       (Array.isArray(remote.meetingHours) && remote.meetingHours.length) ||
-      (Array.isArray(remote.googleCalendars) && remote.googleCalendars.length);
+      (Array.isArray(remote.googleCalendars) && remote.googleCalendars.length) ||
+      (remote.branchNotes && Object.keys(remote.branchNotes).length);
     if (!has) {
       const local = getSettings();
       if (
         getIscrizioniFormUrl() ||
         local.social ||
         (local.meetingHours || []).length ||
-        (local.googleCalendars || []).length
+        (local.googleCalendars || []).length ||
+        Object.keys(local.branchNotes || {}).length
       ) {
         await pushRemoteSettings();
       }
@@ -1064,8 +1069,68 @@ const ScoutStore = (() => {
     } else if ((next.googleCalendars || []).length) {
       pushRemoteSettings().catch(() => {});
     }
+    if (remote.branchNotes && typeof remote.branchNotes === "object" && Object.keys(remote.branchNotes).length) {
+      next.branchNotes = remote.branchNotes;
+    } else if (Object.keys(next.branchNotes || {}).length) {
+      pushRemoteSettings().catch(() => {});
+    }
     write(KEYS.settings, next);
     return true;
+  }
+
+  function branchNotesKey(branca) {
+    return normalizeBrancaId(branca) || String(branca || "").trim() || "gruppo";
+  }
+
+  function getBranchNotes(branca) {
+    const key = branchNotesKey(branca);
+    const all = getSettings().branchNotes || {};
+    const row = all[key] || {};
+    return {
+      branca: key,
+      text: String(row.text || ""),
+      sheetUrl: String(row.sheetUrl || "").trim(),
+      updatedAt: row.updatedAt || null,
+      updatedBy: row.updatedBy || null,
+    };
+  }
+
+  function listBranchNotesForUser(user) {
+    if (!user || !isStaffUser(user)) return [];
+    const branches = Object.keys(window.SCOUT_BRANCHES || {});
+    if (isAdminUser(user)) {
+      return branches.map((b) => getBranchNotes(b));
+    }
+    if (!user.branca) return [];
+    return [getBranchNotes(user.branca)];
+  }
+
+  function canEditBranchNotes(user, branca) {
+    if (!user || !isStaffUser(user)) return false;
+    if (isAdminUser(user)) return true;
+    return !!user.branca && branchNotesKey(user.branca) === branchNotesKey(branca);
+  }
+
+  function saveBranchNotes(branca, { text, sheetUrl }, user) {
+    if (!canEditBranchNotes(user, branca)) {
+      throw new Error("Non puoi modificare le note di questa branca.");
+    }
+    const key = branchNotesKey(branca);
+    const cleanUrl = String(sheetUrl || "").trim();
+    if (cleanUrl && !/^https?:\/\//i.test(cleanUrl)) {
+      throw new Error("Incolla un URL completo (https://…) per il foglio.");
+    }
+    const settings = getSettings();
+    const branchNotes = { ...(settings.branchNotes || {}) };
+    branchNotes[key] = {
+      text: String(text || "").slice(0, 20000),
+      sheetUrl: cleanUrl,
+      updatedAt: new Date().toISOString(),
+      updatedBy: user.id,
+    };
+    write(KEYS.settings, { ...settings, branchNotes });
+    pushRemoteSettings().catch(() => {});
+    return getBranchNotes(key);
   }
 
   function listGoogleCalendars() {
@@ -1436,5 +1501,9 @@ const ScoutStore = (() => {
     saveSocialLinks,
     getIscrizioniFormUrl,
     saveIscrizioniFormUrl,
+    getBranchNotes,
+    listBranchNotesForUser,
+    canEditBranchNotes,
+    saveBranchNotes,
   };
 })();

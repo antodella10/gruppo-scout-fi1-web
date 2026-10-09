@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (!catalog.length) {
-      catalogEl.innerHTML = `<div class="empty-state">Database specialità vuoto. Caricale in Sentiero / specialità.</div>`;
+      catalogEl.innerHTML = `<div class="empty-state">Database specialità vuoto. Caricale da File e documenti → Specialità.</div>`;
       return;
     }
     if (!filtered.length) {

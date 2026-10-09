@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestione galleria · Staff</title>
+  <title>Galleria · Staff</title>
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48">
 </head>
@@ -22,75 +22,88 @@
     <div class="container">
       <div class="staff-hero">
         <div>
-          <h1>Gestione galleria</h1>
-          <p id="staff-meta" data-static="1">Solo foto della galleria (Chi siamo). Negozio e altri file restano separati.</p>
+          <h1>Galleria</h1>
+          <p id="staff-meta" data-static="1">Organizza le foto in cartelle, come su un telefono.</p>
         </div>
         <div class="inline-actions">
+          <a class="btn btn-ghost" href="./documenti.html">← File e documenti</a>
           <a class="btn btn-ghost" href="../chi-siamo.html#galleria" target="_blank" rel="noopener">Vedi su Chi siamo</a>
-          <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
         </div>
       </div>
 
       <div id="gallery-alert" class="alert alert-ok" hidden></div>
 
-      <div class="staff-grid gallery-staff-layout">
-        <section class="panel">
-          <h2>Carica foto</h2>
-          <p class="hint">Puoi selezionarne tante insieme. Branca obbligatoria; cartella e testi valgono per tutte le foto del lotto.</p>
-          <form id="gallery-form" class="form-grid">
-            <label>
-              Foto
-              <input type="file" name="photos" id="gallery-photos" accept="image/*" multiple required>
-            </label>
-            <p id="gallery-file-hint" class="hint" hidden></p>
-            <label>
-              Branca / Gruppo
-              <select name="branca" id="gallery-branca" required></select>
-            </label>
-            <label>
-              Cartella (opzionale)
-              <select name="folderId" id="gallery-folder"></select>
-            </label>
-            <label>
-              Titolo (opzionale)
-              <input type="text" name="title" placeholder="Solo se serve · uguale per tutte" maxlength="120">
-            </label>
-            <label>
-              Didascalia (opzionale)
-              <textarea name="caption" rows="2" placeholder="Visibile a schermo intero · uguale per tutte" maxlength="400"></textarea>
-            </label>
-            <div id="gallery-upload-progress" class="gallery-upload-progress" hidden>
-              <div class="gallery-upload-bar"><span id="gallery-upload-bar"></span></div>
-              <p id="gallery-upload-status" class="hint"></p>
-            </div>
-            <button class="btn btn-primary" type="submit" id="gallery-upload-btn">Carica</button>
-          </form>
-
-          <hr style="border:none;border-top:1px solid var(--line);margin:1.25rem 0">
-          <h3 style="margin:0 0 .6rem">Cartelle</h3>
-          <form id="folder-form" class="inline-actions" style="flex-wrap:wrap">
-            <input type="text" name="name" placeholder="Nuova cartella" maxlength="80" required style="flex:1;min-width:10rem">
-            <button class="btn btn-ghost btn-small" type="submit">Crea</button>
-          </form>
-          <div id="folder-list" style="margin-top:.75rem"></div>
-        </section>
-
-        <section class="panel">
-          <h2>Primo piano <span class="hint" id="featured-count">(0/15)</span></h2>
-          <p class="hint">Clicca una foto: il bordo diventa verde scuro se è in primo piano (max 15).</p>
-          <div class="inline-actions" style="margin-bottom:.75rem">
-            <button type="button" class="btn btn-primary btn-small" id="featured-save">Salva primo piano</button>
+      <!-- Vista cartelle -->
+      <section class="panel gal-panel" id="gal-folders-view">
+        <div class="gal-toolbar">
+          <h2 style="margin:0">Cartelle</h2>
+          <div class="inline-actions">
+            <button type="button" class="btn btn-ghost btn-small" id="featured-edit-btn">Modifica foto in evidenza</button>
+            <button type="button" class="btn btn-primary btn-touch" id="folder-add-btn" aria-label="Nuova cartella">+</button>
           </div>
+        </div>
+        <p class="hint gal-hint-mobile">Tieni premuta una cartella per rinomarla o eliminarla.</p>
+        <div id="gal-folders-grid" class="gal-folders-grid"></div>
+        <div id="gal-unfiled" class="gal-unfiled"></div>
+      </section>
 
-          <label style="margin-bottom:.75rem">
-            Filtra cartella
-            <select id="filter-folder"></select>
+      <!-- Vista dentro cartella -->
+      <section class="panel gal-panel" id="gal-folder-view" hidden>
+        <div class="gal-toolbar">
+          <button type="button" class="btn btn-ghost btn-small" id="gal-back-folders">← Cartelle</button>
+          <h2 id="gal-folder-title" style="margin:0;flex:1">Cartella</h2>
+          <label class="btn btn-primary btn-touch gal-upload-btn" title="Carica foto">
+            <span aria-hidden="true">⬆</span>
+            <span class="sr-only">Carica foto</span>
+            <input type="file" id="gal-upload-input" accept="image/*" multiple hidden>
           </label>
-          <div id="gallery-admin-list"></div>
-        </section>
-      </div>
+        </div>
+        <label class="gal-branca-label">
+          Branca per i nuovi upload
+          <select id="gal-upload-branca"></select>
+        </label>
+        <div id="gal-upload-progress" class="gallery-upload-progress" hidden>
+          <div class="gallery-upload-bar"><span id="gal-upload-bar"></span></div>
+          <p id="gal-upload-status" class="hint"></p>
+        </div>
+        <div id="gal-photos-grid" class="gal-photos-grid"></div>
+      </section>
+
+      <!-- Modal selezione evidenza -->
+      <section class="panel gal-panel" id="gal-featured-view" hidden>
+        <div class="gal-toolbar">
+          <h2 style="margin:0">Foto in evidenza <span class="hint" id="featured-count">(0/15)</span></h2>
+          <div class="inline-actions">
+            <button type="button" class="btn btn-ghost btn-small" id="featured-cancel">Annulla</button>
+            <button type="button" class="btn btn-primary btn-small" id="featured-save">Salva</button>
+          </div>
+        </div>
+        <p class="hint">Seleziona fino a 15 foto, poi conferma con Salva.</p>
+        <div id="gal-featured-grid" class="gal-photos-grid"></div>
+      </section>
     </div>
   </main>
+
+  <!-- Lightbox foto + azioni -->
+  <div id="gal-lightbox" class="gal-lightbox" hidden>
+    <button type="button" class="btn btn-ghost gal-lb-close" id="gal-lb-close" aria-label="Chiudi">✕</button>
+    <img id="gal-lb-img" alt="">
+    <p class="gal-lb-cap" id="gal-lb-cap"></p>
+    <div class="gal-lb-sheet" role="toolbar" aria-label="Azioni foto">
+      <button type="button" class="gal-lb-action" id="gal-lb-move">Sposta</button>
+      <button type="button" class="gal-lb-action" id="gal-lb-rename">Rinomina</button>
+      <button type="button" class="gal-lb-action" id="gal-lb-caption">Didascalia</button>
+      <button type="button" class="gal-lb-action gal-lb-danger" id="gal-lb-delete">Elimina</button>
+    </div>
+  </div>
+
+  <!-- Menu contestuale cartella -->
+  <div id="gal-ctx" class="gal-ctx" hidden>
+    <button type="button" data-ctx="rename">Rinomina</button>
+    <button type="button" data-ctx="delete">Elimina</button>
+    <button type="button" data-ctx="cancel">Annulla</button>
+  </div>
+  <div id="gal-ctx-backdrop" class="gal-ctx-backdrop" hidden></div>
 
   <script src="../js/config.js"></script>
   <script src="../js/cloud-sync.js"></script>

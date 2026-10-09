@@ -213,6 +213,7 @@ async function handleSync(request, env) {
           social: null,
           meetingHours: [],
           googleCalendars: [],
+          branchNotes: {},
           updatedAt: null,
         });
         return json(data);
@@ -220,7 +221,9 @@ async function handleSync(request, env) {
 
       if (resource === "sentiero-meta") {
         const data = await kvGetJson(kv, "sentiero-meta", null);
-        return json(data || { libretto: null, specialita: [], updatedAt: null });
+        return json(
+          data || { libretto: null, specialita: [], classImages: {}, updatedAt: null }
+        );
       }
 
       if (resource === "pdf" || resource === "file") {
@@ -347,6 +350,8 @@ async function handleSync(request, env) {
           social: s.social && typeof s.social === "object" ? s.social : null,
           meetingHours: Array.isArray(s.meetingHours) ? s.meetingHours : [],
           googleCalendars: Array.isArray(s.googleCalendars) ? s.googleCalendars : [],
+          branchNotes:
+            s.branchNotes && typeof s.branchNotes === "object" ? s.branchNotes : {},
           updatedAt: new Date().toISOString(),
         };
         await kv.put("settings", JSON.stringify(payload));
@@ -358,6 +363,8 @@ async function handleSync(request, env) {
         const payload = {
           libretto: meta.libretto || null,
           specialita: Array.isArray(meta.specialita) ? meta.specialita : [],
+          classImages:
+            meta.classImages && typeof meta.classImages === "object" ? meta.classImages : {},
           updatedAt: new Date().toISOString(),
         };
         await kv.put("sentiero-meta", JSON.stringify(payload));

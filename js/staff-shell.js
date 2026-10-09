@@ -48,11 +48,10 @@ window.StaffShell = (() => {
       canCanzoniere(user)
         ? { id: "canzoniere", href: "./canzoniere.html", label: "Canzoniere Riparto", badge: c.songs }
         : null,
-      canSentiero(user) ? { id: "sentiero", href: "./sentiero.html", label: "Sentiero / specialità" } : null,
       ScoutStore.canManageSentieri?.(user)
         ? { id: "gestione-sentieri", href: "./gestione-sentieri.html", label: "Gestione sentieri" }
         : null,
-      { id: "galleria", href: "./galleria.html", label: "Gestione galleria" },
+      { id: "note-punteggi", href: "./note-punteggi.html", label: "Note e punteggi" },
       admin ? { id: "notizie", href: "./notizie.html", label: "Gestione notizie" } : null,
       admin ? { id: "iscrizioni", href: "./iscrizioni.html", label: "Form iscrizioni" } : null,
       canAccountRequests(user)

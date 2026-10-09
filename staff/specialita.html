@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sentiero · Staff</title>
+  <title>Specialità · Staff</title>
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48">
 </head>
@@ -22,8 +22,8 @@
     <div class="container">
       <div class="staff-hero">
         <div>
-          <h1>Sentiero</h1>
-          <p id="staff-meta" data-static="1">Libretto del sentiero e immagini PNG delle classi.</p>
+          <h1>Specialità</h1>
+          <p id="staff-meta" data-static="1">Catalogo specialità del Riparto.</p>
         </div>
         <div class="inline-actions">
           <a class="btn btn-ghost" href="./documenti.html">← File e documenti</a>
@@ -35,24 +35,38 @@
 
       <div class="staff-grid">
         <section class="panel">
-          <h2>Libretto del sentiero</h2>
-          <p class="hint" id="libretto-meta">Nessun libretto caricato.</p>
-          <form id="libretto-form" class="form-grid">
+          <h2 id="spec-form-title">Nuova specialità</h2>
+          <form id="spec-form" class="form-grid">
+            <input type="hidden" name="id" value="">
             <label>
-              PDF libretto
-              <input type="file" name="librettoPdf" accept="application/pdf" required>
+              Nome
+              <input type="text" name="name" required placeholder="Es. Campista">
             </label>
+            <label>
+              PDF specialità
+              <input type="file" name="pdf" accept="application/pdf">
+            </label>
+            <label>
+              Immagine distintivo
+              <input type="file" name="image" accept="image/*">
+            </label>
+            <p class="hint" id="spec-edit-hint" hidden>Lascia i file vuoti per tenere quelli attuali.</p>
             <div class="inline-actions">
-              <button class="btn btn-primary" type="submit">Carica / sostituisci</button>
-              <button class="btn btn-ghost" type="button" id="libretto-clear" hidden>Rimuovi</button>
+              <button class="btn btn-primary" type="submit">Salva</button>
+              <button class="btn btn-ghost" type="button" id="spec-reset" hidden>Annulla</button>
             </div>
           </form>
         </section>
 
-        <section class="panel">
-          <h2>Immagini PNG delle classi</h2>
-          <p class="hint">Carica un PNG per ciascuna classe del sentiero (visibile in area personale).</p>
-          <div id="classi-images-list" class="classi-images-admin"></div>
+        <section class="panel wide">
+          <div class="section-head" style="margin-bottom:0.75rem">
+            <div>
+              <h2>Specialità in catalogo</h2>
+              <p class="hint" style="margin:0">Ordine alfabetico come in pagina pubblica.</p>
+            </div>
+            <button type="button" class="btn btn-ghost btn-small" id="spec-reset-seed">Ripristina elenco iniziale</button>
+          </div>
+          <div id="spec-admin-list"></div>
         </section>
       </div>
     </div>
@@ -68,6 +82,6 @@
   <script src="../js/branch-view.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/staff-shell.js"></script>
-  <script src="../js/sentiero-staff.js"></script>
+  <script src="../js/specialita-staff.js"></script>
 </body>
 </html>

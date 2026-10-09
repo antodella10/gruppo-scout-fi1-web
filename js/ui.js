@@ -407,9 +407,10 @@ function updateNavAuth() {
   if (session) {
     const full = ScoutStore.getCurrentUser() || session;
     const isKid = ScoutStore.isRagazzoUser?.(full) || full.role === "ragazzo";
+    const isAdmin = !isKid && !!(ScoutStore.isAdminUser?.(full) || full.isAdmin);
     const roleLabel = isKid
       ? ""
-      : full.isAdmin
+      : isAdmin
         ? "Admin"
         : full.branca
           ? ScoutStore.branchLabel(full.branca)
@@ -425,11 +426,11 @@ function updateNavAuth() {
       }
     }
     const areaHref = isKid ? `${base}area-personale/` : `${base}staff/`;
-    const areaLabel = isKid ? "Area personale" : "Area staff";
-    const areaShort = isKid ? "Profilo" : "Staff";
+    const areaLabel = isKid ? "Area personale" : isAdmin ? "Area admin" : "Area staff";
+    const areaShort = isKid ? "Profilo" : isAdmin ? "Admin" : "Staff";
     const name = `${full.nome || ""} ${full.cognome || ""}`.trim();
     slot.innerHTML = `
-      <span class="user-chip" title="${escapeHtml(name)}${roleLabel ? " · " + escapeHtml(roleLabel) : ""}">
+      <span class="user-chip${isAdmin ? " is-admin" : ""}" title="${escapeHtml(name)}${roleLabel ? " · " + escapeHtml(roleLabel) : ""}">
         <span class="user-chip-name">${escapeHtml(name)}</span>${
           roleLabel ? `<span class="user-chip-role"> · ${escapeHtml(roleLabel)}</span>` : ""
         }${badge}
@@ -758,9 +759,27 @@ function wireMobileNav() {
   });
 }
 
+function wireBrandStripes() {
+  document.querySelectorAll(".site-nav").forEach((nav) => {
+    if (nav.nextElementSibling?.classList.contains("site-stripe")) return;
+    const stripe = document.createElement("div");
+    stripe.className = "site-stripe site-stripe-top";
+    stripe.setAttribute("aria-hidden", "true");
+    nav.insertAdjacentElement("afterend", stripe);
+  });
+  document.querySelectorAll(".site-footer").forEach((footer) => {
+    if (footer.previousElementSibling?.classList.contains("site-stripe")) return;
+    const stripe = document.createElement("div");
+    stripe.className = "site-stripe site-stripe-bottom";
+    stripe.setAttribute("aria-hidden", "true");
+    footer.insertAdjacentElement("beforebegin", stripe);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof BranchView !== "undefined") BranchView.wireHomeLinks();
   wireMobileNav();
+  wireBrandStripes();
   updateNavAuth();
   if (typeof StaffNotifs !== "undefined" && ScoutStore.getSession?.()) {
     StaffNotifs.pullAll().then(() => updateNavAuth());

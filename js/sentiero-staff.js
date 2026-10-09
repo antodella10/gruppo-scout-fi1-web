@@ -1,8 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const user = StaffShell.boot({ active: "sentiero" });
+  const user = StaffShell.boot({ active: "documenti" });
   if (!user) return;
   if (!SentieroStore.canManage(user)) {
-    location.href = "./index.html";
+    location.href = "./documenti.html";
     return;
   }
 
@@ -10,23 +10,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const libMeta = document.getElementById("libretto-meta");
   const libForm = document.getElementById("libretto-form");
   const libClear = document.getElementById("libretto-clear");
-  const specForm = document.getElementById("spec-form");
-  const specList = document.getElementById("spec-admin-list");
-  const formTitle = document.getElementById("spec-form-title");
-  const resetBtn = document.getElementById("spec-reset");
-  const editHint = document.getElementById("spec-edit-hint");
-  const resetSeed = document.getElementById("spec-reset-seed");
+  const classiList = document.getElementById("classi-images-list");
 
   function flash(msg, ok = true) {
     flashAlert(alertBox, msg, ok);
-  }
-
-  function resetSpecForm() {
-    specForm?.reset();
-    if (specForm) specForm.id.value = "";
-    if (formTitle) formTitle.textContent = "Nuova specialità";
-    if (resetBtn) resetBtn.hidden = true;
-    if (editHint) editHint.hidden = true;
   }
 
   async function refreshLibretto() {
@@ -51,38 +38,42 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  async function refreshSpecs() {
-    if (!specList) return;
-    const list = await SentieroStore.getSpecialita();
-    if (!list.length) {
-      specList.innerHTML = `<div class="empty-state">Nessuna specialità.</div>`;
-      return;
-    }
-    specList.innerHTML = list
-      .map(
-        (s) => `
-      <div class="shop-admin-row">
-        <div class="shop-admin-thumb" data-img="${escapeHtml(s.id)}"><span>★</span></div>
-        <div class="shop-admin-meta">
-          <strong>${escapeHtml(s.name)}</strong>
-          <div style="color:var(--muted)">${s.source === "static" ? "Dal catalogo iniziale" : "Caricata / modificata"}</div>
-        </div>
-        <div class="inline-actions">
-          <button type="button" class="btn btn-ghost btn-small" data-open="${escapeHtml(s.id)}">Apri</button>
-          <button type="button" class="btn btn-ghost btn-small" data-edit="${escapeHtml(s.id)}">Modifica</button>
-          <button type="button" class="btn btn-ghost btn-small" data-del="${escapeHtml(s.id)}">Elimina</button>
-        </div>
-      </div>`
-      )
+  async function refreshClassImages() {
+    if (!classiList) return;
+    const classi = ScoutStore.CLASSI_SENTIERO || [];
+    const images = await SentieroStore.getClassImages();
+    classiList.innerHTML = classi
+      .map((c) => {
+        const rec = images[c.id];
+        return `
+        <article class="classe-image-row" data-classe="${escapeHtml(c.id)}">
+          <div class="classe-image-preview" data-preview="${escapeHtml(c.id)}">
+            <span class="hint">Nessuna immagine</span>
+          </div>
+          <div>
+            <strong>${escapeHtml(c.label)}</strong>
+            <p class="hint">${rec?.fileName ? escapeHtml(rec.fileName) : "PNG non caricato"}</p>
+            <div class="inline-actions" style="margin-top:.45rem">
+              <label class="btn btn-ghost btn-small classe-image-upload">
+                Carica PNG
+                <input type="file" accept="image/png,image/*" hidden data-upload-classe="${escapeHtml(c.id)}">
+              </label>
+              <button type="button" class="btn btn-ghost btn-small" data-clear-classe="${escapeHtml(c.id)}" ${
+                rec?.fileId ? "" : "hidden"
+              }>Rimuovi</button>
+            </div>
+          </div>
+        </article>`;
+      })
       .join("");
 
     await Promise.all(
-      list.map(async (s) => {
-        const el = specList.querySelector(`[data-img="${CSS.escape(s.id)}"]`);
-        if (!el) return;
+      classi.map(async (c) => {
+        const el = classiList.querySelector(`[data-preview="${CSS.escape(c.id)}"]`);
+        if (!el || !images[c.id]?.fileId) return;
         try {
-          const src = await SentieroStore.resolveImageUrl(s);
-          if (src) el.innerHTML = `<img src="${src}" alt="">`;
+          const src = await SentieroStore.resolveClassImageUrl(c.id);
+          if (src) el.innerHTML = `<img src="${src}" alt="${escapeHtml(c.label)}">`;
         } catch {
           /* ignore */
         }
@@ -113,71 +104,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  specForm?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const data = new FormData(specForm);
-    const id = String(data.get("id") || "");
+  classiList?.addEventListener("change", async (e) => {
+    const input = e.target.closest("[data-upload-classe]");
+    if (!input || !(input instanceof HTMLInputElement)) return;
+    const file = input.files?.[0];
+    if (!file) return;
     try {
-      await SentieroStore.upsertSpecialita(
-        { id, name: data.get("name") },
-        user,
-        {
-          pdfFile: specForm.pdf.files?.[0] || null,
-          imageFile: specForm.image.files?.[0] || null,
-        }
-      );
-      flash(id ? "Specialità aggiornata." : "Specialità aggiunta.");
-      resetSpecForm();
-      await refreshSpecs();
+      await SentieroStore.setClassImage(input.dataset.uploadClasse, file, user);
+      flash("Immagine classe aggiornata.");
+      await refreshClassImages();
     } catch (err) {
-      flash(err.message, false);
+      flash(err.message || "Upload fallito.", false);
+    } finally {
+      input.value = "";
     }
   });
 
-  resetBtn?.addEventListener("click", resetSpecForm);
-
-  specList?.addEventListener("click", async (e) => {
-    const open = e.target.closest("[data-open]");
-    const edit = e.target.closest("[data-edit]");
-    const del = e.target.closest("[data-del]");
-    const list = await SentieroStore.getSpecialita();
+  classiList?.addEventListener("click", async (e) => {
+    const clear = e.target.closest("[data-clear-classe]");
+    if (!clear) return;
+    if (!confirm("Rimuovere l’immagine di questa classe?")) return;
     try {
-      if (open) {
-        const item = list.find((x) => x.id === open.dataset.open);
-        await SentieroStore.openPdf(item);
-      }
-      if (edit) {
-        const item = list.find((x) => x.id === edit.dataset.edit);
-        if (!item || !specForm) return;
-        specForm.id.value = item.id;
-        specForm.name.value = item.name;
-        specForm.pdf.value = "";
-        specForm.image.value = "";
-        if (formTitle) formTitle.textContent = "Modifica specialità";
-        if (resetBtn) resetBtn.hidden = false;
-        if (editHint) editHint.hidden = false;
-        specForm.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-      if (del) {
-        if (!confirm("Eliminare questa specialità?")) return;
-        await SentieroStore.deleteSpecialita(del.dataset.del, user);
-        flash("Specialità eliminata.");
-        if (specForm?.id.value === del.dataset.del) resetSpecForm();
-        await refreshSpecs();
-      }
-    } catch (err) {
-      flash(err.message, false);
-    }
-  });
-
-  resetSeed?.addEventListener("click", async () => {
-    if (!confirm("Ripristinare l’elenco iniziale delle specialità? Le modifiche locali andranno perse.")) return;
-    try {
-      await SentieroStore.resetToSeed(user);
-      flash("Elenco iniziale ripristinato.");
-      resetSpecForm();
-      await refreshLibretto();
-      await refreshSpecs();
+      await SentieroStore.clearClassImage(clear.dataset.clearClasse, user);
+      flash("Immagine rimossa.");
+      await refreshClassImages();
     } catch (err) {
       flash(err.message, false);
     }
@@ -186,6 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
   (async () => {
     await SentieroStore.ensureMeta();
     await refreshLibretto();
-    await refreshSpecs();
+    await refreshClassImages();
   })();
 });

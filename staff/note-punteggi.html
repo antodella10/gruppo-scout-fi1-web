@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Note e punteggi · Staff</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="../index.html" data-home-link data-home-base="../">
+        <img src="../photos/logo.jpeg" alt="Logo Firenze 1">
+        <span class="brand-text">Firenze 1</span>
+      </a>
+      <div class="nav-actions" data-auth-slot data-base="../"></div>
+    </div>
+  </nav>
+
+  <main class="staff-shell">
+    <div class="container">
+      <div class="staff-hero">
+        <div>
+          <h1>Note e punteggi</h1>
+          <p id="staff-meta" data-static="1">Note condivise con lo staff della stessa branca e link ai fogli.</p>
+        </div>
+        <a class="btn btn-ghost" href="./index.html">← Dashboard</a>
+      </div>
+
+      <div id="notes-alert" class="alert alert-ok" hidden></div>
+
+      <div id="notes-branch-tabs" class="notes-branch-tabs" hidden></div>
+
+      <section class="panel notes-panel">
+        <h2 id="notes-branch-title">Note condivise</h2>
+        <p class="hint" id="notes-branch-hint">Visibili solo allo staff della stessa branca. Gli admin vedono tutte le branche.</p>
+        <label class="notes-label">
+          Note testuali
+          <textarea id="notes-text" rows="10" placeholder="Scrivi appunti, punteggi, promemoria…" maxlength="20000"></textarea>
+        </label>
+        <p class="hint" id="notes-updated" hidden></p>
+        <div class="inline-actions" style="margin-top:.75rem">
+          <button type="button" class="btn btn-primary" id="notes-save">Salva note</button>
+        </div>
+      </section>
+
+      <section class="panel notes-panel" style="margin-top:1rem">
+        <h2>Foglio collegato</h2>
+        <p class="hint">Collega un Google Sheets o Excel (OneDrive) per aprirlo in un tap.</p>
+        <label class="notes-label">
+          Link al foglio
+          <input type="url" id="notes-sheet-url" placeholder="https://docs.google.com/spreadsheets/…">
+        </label>
+        <div class="inline-actions" style="margin-top:.75rem">
+          <button type="button" class="btn btn-primary" id="notes-sheet-save">Salva link</button>
+          <a class="btn btn-ghost" id="notes-sheet-open" href="#" target="_blank" rel="noopener" hidden>Apri foglio</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/cloud-sync.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/canzoniere-store.js"></script>
+  <script src="../js/shop-store.js"></script>
+  <script src="../js/staff-notifs.js"></script>
+  <script src="../js/branch-view.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/staff-shell.js"></script>
+  <script src="../js/staff-notes.js"></script>
+</body>
+</html>

@@ -45,6 +45,8 @@ const SentieroStore = (() => {
         writeMeta({
           libretto: remote.libretto || null,
           specialita: Array.isArray(remote.specialita) ? remote.specialita : [],
+          classImages:
+            remote.classImages && typeof remote.classImages === "object" ? remote.classImages : {},
           updatedAt: remote.updatedAt,
         });
         return true;
@@ -54,6 +56,8 @@ const SentieroStore = (() => {
       writeMeta({
         libretto: remote.libretto || null,
         specialita: Array.isArray(remote.specialita) ? remote.specialita : [],
+        classImages:
+          remote.classImages && typeof remote.classImages === "object" ? remote.classImages : {},
         updatedAt: remote.updatedAt || new Date().toISOString(),
       });
       return true;
@@ -166,8 +170,16 @@ const SentieroStore = (() => {
   async function ensureMeta() {
     await pullRemoteMeta().catch(() => {});
     let meta = readMeta();
-    if (meta?.specialita?.length) return meta;
+    if (meta?.specialita?.length) {
+      if (!meta.classImages || typeof meta.classImages !== "object") {
+        meta.classImages = {};
+        writeMeta(meta);
+      }
+      return meta;
+    }
     const seed = await loadSeed();
+    const prevClassImages =
+      meta?.classImages && typeof meta.classImages === "object" ? meta.classImages : {};
     meta = {
       libretto: seed.libretto
         ? { ...seed.libretto, source: "static" }
@@ -181,10 +193,73 @@ const SentieroStore = (() => {
         fileId: null,
         imageId: null,
       })),
+      classImages: prevClassImages,
       updatedAt: new Date().toISOString(),
     };
     writeMeta(meta);
     return meta;
+  }
+
+  async function getClassImages() {
+    const meta = await ensureMeta();
+    return meta.classImages && typeof meta.classImages === "object" ? meta.classImages : {};
+  }
+
+  async function resolveClassImageUrl(classeId) {
+    const images = await getClassImages();
+    const item = images?.[classeId];
+    if (!item?.fileId) return "";
+    const rec = await getFile(item.fileId);
+    if (rec?.blob) return URL.createObjectURL(rec.blob);
+    if (typeof CloudSync !== "undefined" && CloudSync.available()) {
+      try {
+        return await CloudSync.fileUrl("file", item.fileId);
+      } catch {
+        return "";
+      }
+    }
+    return "";
+  }
+
+  async function setClassImage(classeId, file, user) {
+    if (!canManage(user)) throw new Error("Non autorizzato.");
+    if (!classeId) throw new Error("Classe non valida.");
+    if (!file || !String(file.type || "").startsWith("image/")) {
+      throw new Error("Carica un’immagine PNG (o altro formato immagine).");
+    }
+    const meta = await ensureMeta();
+    meta.classImages = meta.classImages && typeof meta.classImages === "object" ? meta.classImages : {};
+    const oldId = meta.classImages[classeId]?.fileId;
+    const fileId = uid("cimg");
+    await putImageBlob(fileId, file);
+    meta.classImages[classeId] = {
+      fileId,
+      fileName: file.name,
+      updatedAt: new Date().toISOString(),
+      updatedBy: user.id,
+    };
+    writeMeta(meta);
+    if (typeof CloudSync !== "undefined") {
+      await CloudSync.uploadFile(fileId, file).catch((err) => console.warn(err));
+      if (oldId) await CloudSync.deleteFile(oldId);
+    }
+    if (oldId) await deleteFile(oldId).catch(() => {});
+    await pushMeta();
+    return meta.classImages[classeId];
+  }
+
+  async function clearClassImage(classeId, user) {
+    if (!canManage(user)) throw new Error("Non autorizzato.");
+    const meta = await ensureMeta();
+    meta.classImages = meta.classImages && typeof meta.classImages === "object" ? meta.classImages : {};
+    const oldId = meta.classImages[classeId]?.fileId;
+    delete meta.classImages[classeId];
+    writeMeta(meta);
+    if (oldId) {
+      await deleteFile(oldId).catch(() => {});
+      if (typeof CloudSync !== "undefined") await CloudSync.deleteFile(oldId);
+    }
+    await pushMeta();
   }
 
   async function getLibretto() {
@@ -377,6 +452,10 @@ const SentieroStore = (() => {
     ensureMeta,
     getLibretto,
     getSpecialita,
+    getClassImages,
+    resolveClassImageUrl,
+    setClassImage,
+    clearClassImage,
     canManage,
     resolvePdfUrl,
     resolveImageUrl,
