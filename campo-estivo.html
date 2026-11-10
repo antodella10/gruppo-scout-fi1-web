@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campo estivo · Firenze 1</title>
-  <meta name="description" content="Campo estivo del Gruppo Scout Firenze 1.">
+  <title>Campo estivo · Eurocamp 27 · Firenze 1</title>
+  <meta name="description" content="Eurocamp 27 — Campo scout europeo WFIS a Vialfrè (TO), 31 luglio – 7 agosto 2027. Informazioni per il Riparto Firenze 1.">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48">
 </head>
@@ -30,16 +30,62 @@
     <div class="container page-hero-inner">
       <p class="hero-kicker" style="color:var(--green)">Riparto · Estate</p>
       <h1>Campo estivo</h1>
-      <p class="page-hero-lead">L’avventura dell’anno: natura, comunità e ricordi che restano.</p>
+      <p class="page-hero-lead">Nel 2027 il Riparto guarda a Eurocamp 27: il grande raduno europeo WFIS.</p>
     </div>
   </header>
 
-  <main class="section">
+  <main class="section" style="padding-top:0">
     <div class="container">
-      <div class="page-soon" data-page-soon></div>
-      <div class="inline-actions" style="justify-content:center;margin-top:1.25rem">
-        <a class="btn btn-ghost" href="index.html?branca=riparto">← Torna al Riparto</a>
-      </div>
+      <article class="panel eurocamp-panel">
+        <div class="eurocamp-brand">
+          <img
+            class="eurocamp-logo"
+            src="photos/eurocamp27/logo-eurocamp27.png"
+            alt="Logo ufficiale Eurocamp 27"
+            width="192"
+            height="192"
+          >
+          <div class="eurocamp-brand-copy">
+            <p class="eurocamp-kicker">Campo scout europeo WFIS</p>
+            <h2>Eurocamp 27</h2>
+            <p class="eurocamp-payoff">We can do it!</p>
+            <p class="eurocamp-meta">Vialfrè (TO) · Piemonte · 31 luglio – 7 agosto 2027</p>
+          </div>
+        </div>
+
+        <p>
+          Eurocamp 27 è il grande raduno europeo della
+          <strong>World Federation of Independent Scouts</strong>: otto giorni di avventura,
+          cultura e servizio tra scout di tutta Europa, nell’Area Naturalistica Pianezze di Vialfrè.
+          Un Villaggio Internazionale costruito dalla comunità, per la comunità.
+        </p>
+
+        <ul class="eurocamp-facts">
+          <li><strong>8 giorni</strong> di campo · <strong>7 notti</strong> sotto le stelle</li>
+          <li><strong>3.000+</strong> scout europei WFIS attesi</li>
+          <li>Partecipanti dai <strong>7 ai 25 anni</strong></li>
+          <li><strong>470 m</strong> di altitudine · Anfiteatro Morenico d’Ivrea</li>
+        </ul>
+
+        <h3>Temi chiave</h3>
+        <ul class="eurocamp-themes">
+          <li><strong>Cultura e pace</strong> — incontrare scout da tutto il mondo per diventare costruttori di pace.</li>
+          <li><strong>Sostenibilità</strong> — educazione ambientale e vita a stretto contatto con la natura.</li>
+          <li><strong>Crescita e servizio</strong> — leadership e competenza per diventare cittadini del futuro.</li>
+        </ul>
+
+        <p>
+          Evento riservato alle associazioni affiliate WFIS. Le pre-iscrizioni dei gruppi sono aperte
+          sul sito ufficiale.
+        </p>
+
+        <div class="inline-actions eurocamp-actions">
+          <a class="btn btn-primary" href="https://eurocamp27.it/it/" target="_blank" rel="noopener noreferrer">
+            Vai al sito Eurocamp 27
+          </a>
+          <a class="btn btn-ghost" href="index.html?branca=riparto">← Torna al Riparto</a>
+        </div>
+      </article>
     </div>
   </main>
 
@@ -61,7 +107,6 @@
   <script src="js/ui.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      fillPageSoonBlocks();
       renderSocialFollow(document.getElementById("footer-social"));
     });
   </script>

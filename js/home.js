@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const branchTriggerLabel = document.getElementById("branch-trigger-label");
   const branchPanel = document.getElementById("branch-menu-panel");
   const calLead = document.getElementById("cal-lead");
+  const calTitle = document.getElementById("cal-title");
   const layoutDefault = document.getElementById("layout-default");
   const layoutRiparto = document.getElementById("layout-riparto");
   const nextEventEl = document.getElementById("riparto-next-event");
@@ -43,13 +44,18 @@ document.addEventListener("DOMContentLoaded", () => {
     clan: "pastel-clan",
   };
 
+  const CAL_LEAD_GRUPPO_HTML =
+    'Per vedere gli eventi relativi a una branca, selezionare la branca dalla hotbar o da qua: <a href="index.html?branca=branco#calendario">lupetti</a>, <a href="index.html?branca=riparto#calendario-riparto">riparto</a>, <a href="index.html?branca=clan#calendario">clan</a>.';
+
   const BRANCH_COPY = {
     null: {
-      calLead: "Appuntamenti di gruppo.",
+      calTitle: "Calendario di gruppo",
+      calLeadHtml: CAL_LEAD_GRUPPO_HTML,
       heroLine:
         "Avventura, servizio e crescita tra le colline fiorentine. Un gruppo FederScout, tante strade — un unico sentiero insieme.",
     },
     branco: {
+      calTitle: "Calendario",
       calLead: "Calendario branco e gruppo.",
       heroLine: "Branco in cammino: gioco, amicizia e grandi scoperte.",
     },
@@ -58,10 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
       heroLine: "",
     },
     noviziato: {
+      calTitle: "Calendario",
       calLead: "Calendario noviziato e gruppo.",
       heroLine: "Noviziato: un anno per scegliere e servire.",
     },
     clan: {
+      calTitle: "Calendario",
       calLead: "Calendario clan e gruppo.",
       heroLine: "Clan in servizio: responsabilità e comunità adulta.",
     },
@@ -277,7 +285,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (layoutRiparto) layoutRiparto.hidden = !isRiparto;
 
         if (!isRiparto) {
-          if (calLead) calLead.textContent = copy.calLead;
+          if (calTitle && copy.calTitle) calTitle.textContent = copy.calTitle;
+          if (calLead) {
+            if (copy.calLeadHtml) calLead.innerHTML = copy.calLeadHtml;
+            else if (copy.calLead) calLead.textContent = copy.calLead;
+          }
 
           document.querySelectorAll("#layout-default [data-branca-panel]").forEach((el) => {
             const only = el.getAttribute("data-branca-panel");
